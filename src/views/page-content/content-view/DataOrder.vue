@@ -102,6 +102,15 @@
 							</div>
             </v-tooltip>
           </template>
+					<template #[`item.shippingType`]="{ item }">
+						<v-tooltip v-if="item.shippingType == 'PICKUP'" bottom>
+							<template v-slot:activator="{ on, attrs }">
+                <span v-html="item.shippingType" /> <v-icon small v-bind="attrs" v-on="on">info</v-icon>
+              </template>
+							Code Pickup : <span v-html="item.codePickup" />
+            </v-tooltip>
+						<span v-else v-html="item.shippingType" />
+					</template>
 					<template #expanded-item="{ headers, item }">
 					<td :colspan="headers.length" class="white">
 						<v-btn

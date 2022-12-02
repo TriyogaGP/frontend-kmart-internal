@@ -172,6 +172,19 @@
 			</v-row>
 		</v-card>
 		<v-dialog
+			v-model="isLoadingExport"
+			transition="dialog-bottom-transition"
+			persistent
+			width="500px"
+		>
+			<v-progress-linear
+				class="pa-3"
+				indeterminate
+				color="light-blue darken-3"
+			/>
+			<h4 style="color: #000; text-align: center; background-color: #FFF;">Sedang proses export data, harap menunggu ...</h4>
+		</v-dialog>
+		<v-dialog
 			v-model="dialogNotifikasi"
 			transition="dialog-bottom-transition"
 			persistent
@@ -207,6 +220,7 @@ export default {
 		DataHarian: [],
     loadingButtonDataHarian: false,
     isLoadingDataHarian: false,
+    isLoadingExport: false,
 		page: 1,
     pageCount: 0,
     itemsPerPage: 25,
@@ -298,6 +312,7 @@ export default {
 		exportexcel() {
 			if(!this.DataHarian.length) return this.notifikasi("warning", 'Gagal Export Excel, Data belum tersedia !', "1")
 			let link = process.env.VUE_APP_NODE_ENV === "production" ? process.env.VUE_APP_PROD_API_URL : process.env.VUE_APP_DEV_API_URL
+			this.isLoadingExport = true
 			fetch(`${link}kmart/exportExcel?startdate=${this.input.StartDate}&enddate=${this.input.EndDate}`, {
 				method: 'GET',
 				dataType: "xml",
@@ -305,6 +320,7 @@ export default {
 			.then(response => response.arrayBuffer())
 			.then(async response => {
 				// console.log(response)
+				this.isLoadingExport = false
 				let blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
 				this.downloadBlob(blob,`DataOrder_${this.convertDateToPicker2(new Date())}.xlsx`)
 				this.notifikasi("success", 'Sukses Export Excel', "1")
