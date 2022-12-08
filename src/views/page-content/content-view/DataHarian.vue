@@ -385,9 +385,11 @@ export default {
 		},
 		exportexcel() {
 			if(!this.DataHarian.length) return this.notifikasi("warning", 'Gagal Export Excel, Data belum tersedia !', "1")
+			const totalPages = Math.ceil(this.pageSummary.total / 50)
+			console.log(totalPages);
 			let link = process.env.VUE_APP_NODE_ENV === "production" ? process.env.VUE_APP_PROD_API_URL : process.env.VUE_APP_DEV_API_URL
 			this.isLoadingExport = true
-			fetch(`${link}kmart/exportExcel?startdate=${this.input.StartDate}&enddate=${this.input.EndDate}`, {
+			fetch(`${link}kmart/exportExcel?startdate=${this.input.StartDate}&enddate=${this.input.EndDate}&totalPages=${totalPages}&limit=50`, {
 				method: 'GET',
 				dataType: "xml",
 			})
