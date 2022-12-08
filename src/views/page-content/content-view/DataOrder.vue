@@ -18,11 +18,11 @@
 					>
 					<v-textarea
 						v-model="invoice"
-						placeholder="Invoice (INV-1, INV-2, INV-3, ...)"
+						placeholder="Invoice (INV-1INV-2INV-3...)"
 						outlined
 						dense
 						rows="4"
-						label="Invoice (INV-1, INV-2, INV-3, ...)"
+						label="Invoice (INV-1INV-2INV-3...)"
 						color="light-blue darken-3"
 						hide-details
 						clearable
@@ -47,9 +47,9 @@
 							dense
 							depressed
 							:loading="loadingButtonDataOrder"
-							@click="getData()"
+							@click="getData(1, limit, invoice)"
 						>
-							Get Data
+							Cari Data
 						</v-btn>
 					</v-col>
 				</v-row>
@@ -60,7 +60,6 @@
 					loading-text="Sedang memuat... Harap tunggu"
 					no-data-text="Tidak ada data yang tersedia"
 					no-results-text="Tidak ada catatan yang cocok ditemukan"
-					:options.sync="query"
 					:headers="headersDataOrder"
 					:loading="isLoadingDataOrder"
 					:items="DataOrder"
@@ -70,13 +69,12 @@
 					item-key="orderNumber"
 					hide-default-footer
 					class="elevation-1"
-					:page.sync="page"
 					:items-per-page="itemsPerPage"
 					@page-count="pageCount = $event"
 				>
-					<template #[`item.number`]="{ item }">
+					<!-- <template #[`item.number`]="{ item }">
 						{{ DataOrder.indexOf(item) + 1 }}
-					</template>
+					</template> -->
 					<template #[`item.createdAt`]="{ item }">
 						<span v-html="convertDateTime(item.createdAt)" /> 
 					</template>
@@ -150,13 +148,44 @@
 				</v-data-table>
 			</div>
 			<v-row>
-				<v-col cols="12" class="mt-2 pa-2 px-5">
-					<v-pagination
-						v-if="DataOrder.length > 0"
-						v-model="page"
-						:length="pageCount"
-						:total-visible="25"
-					/>
+				<!-- <v-pagination
+					v-if="DataOrder.length > 0"
+					v-model="page"
+					:length="pageCount"
+					:total-visible="7"
+				/> -->
+				<v-col cols="10" class="mt-2 d-flex justify-start align-center">
+					<span>Halaman <strong>{{ pageSummary.page ? pageSummary.page : 0 }}</strong> dari Total Halaman <strong>{{ pageSummary.totalPages ? pageSummary.totalPages : 0 }}</strong> (Records {{ pageSummary.total ? pageSummary.total : 0 }})</span>
+				</v-col>
+				<v-col cols="2" class="mt-2 text-right">
+					<div class="d-flex justify-end">
+						<v-autocomplete
+							v-model="limit"
+							:items="limitPage"
+							item-text="value"
+							item-value="value"
+							outlined
+							dense
+							hide-details
+							:disabled="DataOrder.length ? false : true"
+						/>
+						<v-icon
+							style="cursor: pointer;"
+							large
+							:disabled="DataOrder.length ? pageSummary.page != 1 ? false : true : true"
+							@click="getData(pageSummary.page - 1, limit, invoice)"
+						>
+							keyboard_arrow_left
+						</v-icon>
+						<v-icon
+							style="cursor: pointer;"
+							large
+							:disabled="DataOrder.length ? pageSummary.page != pageSummary.totalPages ? false : true : true"
+							@click="getData(pageSummary.page + 1, limit, invoice)"
+						>
+							keyboard_arrow_right
+						</v-icon>
+					</div>
 				</v-col>
 			</v-row>
 		</v-card>
@@ -342,7 +371,21 @@ export default {
     DialogUbahStatus: false,
 		page: 1,
     pageCount: 0,
-    itemsPerPage: 25,
+    itemsPerPage: 100,
+    limit: 20,
+		limitPage: [
+			{ value: 5 },
+			{ value: 10 },
+			{ value: 20 },
+			{ value: 50 },
+			{ value: 100 },
+		],
+		pageSummary: {
+			page: '',
+			limit: '',
+			total: '',
+			totalPages: ''
+		},
 		query: {
       limit: 10,
       sort: ["-created_at"],
@@ -350,13 +393,14 @@ export default {
       filter: "",
     },
 		headersDataOrder: [
-      { text: "No.", value: "number", sortable: false, width: "7%" },
+      // { text: "No.", value: "number", sortable: false, width: "7%" },
       { text: "", value: "data-table-expand", sortable: false, width: "5%" },
       { text: "Invoice", value: "orderNumber", sortable: false },
       { text: "Tanggal Order", value: "createdAt", sortable: false },
       { text: "Receiptment", value: "receipt", sortable: false },
       { text: "Total", value: "total", sortable: false },
       { text: "Data User", value: "user", sortable: false },
+      { text: "Payment Status", value: "paymentStatusFinal", sortable: false },
       { text: "Order Type", value: "shippingType", sortable: false },
       { text: "Order Status", value: "orderStatusLatest", sortable: false },
     ],
@@ -376,29 +420,74 @@ export default {
 			amp: true,
 		},
 	},
+	watch: {
+		invoice: {
+			deep: true,
+			handler(value) {
+				if(value == null){
+					this.getData(1, this.limit, '')
+					this.pageSummary = {
+						page: '',
+						limit: '',
+						total: '',
+						totalPages: ''
+					}
+					this.DataOrder = []
+					this.invoice = ''
+				}
+			}
+		},
+		limit: {
+			deep: true,
+			handler(value) {
+				this.getData(1, value, this.invoice)
+			}
+		}
+	},
 	mounted() {
+		this.getData(1, this.limit, this.invoice)
 	},
 	methods: {
 		...mapActions(["fetchData"]),
-		getData() {
-			if(this.invoice == '' || this.invoice == null) return this.notifikasi("warning", 'Invoice masih kosong !', "1")
+		getData(page = 1, limit, inv) {
+			this.itemsPerPage = limit
+			// if(this.invoice == '' || this.invoice == null) return this.notifikasi("warning", 'Invoice masih kosong !', "1") inv=${this.invoice}
+			this.pageSummary = {
+				page: '',
+				limit: '',
+				total: '',
+				totalPages: ''
+			}
 			this.DataOrder = []
 			this.loadingButtonDataOrder = true
 			this.isLoadingDataOrder = true
       let payload = {
 				method: "get",
-				url: `kmart/getdataOrder?inv=${this.invoice}`,
+				url: `kmart/getdataOrder?page=${page}&limit=${limit}${inv && `&inv=${inv}`}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
 			.then((res) => {
 				this.loadingButtonDataOrder = false
 				this.isLoadingDataOrder = false
-				this.DataOrder = res.data.result
+				let resdata = res.data.result
+				this.DataOrder = resdata.data
+				this.pageSummary = {
+					page: resdata.pageSummary.page,
+					limit: resdata.pageSummary.limit,
+					total: resdata.pageSummary.total,
+					totalPages: resdata.pageSummary.totalPages
+				}
 				// this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
 				this.DataOrder = []
+				this.pageSummary = {
+					page: '',
+					limit: '',
+					total: '',
+					totalPages: ''
+				}
 				this.loadingButtonDataOrder = false
 				this.isLoadingDataOrder = false
 				this.notifikasi("error", err.response.data.message, "1")

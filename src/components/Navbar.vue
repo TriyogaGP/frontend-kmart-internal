@@ -144,6 +144,8 @@ export default {
 			{text: 'Data Harian', route: '/dataHarian', icon: 'list'},
 			{text: 'Data Order', route: '/dataOrder', icon: 'list'},
 			{text: 'Data NonCod Stack', route: '/dataStack', icon: 'list'},
+			{text: 'Data Product Order Summary', route: '/dataProductOrderSummary', icon: 'list'},
+			{text: 'Data Variant Product', route: '/dataVariantProduct', icon: 'list'},
 			{text: 'Hit Manual Order', route: '/hitManualOrder', icon: 'bolt'},
 		],
 		linksNavKmart: [

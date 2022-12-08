@@ -18,11 +18,11 @@
 					>
 					<v-textarea
 						v-model="invoice"
-						placeholder="Invoice (INV-1, INV-2, INV-3, ...)"
+						placeholder="Invoice (INV-1INV-2INV-3...)"
 						outlined
 						dense
 						rows="4"
-						label="Invoice (INV-1, INV-2, INV-3, ...)"
+						label="Invoice (INV-1INV-2INV-3...)"
 						color="light-blue darken-3"
 						hide-details
 						clearable
@@ -160,7 +160,7 @@
 						v-if="DataNonCod.length > 0"
 						v-model="page"
 						:length="pageCount"
-						:total-visible="25"
+						:total-visible="7"
 					/>
 				</v-col>
 			</v-row>

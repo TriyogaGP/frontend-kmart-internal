@@ -39,6 +39,16 @@ export default [
         component: () => import('@/views/page-content/content-view/DataStack.vue')
       },
       {
+        path: '/dataProductOrderSummary',
+        name: 'DataProductOrderSummary',
+        component: () => import('@/views/page-content/content-view/DataProductOrderSummary.vue')
+      },
+      {
+        path: '/dataVariantProduct',
+        name: 'DataVariantProduct',
+        component: () => import('@/views/page-content/content-view/DataVariantProduct.vue')
+      },
+      {
         path: '/hitManualOrder',
         name: 'DataHitManualOrder',
         component: () => import('@/views/page-content/content-view/DataHitManual.vue')

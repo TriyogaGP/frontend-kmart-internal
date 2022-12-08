@@ -272,7 +272,7 @@
 						v-if="DataProduct.length > 0"
 						v-model="page"
 						:length="pageCount"
-						:total-visible="25"
+						:total-visible="7"
 					/>
 				</v-col>
 			</v-row>

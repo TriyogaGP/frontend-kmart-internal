@@ -102,7 +102,7 @@
 							dense
 							depressed
 							:loading="loadingButtonDataHarian"
-							@click="getData()"
+							@click="getData(1, limit)"
 						>
 							Get Data
 						</v-btn>
@@ -116,20 +116,18 @@
 					loading-text="Sedang memuat... Harap tunggu"
 					no-data-text="Tidak ada data yang tersedia"
 					no-results-text="Tidak ada catatan yang cocok ditemukan"
-					:options.sync="query"
 					:headers="headersDataHarian"
 					:loading="isLoadingDataHarian"
 					:items="DataHarian"
 					item-key="orderNumber"
 					hide-default-footer
 					class="elevation-1"
-					:page.sync="page"
 					:items-per-page="itemsPerPage"
 					@page-count="pageCount = $event"
 				>
-					<template #[`item.number`]="{ item }">
+					<!-- <template #[`item.number`]="{ item }">
 						{{ DataHarian.indexOf(item) + 1 }}
-					</template>
+					</template> -->
 					<template #[`item.createdAt`]="{ item }">
 						<span v-html="convertDateTime(item.createdAt)" /> 
 					</template>
@@ -161,13 +159,44 @@
 				</v-data-table>
 			</div>
 			<v-row>
-				<v-col cols="12" class="mt-2 pa-2 px-5">
-					<v-pagination
-						v-if="DataHarian.length > 0"
-						v-model="page"
-						:length="pageCount"
-						:total-visible="25"
-					/>
+				<!-- <v-pagination
+					v-if="DataHarian.length > 0"
+					v-model="page"
+					:length="pageCount"
+					:total-visible="7"
+				/> -->
+				<v-col cols="10" class="mt-2 d-flex justify-start align-center">
+					<span>Halaman <strong>{{ pageSummary.page ? pageSummary.page : 0 }}</strong> dari Total Halaman <strong>{{ pageSummary.totalPages ? pageSummary.totalPages : 0 }}</strong> (Records {{ pageSummary.total ? pageSummary.total : 0 }})</span>
+				</v-col>
+				<v-col cols="2" class="mt-2 text-right">
+					<div class="d-flex justify-end">
+						<v-autocomplete
+							v-model="limit"
+							:items="limitPage"
+							item-text="value"
+							item-value="value"
+							outlined
+							dense
+							hide-details
+							:disabled="DataHarian.length ? false : true"
+						/>
+						<v-icon
+							style="cursor: pointer;"
+							large
+							:disabled="DataHarian.length ? pageSummary.page != 1 ? false : true : true"
+							@click="getData(pageSummary.page - 1, limit)"
+						>
+							keyboard_arrow_left
+						</v-icon>
+						<v-icon
+							style="cursor: pointer;"
+							large
+							:disabled="DataHarian.length ? pageSummary.page != pageSummary.totalPages ? false : true : true"
+							@click="getData(pageSummary.page + 1, limit)"
+						>
+							keyboard_arrow_right
+						</v-icon>
+					</div>
 				</v-col>
 			</v-row>
 		</v-card>
@@ -223,7 +252,21 @@ export default {
     isLoadingExport: false,
 		page: 1,
     pageCount: 0,
-    itemsPerPage: 25,
+    itemsPerPage: 100,
+    limit: 20,
+		limitPage: [
+			{ value: 5 },
+			{ value: 10 },
+			{ value: 20 },
+			{ value: 50 },
+			{ value: 100 },
+		],
+		pageSummary: {
+			page: '',
+			limit: '',
+			total: '',
+			totalPages: ''
+		},
 		query: {
       limit: 10,
       sort: ["-created_at"],
@@ -231,7 +274,7 @@ export default {
       filter: "",
     },
 		headersDataHarian: [
-      { text: "No.", value: "number", sortable: false, width: "7%" },
+      // { text: "No.", value: "number", sortable: false, width: "7%" },
       { text: "Invoice", value: "orderNumber", sortable: false },
       { text: "Tanggal Order", value: "createdAt", sortable: false },
       { text: "No.Resi", value: "shippingReceiptNumber", sortable: false },
@@ -241,7 +284,7 @@ export default {
       { text: "Order Type", value: "shippingType", sortable: false },
       { text: "Order Status", value: "orderStatusLatest", sortable: false },
     ],
-    rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
+    rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50, 100] },
     totalItems: 0,
 
 		//notifikasi
@@ -272,6 +315,12 @@ export default {
 			deep: true,
 			handler(value) {
 				if(value.StartDate == null || value.EndDate == null){
+					this.pageSummary = {
+						page: '',
+						limit: '',
+						total: '',
+						totalPages: ''
+					}
 					this.DataHarian = []
 					this.input = {
 						StartDate: '',
@@ -279,19 +328,32 @@ export default {
 					}
 				}
 			}
+		},
+		limit: {
+			deep: true,
+			handler(value) {
+				this.getData(1, value)
+			}
 		}
 	},
 	mounted() {
 	},
 	methods: {
 		...mapActions(["fetchData"]),
-		getData() {
+		getData(page = 1, limit) {
+			this.itemsPerPage = limit
 			this.DataHarian = []
+			this.pageSummary = {
+				page: '',
+				limit: '',
+				total: '',
+				totalPages: ''
+			}
 			this.loadingButtonDataHarian = true
 			this.isLoadingDataHarian = true
       let payload = {
 				method: "get",
-				url: `kmart/getdataHarian?startdate=${this.input.StartDate}&enddate=${this.input.EndDate}`,
+				url: `kmart/getdataHarian?startdate=${this.input.StartDate}&enddate=${this.input.EndDate}&page=${page}&limit=${limit}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -300,10 +362,22 @@ export default {
 				this.isLoadingDataHarian = false
 				let resdata = res.data.result
 				this.DataHarian = resdata.data
+				this.pageSummary = {
+					page: resdata.pageSummary.page,
+					limit: resdata.pageSummary.limit,
+					total: resdata.pageSummary.total,
+					totalPages: resdata.pageSummary.totalPages
+				}
 				// this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
 				this.DataHarian = []
+				this.pageSummary = {
+					page: '',
+					limit: '',
+					total: '',
+					totalPages: ''
+				}
 				this.loadingButtonDataHarian = false
 				this.isLoadingDataHarian = false
 				this.notifikasi("error", err.response.data.message, "1")
