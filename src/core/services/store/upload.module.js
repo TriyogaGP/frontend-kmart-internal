@@ -75,7 +75,19 @@ const actions = {
       fData.append('id_profile', idProfile ? idProfile : null); //id profile user
       fData.append('file', data.files); //data files
       // axios services
-      ApiService.post('file/uploadExcel', fData)
+      ApiService.postFile('file/uploadExcel', fData)
+        .then((res) => resolve(res))
+        .catch((err) => reject(err))
+    });
+  },
+  uploadCSV: function ({commit},data) {
+    return new Promise((resolve, reject) => {
+      let fData = new FormData();
+      let url = data.bagian == 'install' ? 'kmart/google/loader/UserInstall' : 'kmart/google/loader/UserAcquisition'
+      fData.append('bagian', data.bagian); //data files
+      fData.append('file', data.files); //data files
+      // axios services
+      ApiService.postFile(url, fData)
         .then((res) => resolve(res))
         .catch((err) => reject(err))
     });

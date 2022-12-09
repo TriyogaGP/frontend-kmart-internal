@@ -33,7 +33,7 @@
 					<v-col
 						cols="12"
 						md="4"
-						class="pt-2 d-flex align-center"
+						class="pt-2 d-flex align-center font-weight-bold"
 					>
 						Start Date
 					</v-col>
@@ -74,7 +74,7 @@
 					<v-col
 						cols="12"
 						md="4"
-						class="pt-2 d-flex align-center"
+						class="pt-2 d-flex align-center font-weight-bold"
 					>
 						End Date
 					</v-col>
@@ -115,7 +115,7 @@
 					<v-col
 						cols="12"
 						md="4"
-						class="pt-2 d-flex align-center"
+						class="pt-2 d-flex align-center font-weight-bold"
 					>
 						Product Name
 					</v-col>
@@ -142,7 +142,7 @@
 					<v-col
 						cols="12"
 						md="4"
-						class="pt-2 d-flex align-center"
+						class="pt-2 d-flex align-center font-weight-bold"
 					>
 						Payment
 					</v-col>
@@ -169,7 +169,7 @@
 					<v-col
 						cols="12"
 						md="4"
-						class="pt-2 d-flex align-center"
+						class="pt-2 d-flex align-center font-weight-bold"
 					>
 						Shipping Type
 					</v-col>

@@ -7,7 +7,7 @@
 					<v-col
 						cols="12"
 						md="4"
-						class="pt-2 d-flex align-center"
+						class="pt-2 d-flex align-center font-weight-bold"
 					>
 						Pilihan
 					</v-col>
@@ -35,7 +35,7 @@
 					<v-col
 						cols="12"
 						md="4"
-						class="pt-2 d-flex align-center"
+						class="pt-2 d-flex align-center font-weight-bold"
 					>
 						Package Product
 					</v-col>
@@ -60,7 +60,7 @@
 					<v-col
 						cols="12"
 						md="4"
-						class="pt-2 d-flex align-center"
+						class="pt-2 d-flex align-center font-weight-bold"
 					>
 						Invoice
 					</v-col>

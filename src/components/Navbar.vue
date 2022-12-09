@@ -69,7 +69,7 @@
 					active-class="SelectedTile-active"
 				>
 					<v-list-item-title>
-						<span>Dashboard</span>
+						<span class="menufont">Dashboard</span>
 					</v-list-item-title>
 					<v-icon right>dashboard</v-icon>
 				</v-list-item>
@@ -81,7 +81,7 @@
 					active-class="SelectedTile-active"
 				>
 					<v-list-item-title>
-						<span>{{link.text}}</span>
+						<span class="menufont">{{link.text}}</span>
 					</v-list-item-title>
 					<v-icon right>{{link.icon}}</v-icon>
 				</v-list-item>
@@ -94,7 +94,7 @@
 					active-class="SelectedTile-active"
 				>
 					<v-list-item-title>
-						<span>{{linkKmart.text}}</span>
+						<span class="menufont">{{linkKmart.text}}</span>
 					</v-list-item-title>
 					<v-icon right>{{linkKmart.icon}}</v-icon>
 				</v-list-item>
@@ -104,7 +104,7 @@
 					active-class="SelectedTile-active"
 				>
 					<v-list-item-title>
-						<span>Settings</span>
+						<span class="menufont">Settings</span>
 					</v-list-item-title>
 					<v-icon right>settings</v-icon>
 				</v-list-item>
@@ -149,6 +149,7 @@ export default {
 			{text: 'Hit Manual Order', route: '/hitManualOrder', icon: 'bolt'},
 		],
 		linksNavKmart: [
+			{text: 'Data User Install & Acquisition', route: '/dataUserInstallAcquisition', icon: 'list'},
 			{text: 'Data Transaksi Detail', route: '/dataTransaksiDetail', icon: 'list'},
 			{text: 'Data Transaksi Summary', route: '/dataTransaksiDetailSummary', icon: 'list'},
 			{text: 'Data Product', route: '/dataProduct', icon: 'list'},
@@ -193,6 +194,9 @@ export default {
 </script>
 
 <style>
+.menufont {
+	font-size: 12px !important;
+}
 .SelectedTile:hover {
 	border-radius: 2px;
 	background: #455A64

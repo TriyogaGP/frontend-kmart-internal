@@ -172,7 +172,7 @@
                 <v-col
                   cols="12"
                   md="4"
-                  class="pt-2 d-flex align-center"
+                  class="pt-2 d-flex align-center font-weight-bold"
                 >
                   Nama Lengkap
                 </v-col>
@@ -198,7 +198,7 @@
                 <v-col
                   cols="12"
                   md="4"
-                  class="pt-2 d-flex align-center"
+                  class="pt-2 d-flex align-center font-weight-bold"
                 >
                   Level Role
                 </v-col>
@@ -226,7 +226,7 @@
 								<v-col
 									cols="12"
 									md="4"
-									class="pt-2 d-flex align-center"
+									class="pt-2 d-flex align-center font-weight-bold"
 								>
 									Downline Admin Mall
 								</v-col>
@@ -254,7 +254,7 @@
                 <v-col
                   cols="12"
                   md="4"
-                  class="pt-2 d-flex align-center"
+                  class="pt-2 d-flex align-center font-weight-bold"
                 >
                   Username
                 </v-col>
@@ -280,7 +280,7 @@
                 <v-col
                   cols="12"
                   md="4"
-                  class="pt-2 d-flex align-center"
+                  class="pt-2 d-flex align-center font-weight-bold"
                 >
                   Email
                 </v-col>
@@ -307,7 +307,7 @@
                 <v-col
                   cols="12"
                   md="4"
-                  class="pt-2 d-flex align-center"
+                  class="pt-2 d-flex align-center font-weight-bold"
                 >
                   Kata Sandi
                 </v-col>
@@ -351,7 +351,7 @@
                 <v-col
                   cols="12"
                   md="4"
-                  class="pt-2 d-flex align-center"
+                  class="pt-2 d-flex align-center font-weight-bold"
                 >
                   Kabupaten / Kota
                 </v-col>
@@ -379,7 +379,7 @@
                 <v-col
                   cols="12"
                   md="4"
-                  class="pt-2 d-flex align-center"
+                  class="pt-2 d-flex align-center font-weight-bold"
                 >
                   No Handphone
                 </v-col>
@@ -406,7 +406,7 @@
                 <v-col
                   cols="12"
                   md="4"
-                  class="pt-2 d-flex align-center"
+                  class="pt-2 d-flex align-center font-weight-bold"
                 >
                   Alamat
                 </v-col>

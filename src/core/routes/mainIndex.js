@@ -55,6 +55,11 @@ export default [
       },
 
       {
+        path: '/dataUserInstallAcquisition',
+        name: 'DataUserInstallAcquisition',
+        component: () => import('@/views/page-content/content-view/DataUserInstallAcquisition.vue')
+      },
+      {
         path: '/dataTransaksiDetail',
         name: 'DataTransaksiDetail',
         component: () => import('@/views/page-content/content-view/DataTransaksi.vue')

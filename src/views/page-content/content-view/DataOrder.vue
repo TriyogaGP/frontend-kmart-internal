@@ -7,7 +7,7 @@
 					<v-col
 						cols="12"
 						md="4"
-						class="pt-2 d-flex align-center"
+						class="pt-2 d-flex align-center font-weight-bold"
 					>
 						Invoice
 					</v-col>
@@ -218,7 +218,7 @@
 							<v-col
 								cols="12"
 								md="4"
-								class="pt-2 d-flex align-center"
+								class="pt-2 d-flex align-center font-weight-bold"
 							>
 								ID Order
 							</v-col>
@@ -243,7 +243,7 @@
 							<v-col
 								cols="12"
 								md="4"
-								class="pt-2 d-flex align-center"
+								class="pt-2 d-flex align-center font-weight-bold"
 							>
 								Status
 							</v-col>
@@ -270,7 +270,7 @@
 							<v-col
 								cols="12"
 								md="4"
-								class="pt-2 d-flex align-center"
+								class="pt-2 d-flex align-center font-weight-bold"
 							>
 								Remarks
 							</v-col>
