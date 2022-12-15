@@ -1,19 +1,8 @@
 <template>
   <div>
-		<h1 class="subheading grey--text">Panel Hak Akses</h1>
+		<h1 class="subheading grey--text">Panel Hak Akses Menu</h1>
 		<v-row no-gutters class="pa-2">
-			<v-col cols="12" md="6">
-				<v-btn
-					color="light-blue darken-3"
-					small
-					dense
-					depressed
-					class="ma-2 white--text text--darken-2"
-					@click.stop="bukaDialog(null, 0)"
-				>
-					<v-icon small>add</v-icon>	Tambah
-				</v-btn>
-			</v-col>
+			<v-col cols="12" md="6" />
 			<v-col cols="12" md="6">
 				<v-text-field
 					v-model="searchData"
@@ -36,11 +25,11 @@
 				:headers="headers"
 				:search="searchData"
 				:loading="isLoading"
-				:items="DataHakAkses"
+				:items="DataHakAksesMenu"
 				:single-expand="singleExpand"
 				:expanded.sync="expanded"
 				show-expand
-				item-key="idRole"
+				item-key="idRoleMenu"
 				hide-default-footer
 				class="elevation-1"
 				:page.sync="page"
@@ -48,61 +37,33 @@
 				@page-count="pageCount = $event"
 			>
 				<template #[`item.number`]="{ item }">
-					{{ DataHakAkses.indexOf(item) + 1 }}
+					{{ DataHakAksesMenu.indexOf(item) + 1 }}
 				</template>
-				<template #[`item.status`]="{ item }">
-					<v-icon small v-if="item.status === true" color="green">check</v-icon>
-					<v-icon small v-else-if="item.status == false" color="red">clear</v-icon>
-					<br>
-					<span v-html="item.status == true ? 'Active' : 'Non Active'" /> 
+				<template #[`item.menu`]="{ item }">
+					<v-tooltip top>
+						<template v-slot:activator="{ on, attrs }">
+							Detail <v-icon small v-bind="attrs" v-on="on">info</v-icon>
+						</template>
+						<div v-if="item.menu.length">
+							<div v-for="(val, i) in item.menu" :key="i">
+								{{ val.menuText }}
+							</div>
+						</div>
+						<span v-else>Tidak ada Menu</span>
+					</v-tooltip>
 				</template>
 				<template #expanded-item="{ headers, item }">
 					<td :colspan="headers.length" class="white">
 						<v-btn
-							:value="item.idRole"
+							:value="item.idRoleMenu"
 							color="#0bd369"
 							small
 							dark
 							dense
 							class="ma-2"
-							@click="bukaDialog(item, 1)"
+							@click="bukaDialog(item)"
 						>
 						<v-icon>edit</v-icon>	Ubah
-						</v-btn> 
-						<v-btn
-							v-if="item.status == false"
-							:value="item.idRole"
-							color="#0bd369"
-							small
-							dark
-							dense
-							class="ma-2"
-							@click="StatusRecord(item, 1)"
-						>
-						<v-icon>visibility</v-icon>	Active
-						</v-btn> 
-						<v-btn
-							v-else-if="item.status == true"
-							:value="item.idRole"
-							color="#0bd369"
-							small
-							dark
-							dense
-							class="ma-2"
-							@click="StatusRecord(item, 0)"
-						>
-						<v-icon>visibility_off</v-icon>	Non Active
-						</v-btn> 
-						<v-btn
-							:value="item.idRole"
-							color="#bd3a07"
-							small
-							dark
-							dense
-							class="ma-2"
-							@click="HapusRecord(item)"
-						>
-						<v-icon>delete</v-icon>	Hapus
 						</v-btn> 
 						<v-divider />
 					</td>
@@ -112,15 +73,15 @@
 		<v-row>
 			<v-col cols="12" class="mt-2 pa-2 px-5">
 				<v-pagination
-					v-if="DataHakAkses.length > 0"
+					v-if="DataHakAksesMenu.length > 0"
 					v-model="page"
 					:length="pageCount"
-					:total-visible="5"
+					:total-visible="7"
 				/>
 			</v-col>
 		</v-row>
 		<v-dialog
-      v-model="DialogRole"
+      v-model="DialogRoleMenu"
       max-width="800px"
       persistent
       transition="dialog-bottom-transition"
@@ -130,7 +91,7 @@
           dark
           color="light-blue darken-3"
         >
-          <v-toolbar-title>{{editedIndex == 0 ? 'Tambah' : editedIndex == 1 ? 'Ubah' : 'View'}} Data Hak Akses</v-toolbar-title>
+          <v-toolbar-title>Ubah Data Hak Akses Menu</v-toolbar-title>
           <v-spacer />
           <v-toolbar-items>
             <v-btn
@@ -161,16 +122,36 @@
                   md="8"
                   class="pt-3"
                 >
-                  <v-text-field
-                    v-model="inputRole.nama_role"
-                    placeholder="Role Name"
-                    outlined
-                    dense
-                    label="Role Name"
-                    color="light-blue darken-3"
-                    hide-details
-                    clearable
-                  />
+									<v-autocomplete
+										v-model="inputRoleMenu.menu"
+										:items="menuOptions"
+										placeholder="Pilih Menu"
+										label="Pilih Menu"
+										item-text="menuText"
+										item-value="idMenu"
+										multiple
+										outlined
+										hide-details
+										dense
+										clearable
+										@change="addData($event)"
+									>
+										<template #selection="data">
+											<v-chip
+												v-bind="data.attrs"
+												:input-value="data.selected"
+												close
+												small
+												outlined
+												class="ma-1"
+												color="light-blue darken-3"
+												@click="data.select"
+												@click:close="remove(data.item)"
+											>
+												{{ data.item.menuText }}
+											</v-chip>
+										</template>
+									</v-autocomplete>
                 </v-col>
               </v-row>
             </v-card-text>
@@ -185,26 +166,12 @@
                 cols="12"
               >
                 <v-btn
-                  v-if="editedIndex == 0"
                   color="light-blue darken-3"
                   class="white--text text--darken-2"
                   small
                   dense
                   depressed
-                  :disabled="kondisiTombol"
-                  @click="SimpanForm(0)"
-                >
-                  Simpan Data
-                </v-btn> 
-                <v-btn
-                  v-else-if="editedIndex == 1"
-                  color="light-blue darken-3"
-                  class="white--text text--darken-2"
-                  small
-                  dense
-                  depressed
-                  :disabled="kondisiTombol"
-                  @click="SimpanForm(1)"
+                  @click="SimpanForm()"
                 >
                   Ubah Data
                 </v-btn>
@@ -234,19 +201,19 @@
 import { mapActions } from "vuex";
 import PopUpNotifikasiVue from "../Layout/PopUpNotifikasi.vue";
 export default {
-  name: 'HakAkses',
+  name: 'HakAksesMenu',
 	components: { PopUpNotifikasiVue },
   data: () => ({
     isLoading: false,
-		DataHakAkses: [],
+		DataHakAksesMenu: [],
 		page: 1,
     pageCount: 0,
-    itemsPerPage: 5,
+    itemsPerPage: 10,
     expanded: [],
     singleExpand: true,
 		searchData: "",
     query: {
-			limit: 10,
+      limit: 10,
       sort: ["-created_at"],
       page: 1,
       filter: "",
@@ -255,16 +222,19 @@ export default {
       { text: "No", value: "number", sortable: false, width: "7%" },
       { text: "", value: "data-table-expand", sortable: false, width: "5%" },
       { text: "Nama Role", value: "namaRole", sortable: false },
-      { text: "Status", value: "status", sortable: false },
+      { text: "Menu", value: "menu", sortable: false },
     ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
-		DialogRole: false,
+		menuOptions: [],
+		DialogRoleMenu: false,
 		kondisiTombol: true,
 		editedIndex: 0,
-		inputRole: {
+		inputRoleMenu: {
+			id_role_menu: '',
 			id_role: '',
-			nama_role: '',
+			menu: '',
+			kumpulanMenu: '',
 		},
 
 		//notifikasi
@@ -274,41 +244,27 @@ export default {
     notifikasiButton: '',
   }),
   metaInfo: {
-		title: "Settings (Hak Akses) - DNM Mobile",
+		title: "Settings (Hak Akses Menu) - DNM Mobile",
 		htmlAttrs: {
 			lang: "id",
 			amp: true,
 		},
 	},
-	watch: {
-    inputRole: {
-      deep: true,
-      handler(value){
-				if(value.nama_role == null){ this.inputRole.nama_role = '' }
-        
-        if(value.nama_role != ''){
-          this.kondisiTombol = false
-        }else{
-          this.kondisiTombol = true
-        }
-      }
-    },
-  },
 	mounted() {
-		this.getHakAkses();
+		this.getHakAksesMenu();
 	},
 	methods: {
 		...mapActions(["fetchData"]),
-		getHakAkses() {
+		getHakAksesMenu() {
 			this.isLoading = true
 			let payload = {
 				method: "get",
-				url: `settings/getRole`,
+				url: `settings/getRoleMenu`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
 			.then((res) => {
-				this.DataHakAkses = res.data.result;
+				this.DataHakAksesMenu = res.data.result;
 				this.isLoading = false
 			})
 			.catch((err) => {
@@ -316,87 +272,97 @@ export default {
 				this.notifikasi("error", err.response.data.message, "1")
 			});
 		},
-		bukaDialog(item, index){
-      this.editedIndex = index
-      if(index == 0){
-        this.inputRole.id_role = ''
-        this.inputRole.nama_role = ''
-      }else{
-				this.inputRole.id_role = item.idRole
-        this.inputRole.nama_role = item.namaRole
-      }
-      this.DialogRole = true
+		getMenu() {
+			let payload = {
+				method: "get",
+				url: `settings/getMenu`,
+				authToken: localStorage.getItem('user_token')
+			};
+			this.fetchData(payload)
+			.then((res) => {
+				this.menuOptions = res.data.result;
+			})
+			.catch((err) => {
+				this.notifikasi("error", err.response.data.message, "1")
+			});
+		},
+		bukaDialog(item){
+			this.getMenu()
+			this.inputRoleMenu.id_role_menu = item.idRoleMenu
+			this.inputRoleMenu.id_role = item.idRole
+			let kumpul = [], kumpulMenu = []
+			item.menu.map(el => {
+				kumpulMenu.push({
+					kategori: el.kategori,
+					idMenu: el.idMenu,
+				})
+				kumpul.push(el.idMenu)
+			})
+			this.inputRoleMenu.menu = kumpul
+			this.inputRoleMenu.kumpulanMenu = kumpulMenu
+      this.DialogRoleMenu = true
     },
 		tutupDialog(){
-			this.inputRole.id_role = ''
-			this.inputRole.nama_role = ''
-			this.DialogRole = false
+			this.inputRoleMenu.id_role_menu = ''
+			this.inputRoleMenu.id_role = ''
+			this.inputRoleMenu.menu = ''
+			this.inputRoleMenu.kumpulanMenu = ''
+			this.DialogRoleMenu = false
 		},
-		SimpanForm(index) {
-      let bodyData = {
-        jenis: index == 0 ? 'ADD' : 'EDIT',
-        id_role: index == 0 ? '' : this.inputRole.id_role,
-        nama_role: this.inputRole.nama_role,
+		SimpanForm() {
+			const menu = [];
+      for (let i = 0; i < this.inputRoleMenu.kumpulanMenu.length; i++) {
+        menu.push({
+					kategori: this.inputRoleMenu.kumpulanMenu[i].kategori,
+					idMenu: this.inputRoleMenu.kumpulanMenu[i].idMenu,
+				});
+      }
+			let bodyData = {
+        id_role_menu: this.inputRoleMenu.id_role_menu,
+        id_role: this.inputRoleMenu.id_role,
+        menu: menu,
       }
       let payload = {
 				method: "post",
-				url: `settings/postRole`,
+				url: `settings/postRoleMenu`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
 			.then((res) => {
-        this.DialogRole = false
-        this.getHakAkses()
+        this.DialogRoleMenu = false
+        this.getHakAksesMenu()
         this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
 				this.notifikasi("error", err.response.data.message, "1")
 			});
-    },
-    HapusRecord(item) {
-      let bodyData = {
-        jenis: 'DELETE',
-        id_role: item.idRole,
-      }
-      let payload = {
-				method: "post",
-				url: `settings/postRole`,
-        body: bodyData,
-				authToken: localStorage.getItem('user_token')
-			};
-			this.fetchData(payload)
-			.then((res) => {
-        this.DialogRole = false
-        this.getHakAkses()
-        this.notifikasi("success", res.data.message, "1")
+		},
+		remove(item) {
+      this.inputRoleMenu.menu.splice(this.inputRoleMenu.menu.indexOf(item.idMenu), 1);
+			this.getMenu()
+			let kumpul = []
+			this.inputRoleMenu.menu.map(val => {
+				let data = this.menuOptions.filter(menu => menu.idMenu == val)[0]
+				kumpul.push({
+					kategori: data.kategori,
+					idMenu: data.idMenu,
+				})
 			})
-			.catch((err) => {
-				this.notifikasi("error", err.response.data.message, "1")
-			});
+			this.inputRoleMenu.kumpulanMenu = kumpul
     },
-    StatusRecord(item, status) {
-      let bodyData = {
-        jenis: 'STATUSRECORD',
-        id_role: item.idRole,
-        status: status,
-      }
-      let payload = {
-				method: "post",
-				url: `settings/postRole`,
-        body: bodyData,
-				authToken: localStorage.getItem('user_token')
-			};
-			this.fetchData(payload)
-			.then((res) => {
-        this.DialogRole = false
-        this.getHakAkses()
-        this.notifikasi("success", res.data.message, "1")
+		addData(idMenu) {
+			this.getMenu()
+			let kumpul = []
+			idMenu.map(val => {
+				let data = this.menuOptions.filter(menu => menu.idMenu == val)[0]
+				kumpul.push({
+					kategori: data.kategori,
+					idMenu: data.idMenu,
+				})
 			})
-			.catch((err) => {
-				this.notifikasi("error", err.response.data.message, "1")
-			});
-    },
+			this.inputRoleMenu.kumpulanMenu = kumpul
+		},
 		notifikasi(kode, text, proses){
       this.dialogNotifikasi = true
       this.notifikasiKode = kode

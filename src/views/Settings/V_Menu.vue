@@ -1,6 +1,6 @@
 <template>
   <div>
-		<h1 class="subheading grey--text">Panel Hak Akses</h1>
+		<h1 class="subheading grey--text">Panel Menu</h1>
 		<v-row no-gutters class="pa-2">
 			<v-col cols="12" md="6">
 				<v-btn
@@ -36,11 +36,11 @@
 				:headers="headers"
 				:search="searchData"
 				:loading="isLoading"
-				:items="DataHakAkses"
+				:items="DataMenu"
 				:single-expand="singleExpand"
 				:expanded.sync="expanded"
 				show-expand
-				item-key="idRole"
+				item-key="idMenu"
 				hide-default-footer
 				class="elevation-1"
 				:page.sync="page"
@@ -48,18 +48,21 @@
 				@page-count="pageCount = $event"
 			>
 				<template #[`item.number`]="{ item }">
-					{{ DataHakAkses.indexOf(item) + 1 }}
+					{{ DataMenu.indexOf(item) + 1 }}
 				</template>
-				<template #[`item.status`]="{ item }">
-					<v-icon small v-if="item.status === true" color="green">check</v-icon>
-					<v-icon small v-else-if="item.status == false" color="red">clear</v-icon>
+				<template #[`item.menuIcon`]="{ item }">
+					<v-icon midle>{{ item.menuIcon }}</v-icon>
+				</template>
+				<template #[`item.statusAktif`]="{ item }">
+					<v-icon small v-if="item.statusAktif === true" color="green">check</v-icon>
+					<v-icon small v-else-if="item.statusAktif == false" color="red">clear</v-icon>
 					<br>
-					<span v-html="item.status == true ? 'Active' : 'Non Active'" /> 
+					<span v-html="item.statusAktif == true ? 'Active' : 'Non Active'" /> 
 				</template>
 				<template #expanded-item="{ headers, item }">
 					<td :colspan="headers.length" class="white">
 						<v-btn
-							:value="item.idRole"
+							:value="item.idMenu"
 							color="#0bd369"
 							small
 							dark
@@ -70,8 +73,8 @@
 						<v-icon>edit</v-icon>	Ubah
 						</v-btn> 
 						<v-btn
-							v-if="item.status == false"
-							:value="item.idRole"
+							v-if="item.statusAktif == false"
+							:value="item.idMenu"
 							color="#0bd369"
 							small
 							dark
@@ -82,8 +85,8 @@
 						<v-icon>visibility</v-icon>	Active
 						</v-btn> 
 						<v-btn
-							v-else-if="item.status == true"
-							:value="item.idRole"
+							v-else-if="item.statusAktif == true"
+							:value="item.idMenu"
 							color="#0bd369"
 							small
 							dark
@@ -94,7 +97,7 @@
 						<v-icon>visibility_off</v-icon>	Non Active
 						</v-btn> 
 						<v-btn
-							:value="item.idRole"
+							:value="item.idMenu"
 							color="#bd3a07"
 							small
 							dark
@@ -112,15 +115,15 @@
 		<v-row>
 			<v-col cols="12" class="mt-2 pa-2 px-5">
 				<v-pagination
-					v-if="DataHakAkses.length > 0"
+					v-if="DataMenu.length > 0"
 					v-model="page"
 					:length="pageCount"
-					:total-visible="5"
+					:total-visible="7"
 				/>
 			</v-col>
 		</v-row>
 		<v-dialog
-      v-model="DialogRole"
+      v-model="DialogMenu"
       max-width="800px"
       persistent
       transition="dialog-bottom-transition"
@@ -130,7 +133,7 @@
           dark
           color="light-blue darken-3"
         >
-          <v-toolbar-title>{{editedIndex == 0 ? 'Tambah' : editedIndex == 1 ? 'Ubah' : 'View'}} Data Hak Akses</v-toolbar-title>
+          <v-toolbar-title>{{editedIndex == 0 ? 'Tambah' : editedIndex == 1 ? 'Ubah' : 'View'}} Data Menu</v-toolbar-title>
           <v-spacer />
           <v-toolbar-items>
             <v-btn
@@ -154,7 +157,34 @@
                   md="4"
                   class="pt-2 d-flex align-center font-weight-bold"
                 >
-                  Role Name
+                  Kategori Menu
+                </v-col>
+                <v-col
+                  cols="12"
+                  md="8"
+                  class="pt-3"
+                >
+									<v-autocomplete
+										v-model="inputMenu.kategori"
+										:items="kategoriOptions"
+										item-text="text"
+										item-value="value"
+										placeholder="Kategori Menu"
+										label="Kategori Menu"
+										outlined
+										dense
+										hide-details
+										clearable
+									/>
+                </v-col>
+              </v-row>
+              <v-row no-gutters>
+                <v-col
+                  cols="12"
+                  md="4"
+                  class="pt-2 d-flex align-center font-weight-bold"
+                >
+                  Menu Text
                 </v-col>
                 <v-col
                   cols="12"
@@ -162,11 +192,61 @@
                   class="pt-3"
                 >
                   <v-text-field
-                    v-model="inputRole.nama_role"
-                    placeholder="Role Name"
+                    v-model="inputMenu.menu_text"
+                    placeholder="Menu Text"
                     outlined
                     dense
-                    label="Role Name"
+                    label="Menu Text"
+                    color="light-blue darken-3"
+                    hide-details
+                    clearable
+                  />
+                </v-col>
+              </v-row>
+              <v-row no-gutters>
+                <v-col
+                  cols="12"
+                  md="4"
+                  class="pt-2 d-flex align-center font-weight-bold"
+                >
+                  Menu Route
+                </v-col>
+                <v-col
+                  cols="12"
+                  md="8"
+                  class="pt-3"
+                >
+                  <v-text-field
+                    v-model="inputMenu.menu_route"
+                    placeholder="Menu Route"
+                    outlined
+                    dense
+                    label="Menu Route"
+                    color="light-blue darken-3"
+                    hide-details
+                    clearable
+                  />
+                </v-col>
+              </v-row>
+              <v-row no-gutters>
+                <v-col
+                  cols="12"
+                  md="4"
+                  class="pt-2 d-flex align-center font-weight-bold"
+                >
+                  Menu Icon
+                </v-col>
+                <v-col
+                  cols="12"
+                  md="8"
+                  class="pt-3"
+                >
+                  <v-text-field
+                    v-model="inputMenu.menu_icon"
+                    placeholder="Menu Icon"
+                    outlined
+                    dense
+                    label="Menu Icon"
                     color="light-blue darken-3"
                     hide-details
                     clearable
@@ -234,19 +314,19 @@
 import { mapActions } from "vuex";
 import PopUpNotifikasiVue from "../Layout/PopUpNotifikasi.vue";
 export default {
-  name: 'HakAkses',
+  name: 'Menu',
 	components: { PopUpNotifikasiVue },
   data: () => ({
     isLoading: false,
-		DataHakAkses: [],
+		DataMenu: [],
 		page: 1,
     pageCount: 0,
-    itemsPerPage: 5,
+    itemsPerPage: 10,
     expanded: [],
     singleExpand: true,
 		searchData: "",
     query: {
-			limit: 10,
+      limit: 10,
       sort: ["-created_at"],
       page: 1,
       filter: "",
@@ -254,17 +334,26 @@ export default {
 		headers: [
       { text: "No", value: "number", sortable: false, width: "7%" },
       { text: "", value: "data-table-expand", sortable: false, width: "5%" },
-      { text: "Nama Role", value: "namaRole", sortable: false },
-      { text: "Status", value: "status", sortable: false },
+      { text: "Nama Menu", value: "menuText", sortable: false },
+      { text: "Nama Route", value: "menuRoute", sortable: false },
+      { text: "Nama Icon", value: "menuIcon", sortable: false },
+      { text: "Status", value: "statusAktif", sortable: false },
     ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
-		DialogRole: false,
+		kategoriOptions: [
+			{ value: "utama", text: "Utama" },
+			{ value: "dnm", text: "DNM" },
+		],
+		DialogMenu: false,
 		kondisiTombol: true,
 		editedIndex: 0,
-		inputRole: {
-			id_role: '',
-			nama_role: '',
+		inputMenu: {
+			id_menu: '',
+			kategori: '',
+			menu_text: '',
+			menu_route: '',
+			menu_icon: '',
 		},
 
 		//notifikasi
@@ -274,19 +363,22 @@ export default {
     notifikasiButton: '',
   }),
   metaInfo: {
-		title: "Settings (Hak Akses) - DNM Mobile",
+		title: "Settings (Menu) - DNM Mobile",
 		htmlAttrs: {
 			lang: "id",
 			amp: true,
 		},
 	},
 	watch: {
-    inputRole: {
+    inputMenu: {
       deep: true,
       handler(value){
-				if(value.nama_role == null){ this.inputRole.nama_role = '' }
+				if(value.kategori == null){ this.inputMenu.kategori = '' }
+				if(value.menu_text == null){ this.inputMenu.menu_text = '' }
+				if(value.menu_route == null){ this.inputMenu.menu_route = '' }
+				if(value.menu_icon == null){ this.inputMenu.menu_icon = '' }
         
-        if(value.nama_role != ''){
+        if(value.kategori != '' && value.menu_text != '' && value.menu_route != '' && value.menu_icon != ''){
           this.kondisiTombol = false
         }else{
           this.kondisiTombol = true
@@ -295,20 +387,20 @@ export default {
     },
   },
 	mounted() {
-		this.getHakAkses();
+		this.getMenu();
 	},
 	methods: {
 		...mapActions(["fetchData"]),
-		getHakAkses() {
+		getMenu() {
 			this.isLoading = true
 			let payload = {
 				method: "get",
-				url: `settings/getRole`,
+				url: `settings/getMenu`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
 			.then((res) => {
-				this.DataHakAkses = res.data.result;
+				this.DataMenu = res.data.result;
 				this.isLoading = false
 			})
 			.catch((err) => {
@@ -319,35 +411,47 @@ export default {
 		bukaDialog(item, index){
       this.editedIndex = index
       if(index == 0){
-        this.inputRole.id_role = ''
-        this.inputRole.nama_role = ''
+        this.inputMenu.id_menu = ''
+        this.inputMenu.kategori = ''
+        this.inputMenu.menu_text = ''
+        this.inputMenu.menu_route = ''
+        this.inputMenu.menu_icon = ''
       }else{
-				this.inputRole.id_role = item.idRole
-        this.inputRole.nama_role = item.namaRole
+				this.inputMenu.id_menu = item.idMenu
+				this.inputMenu.kategori = item.kategori
+        this.inputMenu.menu_text = item.menuText
+        this.inputMenu.menu_route = item.menuRoute
+        this.inputMenu.menu_icon = item.menuIcon
       }
-      this.DialogRole = true
+      this.DialogMenu = true
     },
 		tutupDialog(){
-			this.inputRole.id_role = ''
-			this.inputRole.nama_role = ''
-			this.DialogRole = false
+			this.inputMenu.id_menu = ''
+			this.inputMenu.kategori = ''
+			this.inputMenu.menu_text = ''
+			this.inputMenu.menu_route = ''
+			this.inputMenu.menu_icon = ''
+			this.DialogMenu = false
 		},
 		SimpanForm(index) {
       let bodyData = {
         jenis: index == 0 ? 'ADD' : 'EDIT',
-        id_role: index == 0 ? '' : this.inputRole.id_role,
-        nama_role: this.inputRole.nama_role,
+        id_menu: index == 0 ? '' : this.inputMenu.id_menu,
+        kategori: this.inputMenu.kategori,
+        menu_text: this.inputMenu.menu_text,
+        menu_route: this.inputMenu.menu_route,
+        menu_icon: this.inputMenu.menu_icon,
       }
       let payload = {
 				method: "post",
-				url: `settings/postRole`,
+				url: `settings/postMenu`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
 			.then((res) => {
-        this.DialogRole = false
-        this.getHakAkses()
+        this.DialogMenu = false
+        this.getMenu()
         this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
@@ -357,40 +461,40 @@ export default {
     HapusRecord(item) {
       let bodyData = {
         jenis: 'DELETE',
-        id_role: item.idRole,
+        id_menu: item.idMenu,
       }
       let payload = {
 				method: "post",
-				url: `settings/postRole`,
+				url: `settings/postMenu`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
 			.then((res) => {
-        this.DialogRole = false
-        this.getHakAkses()
+        this.DialogMenu = false
+        this.getMenu()
         this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
 				this.notifikasi("error", err.response.data.message, "1")
 			});
     },
-    StatusRecord(item, status) {
+    StatusRecord(item, status_aktif) {
       let bodyData = {
         jenis: 'STATUSRECORD',
-        id_role: item.idRole,
-        status: status,
+        id_menu: item.idMenu,
+        status_aktif: status_aktif,
       }
       let payload = {
 				method: "post",
-				url: `settings/postRole`,
+				url: `settings/postMenu`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
 			.then((res) => {
-        this.DialogRole = false
-        this.getHakAkses()
+        this.DialogMenu = false
+        this.getMenu()
         this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {

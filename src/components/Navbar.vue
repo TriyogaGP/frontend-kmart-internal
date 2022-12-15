@@ -75,30 +75,31 @@
 				</v-list-item>
 				<v-list-item
 					v-for="(link) in linksNav"
-					:key="link.route"
-					router :to="link.route"
+					:key="link.menuRoute"
+					router :to="link.menuRoute"
 					class="SelectedTile"
 					active-class="SelectedTile-active"
 				>
 					<v-list-item-title>
-						<span class="menufont">{{link.text}}</span>
+						<span class="menufont">{{link.menuText}}</span>
 					</v-list-item-title>
-					<v-icon right>{{link.icon}}</v-icon>
+					<v-icon right>{{link.menuIcon}}</v-icon>
 				</v-list-item>
-				<h5 class="ml-2 mt-3 mb-3" style="color: #0F0;">DATA ORDER DNM Mobile<v-divider style="border: 1px solid #0F0"/></h5>
+				<h5 v-if="linksNavKmart.length" class="ml-2 mt-3 mb-3" style="color: #0F0;">DATA ORDER DNM Mobile<v-divider style="border: 1px solid #0F0"/></h5>
 				<v-list-item
 					v-for="(linkKmart) in linksNavKmart"
-					:key="linkKmart.route"
-					router :to="linkKmart.route"
+					:key="linkKmart.menuRoute"
+					router :to="linkKmart.menuRoute"
 					class="SelectedTile"
 					active-class="SelectedTile-active"
 				>
 					<v-list-item-title>
-						<span class="menufont">{{linkKmart.text}}</span>
+						<span class="menufont">{{linkKmart.menuText}}</span>
 					</v-list-item-title>
-					<v-icon right>{{linkKmart.icon}}</v-icon>
+					<v-icon right>{{linkKmart.menuIcon}}</v-icon>
 				</v-list-item>
 				<v-list-item
+					v-if="roleID == 1"
 					router to="/settings"
 					class="SelectedTile"
 					active-class="SelectedTile-active"
@@ -140,23 +141,24 @@ export default {
 			{text: 'Profile', route: '/profile', icon: 'person'},
 		],
 		linksNav: [
-			{text: 'Data Administrator', route: '/dataAdmin', icon: 'person'},
-			{text: 'Data Harian', route: '/dataHarian', icon: 'list'},
-			{text: 'Data Order', route: '/dataOrder', icon: 'list'},
-			{text: 'Data NonCod Stack', route: '/dataStack', icon: 'list'},
-			{text: 'Data Product Order Summary', route: '/dataProductOrderSummary', icon: 'list'},
-			{text: 'Data Variant Product', route: '/dataVariantProduct', icon: 'list'},
-			{text: 'Hit Manual Order', route: '/hitManualOrder', icon: 'bolt'},
+			// {text: 'Data Administrator', route: '/dataAdmin', icon: 'person'},
+			// {text: 'Data Harian', route: '/dataHarian', icon: 'list'},
+			// {text: 'Data Order', route: '/dataOrder', icon: 'list'},
+			// {text: 'Data NonCod Stack', route: '/dataStack', icon: 'list'},
+			// {text: 'Data Product Order Summary', route: '/dataProductOrderSummary', icon: 'list'},
+			// {text: 'Data Variant Product', route: '/dataVariantProduct', icon: 'list'},
+			// {text: 'Hit Manual Order', route: '/hitManualOrder', icon: 'bolt'},
 		],
 		linksNavKmart: [
-			{text: 'Data User Install & Acquisition', route: '/dataUserInstallAcquisition', icon: 'list'},
-			{text: 'Data Transaksi Detail', route: '/dataTransaksiDetail', icon: 'list'},
-			{text: 'Data Transaksi Summary', route: '/dataTransaksiDetailSummary', icon: 'list'},
-			{text: 'Data Product', route: '/dataProduct', icon: 'list'},
-			{text: 'Data Product Summary', route: '/dataProductSummary', icon: 'list'},
-			{text: 'Data Customer By Area', route: '/dataCustomerByArea', icon: 'list'},
-			{text: 'Data Customer Sales By Area', route: '/dataCustomerSalesByArea', icon: 'list'},
+			// {text: 'Data User Install & Acquisition', route: '/dataUserInstallAcquisition', icon: 'list'},
+			// {text: 'Data Transaksi Detail', route: '/dataTransaksiDetail', icon: 'list'},
+			// {text: 'Data Transaksi Summary', route: '/dataTransaksiDetailSummary', icon: 'list'},
+			// {text: 'Data Product', route: '/dataProduct', icon: 'list'},
+			// {text: 'Data Product Summary', route: '/dataProductSummary', icon: 'list'},
+			// {text: 'Data Customer By Area', route: '/dataCustomerByArea', icon: 'list'},
+			// {text: 'Data Customer Sales By Area', route: '/dataCustomerSalesByArea', icon: 'list'},
 		],
+		roleID: '',
 		nama: '',
 
 		//notifikasi
@@ -168,9 +170,34 @@ export default {
 	mounted() {
 		if(!localStorage.getItem('user_token')) return this.$router.push({name: 'Login'});
 		this.nama = localStorage.getItem('nama')
+		this.roleID = localStorage.getItem('roleID')
+		this.getData()
 	},
 	methods: {
 		...mapActions(["fetchData"]),
+    getData() {
+      let payload = {
+				method: "get",
+				url: `settings/getRoleMenu?id_role=${this.roleID}`,
+				authToken: localStorage.getItem('user_token')
+			};
+			this.fetchData(payload)
+			.then((res) => {
+				let resdata = res.data.result
+				let menu = resdata[0].menu
+				menu.map(val => {
+					if(val.kategori == 'utama'){
+						this.linksNav.push(val)
+					}else if(val.kategori == 'dnm'){
+						this.linksNavKmart.push(val)
+					}
+				})
+				// console.log(this.linksNav, this.linksNavKmart);
+			})
+			.catch((err) => {
+				this.notifikasi("warning", err.response.data.message, "2")
+			});
+		},
 		keluar() {
 			this.notifikasi("question", "Apakah anda yakin ingin keluar ?", "2")
 		},

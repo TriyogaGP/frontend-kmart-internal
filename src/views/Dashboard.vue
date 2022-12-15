@@ -1,6 +1,19 @@
 <template>
   <div>
     <h1 class="subheading grey--text">Dashboard</h1>
+    <div class="text-right">
+      <v-btn
+        color="light-blue darken-3"
+        small
+        dense
+        depressed
+        class="ma-2 white--text text--darken-2"
+        :loading="isLoadingRefresh"
+        @click="getReloadDashboardTransaksi()"
+      >
+      <v-icon>refresh</v-icon>	Refresh Data
+      </v-btn> 
+    </div>
     <v-container>
       <v-layout row wrap>
         <v-flex sm6 xs12 md6 lg6>
@@ -31,6 +44,19 @@
         </v-flex>
 			</v-layout>
 		</v-container>
+    <v-dialog
+			v-model="isLoadingRefresh"
+			transition="dialog-bottom-transition"
+			persistent
+			width="500px"
+		>
+			<v-progress-linear
+				class="pa-3"
+				indeterminate
+				color="light-blue darken-3"
+			/>
+			<h4 style="color: #000; text-align: center; background-color: #FFF;">Sedang proses refresh data dashboard, harap menunggu ...</h4>
+		</v-dialog>
     <v-dialog
       v-model="dialogNotifikasi"
       transition="dialog-bottom-transition"
@@ -78,6 +104,7 @@ export default {
       responsive: true,
       maintainAspectRatio: false
     },
+    isLoadingRefresh: false,
     //notifikasi
     dialogNotifikasi: false,
     notifikasiKode: '',
@@ -131,7 +158,24 @@ export default {
         )
 			})
 			.catch((err) => {
-				this.notifikasi("error", err, "1")
+				this.notifikasi("error", err.response.data.message, "1")
+			});
+		},
+    getReloadDashboardTransaksi() {
+      this.isLoadingRefresh = true
+      let payload = {
+				method: "get",
+				url: `kmart/reloadDashboardTransaksi`,
+				authToken: localStorage.getItem('user_token')
+			};
+			this.fetchData(payload)
+			.then((res) => {
+        this.isLoadingRefresh = false
+        this.notifikasi("success", res.data.message, "1")
+			})
+			.catch((err) => {
+        this.isLoadingRefresh = false
+				this.notifikasi("error", err.response.data.message, "1")
 			});
 		},
     notifikasi(kode, text, proses){
