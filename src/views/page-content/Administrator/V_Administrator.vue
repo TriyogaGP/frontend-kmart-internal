@@ -134,7 +134,7 @@
             v-if="DataAdmin.length > 0"
             v-model="page"
             :length="pageCount"
-            :total-visible="5"
+            :total-visible="7"
           />
         </v-col>
       </v-row>
@@ -501,7 +501,7 @@ export default {
 		AdminOptions: [],
 		page: 1,
     pageCount: 0,
-    itemsPerPage: 5,
+    itemsPerPage: 10,
     expanded: [],
     singleExpand: true,
 		searchData: "",

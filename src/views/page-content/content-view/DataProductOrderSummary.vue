@@ -117,7 +117,7 @@
 						md="4"
 						class="pt-2 d-flex align-center font-weight-bold"
 					>
-						Product Name
+						ID Product
 					</v-col>
 					<v-col
 						cols="12"
@@ -125,12 +125,12 @@
 						class="pt-3"
 					>
 					<v-textarea
-						v-model="input.productName"
-						placeholder="Product Name (NameA;NameB;NameC;...)"
+						v-model="input.idProductName"
+						placeholder="ID Product (PPKG1;PPKG2;PPKG3;...)"
 						outlined
 						dense
 						rows="4"
-						label="Product Name (NameA;NameB;NameC;...)"
+						label="ID Product (PPKG1;PPKG2;PPKG3;...)"
 						color="light-blue darken-3"
 						hide-details
 						clearable
@@ -310,7 +310,7 @@ export default {
 		input: {
 			StartDate: '',
 			EndDate: '',
-			productName: '',
+			idProductName: '',
 			shippingType: '',
 			payment: '',
 		},
@@ -388,7 +388,7 @@ export default {
 		input: {
 			deep: true,
 			handler(value) {
-				if(value.StartDate == null || value.EndDate == null || value.productName == null || value.shippingType == null || value.payment == null){
+				if(value.StartDate == null || value.EndDate == null || value.idProductName == null || value.shippingType == null || value.payment == null){
 					this.DataProductOrderSummary = []
 					this.DataJumTransaksiDetail = {
 						quantity: 0,
@@ -397,7 +397,7 @@ export default {
 					this.input = {
 						StartDate: '',
 						EndDate: '',
-						productName: '',
+						idProductName: '',
 						shippingType: '',
 						payment: '',
 					}
@@ -412,7 +412,7 @@ export default {
 		getData() {
 			var url = ''
 			if(this.input.StartDate && this.input.EndDate){ url += `startdate=${this.input.StartDate}&enddate=${this.input.EndDate}&` }
-			if(this.input.productName){ url += `productName=${this.input.productName}&` }
+			if(this.input.idProductName){ url += `idProductName=${this.input.idProductName}&` }
 			if(this.input.payment){ url += `payment=${this.input.payment}&` }
 			if(this.input.shippingType){
 				let shipping = this.input.shippingType.join(',')
