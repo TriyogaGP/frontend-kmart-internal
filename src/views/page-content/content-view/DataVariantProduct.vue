@@ -19,6 +19,7 @@
 					<v-radio-group
 						v-model="pilihan"
 						mandatory
+						@change="HitPilihan($event)"
 					>
 						<v-radio
 							label="Package Product"
@@ -251,6 +252,15 @@ export default {
 					this.invoice = ''
 				}
 			}
+		},
+		productPackage: {
+			deep: true,
+			handler(value) {
+				if(value == null){
+					this.DataVariantProduct = []
+					this.productPackage = ''
+				}
+			}
 		}
 	},
 	mounted() {
@@ -280,6 +290,14 @@ export default {
 				this.isLoadingDataVariantProduct = false
 				this.notifikasi("error", err.response.data.message, "1")
 			});
+		},
+		HitPilihan(data){
+			this.DataVariantProduct = []
+			if(data == 1){
+				this.invoice = ''
+			}else if(data == 2){
+				this.productPackage = ''
+			}
 		},
 		notifikasi(kode, text, proses){
       this.dialogNotifikasi = true

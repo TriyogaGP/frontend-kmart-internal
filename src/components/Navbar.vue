@@ -73,31 +73,55 @@
 					</v-list-item-title>
 					<v-icon right>dashboard</v-icon>
 				</v-list-item>
-				<v-list-item
-					v-for="(link) in linksNav"
-					:key="link.menuRoute"
-					router :to="link.menuRoute"
+				<v-list-group
+          :value="false"
 					class="SelectedTile"
 					active-class="SelectedTile-active"
 				>
-					<v-list-item-title>
-						<span class="menufont">{{link.menuText}}</span>
-					</v-list-item-title>
-					<v-icon right>{{link.menuIcon}}</v-icon>
-				</v-list-item>
-				<h5 v-if="linksNavKmart.length" class="ml-2 mt-3 mb-3" style="color: #0F0;">DATA ORDER DNM Mobile<v-divider style="border: 1px solid #0F0"/></h5>
-				<v-list-item
-					v-for="(linkKmart) in linksNavKmart"
-					:key="linkKmart.menuRoute"
-					router :to="linkKmart.menuRoute"
+          <template v-slot:activator>
+            <v-list-item-content style="color: white;">
+              <v-list-item-title>Proses Data</v-list-item-title>
+            </v-list-item-content>
+          </template>
+
+					<v-list-item
+						v-for="(link) in linksNav"
+						:key="link.menuRoute"
+						router :to="link.menuRoute"
+						class="SelectedTile"
+						active-class="SelectedTile-active"
+					>
+						<v-list-item-title>
+							<span class="menufont" style="margin-left: 20px;">{{link.menuText}}</span>
+						</v-list-item-title>
+						<v-icon right>{{link.menuIcon}}</v-icon>
+					</v-list-item>
+				</v-list-group>
+				<v-list-group
+					v-if="linksNavKmart.length"
+          :value="false"
 					class="SelectedTile"
 					active-class="SelectedTile-active"
 				>
-					<v-list-item-title>
-						<span class="menufont">{{linkKmart.menuText}}</span>
-					</v-list-item-title>
-					<v-icon right>{{linkKmart.menuIcon}}</v-icon>
-				</v-list-item>
+          <template v-slot:activator>
+            <v-list-item-content style="color: white;">
+              <v-list-item-title>Menu DNM</v-list-item-title>
+            </v-list-item-content>
+          </template>
+
+					<v-list-item
+						v-for="(linkKmart) in linksNavKmart"
+						:key="linkKmart.menuRoute"
+						router :to="linkKmart.menuRoute"
+						class="SelectedTile"
+						active-class="SelectedTile-active"
+					>
+						<v-list-item-title>
+							<span class="menufont" style="margin-left: 20px;">{{linkKmart.menuText}}</span>
+						</v-list-item-title>
+						<v-icon right>{{linkKmart.menuIcon}}</v-icon>
+					</v-list-item>
+				</v-list-group>
 				<v-list-item
 					v-if="roleID == 1"
 					router to="/settings"
@@ -223,14 +247,17 @@ export default {
 <style>
 .menufont {
 	font-size: 12px !important;
+	color: #FFFFFF;
 }
 .SelectedTile:hover {
 	border-radius: 2px;
-	background: #455A64
+	background: #44a4d0ae;
+	color: white;
 }
 .SelectedTile-active {
 	border-radius: 2px;
-	background: rgba(10, 204, 117, 0.19)
+	background: rgba(10, 204, 117, 0.694);
+	color: white;
 }
 .SelectedMenu:hover {
 	border-radius: 2px;
@@ -283,5 +310,8 @@ export default {
 	font-size: 10px;
 	text-align: right;
 	font-style: italic;
+}
+.theme--dark.v-icon {
+	color: #FFFFFF !important;
 }
 </style>

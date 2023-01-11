@@ -679,7 +679,7 @@ export default {
         this.kategori = 'productBSL90D'
       }else if(this.judul == '10 New Release Product') {
         this.url = 'kategori=PART&condition=NEW_RELEASE&condition_value='
-        this.kategori = 'productNR'
+        this.kategori = 'product'
       }
       this.getDataProduct(this.url)
       this.detailProduct = true

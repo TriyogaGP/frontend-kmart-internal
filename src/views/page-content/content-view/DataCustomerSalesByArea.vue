@@ -168,7 +168,6 @@
 					loading-text="Sedang memuat... Harap tunggu"
 					no-data-text="Tidak ada data yang tersedia"
 					no-results-text="Tidak ada catatan yang cocok ditemukan"
-					:options.sync="query"
 					:headers="headersDataCustomerSales"
 					:loading="isLoadingDataCustomerSales"
 					:items="DataCustomerSales"
@@ -244,12 +243,6 @@ export default {
 		page: 1,
     pageCount: 0,
     itemsPerPage: 25,
-		query: {
-      limit: 10,
-      sort: ["-created_at"],
-      page: 1,
-      filter: "",
-    },
 		headersDataCustomerSales: [
       { text: "No.", value: "number", sortable: false, width: "7%" },
       { text: "Provinsi", value: "province_name", sortable: false },

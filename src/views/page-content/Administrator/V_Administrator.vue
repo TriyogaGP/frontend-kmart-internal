@@ -33,7 +33,6 @@
           loading-text="Sedang memuat... Harap tunggu"
           no-data-text="Tidak ada data yang tersedia"
           no-results-text="Tidak ada catatan yang cocok ditemukan"
-          :options.sync="query"
           :headers="headers"
           :search="searchData"
           :loading="isLoading"
@@ -505,12 +504,6 @@ export default {
     expanded: [],
     singleExpand: true,
 		searchData: "",
-    query: {
-      limit: 10,
-      sort: ["-created_at"],
-      page: 1,
-      filter: "",
-    },
 		headers: [
       { text: "No", value: "number", sortable: false, width: "7%" },
       { text: "", value: "data-table-expand", sortable: false, width: "5%" },

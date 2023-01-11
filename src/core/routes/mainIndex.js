@@ -89,6 +89,16 @@ export default [
         name: 'DataCustomerSalesByArea',
         component: () => import('@/views/page-content/content-view/DataCustomerSalesByArea.vue')
       },
+      {
+        path: '/dataMember',
+        name: 'DataMember',
+        component: () => import('@/views/page-content/content-view/DataMember.vue')
+      },
+      {
+        path: '/dataCustomer',
+        name: 'DataCustomer',
+        component: () => import('@/views/page-content/content-view/DataCustomer.vue')
+      },
     ]
   },
   {

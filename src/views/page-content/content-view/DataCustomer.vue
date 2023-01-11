@@ -1,8 +1,33 @@
 <template>
 	<div>
-		<h1 class="subheading grey--text">Panel Data Harian</h1>
+		<h1 class="subheading grey--text">Panel Data Customer</h1>
 		<v-card class="mt-2 mb-2 pa-1" outlined elevation="0">
 			<v-card-text>
+				<v-row no-gutters>
+					<v-col
+						cols="12"
+						md="4"
+						class="pt-2 d-flex align-center font-weight-bold"
+					>
+						Pencarian
+					</v-col>
+					<v-col
+						cols="12"
+						md="8"
+						class="pt-3"
+					>
+					<v-text-field
+						v-model="input.keyword"
+						placeholder="Nama / kode referal"
+						outlined
+						dense
+						label="Nama / kode referal"
+						color="light-blue darken-3"
+						hide-details
+						clearable
+					/>
+					</v-col>
+				</v-row>
 				<v-row no-gutters>
 					<v-col
 						cols="12"
@@ -101,72 +126,81 @@
 							small
 							dense
 							depressed
-							:loading="loadingButtonDataHarian"
+							:loading="loadingButtonDataCustomer"
 							@click="getData(1, limit)"
 						>
-							Get Data
+							Cari Data
 						</v-btn>
 					</v-col>
 				</v-row>
 			</v-card-actions>
 
 			<div class="px-1">
-				<v-icon style="cursor: pointer;" large @click="exportexcel()">fas fa-file-excel</v-icon>
 				<v-data-table
 					loading-text="Sedang memuat... Harap tunggu"
 					no-data-text="Tidak ada data yang tersedia"
 					no-results-text="Tidak ada catatan yang cocok ditemukan"
-					:headers="headersDataHarian"
-					:loading="isLoadingDataHarian"
-					:items="DataHarian"
-					item-key="orderNumber"
+					:headers="headersDataCustomer"
+					:loading="isLoadingDataCustomer"
+					:items="DataCustomer"
+					item-key="idUser"
 					hide-default-footer
 					class="elevation-1"
 					:items-per-page="itemsPerPage"
 					@page-count="pageCount = $event"
 				>
-					<!-- <template #[`item.number`]="{ item }">
-						{{ DataHarian.indexOf(item) + 1 }}
-					</template> -->
-					<template #[`item.createdAt`]="{ item }">
-						<span v-html="convertDateTime(item.createdAt)" /> 
+				<template #[`item.Refcode`]="{ item }">
+						<input type="hidden" id="testing-code-on" :value="item.Refcode">
+					 	<span ref="myinputon" v-html="item.Refcode" /> <v-icon @click.stop.prevent="copyText(item.Refcode, 'Kode Referal')" small>copy_all</v-icon>
 					</template>
-					<template #[`item.product`]="{ item }">
-						<v-tooltip bottom>
-							<template v-slot:activator="{ on, attrs }">
-                <v-icon small v-bind="attrs" v-on="on">info</v-icon>
-              </template>
-							<div v-for="(data, i) in item.productDetails" :key="i">
-								<span v-html="data.name" /> (<span v-html="data.quantity" />)<br>
-							</div>
-            </v-tooltip>
-          </template>
-					<template #[`item.user`]="{ item }">
-						<v-tooltip bottom>
+					<template #[`item.identitas`]="{ item }">
+						<strong>{{ item.fullname }}</strong><br>
+						{{ item.email }}<br>
+						{{ item.deviceNumber }}<br>
+						{{ item.gender }}
+					</template>
+					<template #[`item.TopicUser`]="{ item }">
+						<span v-html="item.TopicUser ? item.TopicUser : '-'"></span>
+					</template>
+					<template #[`item.productFirst`]="{ item }">
+						<v-tooltip v-if="item.productFirst" bottom>
 							<template v-slot:activator="{ on, attrs }">
                 <v-icon small v-bind="attrs" v-on="on">info</v-icon>
               </template>
 							<div>
-								Data User<br>
-								fullname / devicenumber : <span v-html="item.dataUser.fullname" /> / <span v-html="item.dataUser.devicenumber" /><br>
-								Member / Non Member : <span v-html="item.dataUser.consumerType" /><br>
-								Customer Ref Code : <span v-html="item.dataUser.customerRegRefcode" /><br><br>
-								Data Member<br>
-								fullname / devicenumber : <span v-html="item.dataUser.consumerType != 'MEMBER' ? item.dataMember.fullname : item.dataUser.fullname" /> / <span v-html="item.dataUser.consumerType != 'MEMBER' ? item.dataMember.devicenumber : item.dataUser.devicenumber" /><br>
+								Invoice: {{ item.productFirst ? item.productFirst.orderNumber : null }}<br>
+								Tanggal Order: <span v-html="item.productFirst ? convertDateTime(item.productFirst.createdAt) : null" /> <br>
+								Product: <br>
+								<span v-html="item.productFirst.product" />
 							</div>
             </v-tooltip>
-          </template>
+						<span v-else>-</span>
+					</template>
+					<template #[`item.productLast`]="{ item }">
+						<v-tooltip v-if="item.productLast" bottom>
+							<template v-slot:activator="{ on, attrs }">
+                <v-icon small v-bind="attrs" v-on="on">info</v-icon>
+              </template>
+							<div>
+								Invoice: {{ item.productLast ? item.productLast.orderNumber : null }}<br>
+								Tanggal Order: <span v-html="item.productLast ? convertDateTime(item.productLast.createdAt) : null" /> <br>
+								Product: <br>
+								<span v-html="item.productLast.product" />
+							</div>
+            </v-tooltip>
+						<span v-else>-</span>
+					</template>
 				</v-data-table>
 			</div>
 			<v-row>
 				<!-- <v-pagination
-					v-if="DataHarian.length > 0"
+					v-if="DataCustomer.length > 0"
 					v-model="page"
 					:length="pageCount"
 					:total-visible="7"
 				/> -->
 				<v-col cols="10" class="mt-2 d-flex justify-start align-center">
-					<span>Halaman <strong>{{ pageSummary.page ? pageSummary.page : 0 }}</strong> dari Total Halaman <strong>{{ pageSummary.totalPages ? pageSummary.totalPages : 0 }}</strong> (Records {{ pageSummary.total ? pageSummary.total : 0 }})</span>
+					<span>Halaman <strong>{{ pageSummary.page ? pageSummary.page : 0 }}</strong> dari Total Halaman <strong>{{ pageSummary.totalPages ? pageSummary.totalPages : 0 }}</strong> (Records {{ pageSummary.totalRecord ? pageSummary.totalRecord : 0 }})</span>
 				</v-col>
 				<v-col cols="2" class="mt-2 text-right">
 					<div class="d-flex justify-end">
@@ -178,12 +212,12 @@
 							outlined
 							dense
 							hide-details
-							:disabled="DataHarian.length ? false : true"
+							:disabled="DataCustomer.length ? false : true"
 						/>
 						<v-icon
 							style="cursor: pointer;"
 							large
-							:disabled="DataHarian.length ? pageSummary.page != 1 ? false : true : true"
+							:disabled="DataCustomer.length ? pageSummary.page != 1 ? false : true : true"
 							@click="getData(pageSummary.page - 1, limit)"
 						>
 							keyboard_arrow_left
@@ -191,7 +225,7 @@
 						<v-icon
 							style="cursor: pointer;"
 							large
-							:disabled="DataHarian.length ? pageSummary.page != pageSummary.totalPages ? false : true : true"
+							:disabled="DataCustomer.length ? pageSummary.page != pageSummary.totalPages ? false : true : true"
 							@click="getData(pageSummary.page + 1, limit)"
 						>
 							keyboard_arrow_right
@@ -200,19 +234,6 @@
 				</v-col>
 			</v-row>
 		</v-card>
-		<v-dialog
-			v-model="isLoadingExport"
-			transition="dialog-bottom-transition"
-			persistent
-			width="500px"
-		>
-			<v-progress-linear
-				class="pa-3"
-				indeterminate
-				color="light-blue darken-3"
-			/>
-			<h4 style="color: #000; text-align: center; background-color: #FFF;">Sedang proses export data, harap menunggu ...</h4>
-		</v-dialog>
 		<v-dialog
 			v-model="dialogNotifikasi"
 			transition="dialog-bottom-transition"
@@ -233,12 +254,13 @@
 import { mapActions } from "vuex";
 import PopUpNotifikasiVue from "../../Layout/PopUpNotifikasi.vue";
 export default {
-	name: 'DataHarian',
+	name: 'DataCustomer',
   components: {
     PopUpNotifikasiVue
   },
 	data: () => ({
 		input: {
+			keyword: '',
 			StartDate: '',
 			EndDate: ''
 		},
@@ -246,10 +268,9 @@ export default {
 		menu2: false,
 		nowDate: new Date().toISOString().slice(0,10),
 		Hariini: new Date(),
-		DataHarian: [],
-    loadingButtonDataHarian: false,
-    isLoadingDataHarian: false,
-    isLoadingExport: false,
+		DataCustomer: [],
+    loadingButtonDataCustomer: false,
+    isLoadingDataCustomer: false,
 		page: 1,
     pageCount: 0,
     itemsPerPage: 100,
@@ -264,21 +285,18 @@ export default {
 		pageSummary: {
 			page: '',
 			limit: '',
-			total: '',
+			totalRecord: '',
 			totalPages: ''
 		},
-		headersDataHarian: [
-      // { text: "No.", value: "number", sortable: false, width: "7%" },
-      { text: "Invoice", value: "orderNumber", sortable: false },
-      { text: "Tanggal Order", value: "createdAt", sortable: false },
-      { text: "No.Resi", value: "shippingReceiptNumber", sortable: false },
-      { text: "Kurir", value: "carrierName", sortable: false },
-      { text: "Product", value: "product", sortable: false },
-      { text: "Data User", value: "user", sortable: false },
-      { text: "Order Type", value: "shippingType", sortable: false },
-      { text: "Order Status", value: "orderStatusLatest", sortable: false },
+		headersDataCustomer: [
+      { text: "ID User", value: "idUser", sortable: false },
+      { text: "Identitas", value: "identitas", sortable: false },
+      { text: "Member Kode Referal", value: "Refcode", sortable: false },
+      { text: "Topic", value: "TopicUser", sortable: false },
+      { text: "First Product", value: "productFirst", sortable: false },
+      { text: "Last Product", value: "productLast", sortable: false },
     ],
-    rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50, 100] },
+    rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
 
 		//notifikasi
@@ -288,7 +306,7 @@ export default {
     notifikasiButton: '',
 	}),
 	metaInfo: {
-		title: "Data Harian - DNM Mobile",
+		title: "Data Customer - DNM Mobile",
 		htmlAttrs: {
 			lang: "id",
 			amp: true,
@@ -308,17 +326,19 @@ export default {
 		input: {
 			deep: true,
 			handler(value) {
-				if(value.StartDate == null || value.EndDate == null){
+				if(value.StartDate == null || value.EndDate == null || value.keyword == null){
+					this.getData(1, this.limit)
 					this.pageSummary = {
 						page: '',
 						limit: '',
-						total: '',
+						totalRecord: '',
 						totalPages: ''
 					}
-					this.DataHarian = []
+					this.DataCustomer = []
 					this.input = {
+						keyword: '',
 						StartDate: '',
-						EndDate: ''
+						EndDate: '',
 					}
 				}
 			}
@@ -331,86 +351,76 @@ export default {
 		}
 	},
 	mounted() {
+		this.getData(1, this.limit)
 	},
 	methods: {
 		...mapActions(["fetchData"]),
-		getData(page = 1, limit) {
+		getData(last, limit) {
+			var url = ''
+			if(this.input.StartDate && this.input.EndDate){ 
+				let gabung = `${this.input.StartDate},${this.input.EndDate}`
+				url += `&dateRange=${gabung}`
+			}
+			if(this.input.keyword){ url += `&keyword=${this.input.keyword}&` }
 			this.itemsPerPage = limit
-			this.DataHarian = []
 			this.pageSummary = {
 				page: '',
 				limit: '',
-				total: '',
+				totalRecord: '',
 				totalPages: ''
 			}
-			this.loadingButtonDataHarian = true
-			this.isLoadingDataHarian = true
+			this.DataCustomer = []
+			this.loadingButtonDataCustomer = true
+			this.isLoadingDataCustomer = true
       let payload = {
 				method: "get",
-				url: `kmart/getdataHarian?startdate=${this.input.StartDate}&enddate=${this.input.EndDate}&page=${page}&limit=${limit}`,
+				url: `kmart/getdataConsumer?isConsumer=0&limit=${limit}&last=${last}${url}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
 			.then((res) => {
-				this.loadingButtonDataHarian = false
-				this.isLoadingDataHarian = false
+				this.loadingButtonDataCustomer = false
+				this.isLoadingDataCustomer = false
 				let resdata = res.data.result
-				this.DataHarian = resdata.data
+				this.DataCustomer = resdata.records
 				this.pageSummary = {
 					page: resdata.pageSummary.page,
 					limit: resdata.pageSummary.limit,
-					total: resdata.pageSummary.total,
+					totalRecord: resdata.pageSummary.totalRecord,
 					totalPages: resdata.pageSummary.totalPages
 				}
 				// this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
-				this.DataHarian = []
+				this.DataCustomer = []
 				this.pageSummary = {
 					page: '',
 					limit: '',
 					total: '',
 					totalPages: ''
 				}
-				this.loadingButtonDataHarian = false
-				this.isLoadingDataHarian = false
+				this.loadingButtonDataCustomer = false
+				this.isLoadingDataCustomer = false
 				this.notifikasi("error", err.response.data.message, "1")
 			});
 		},
-		exportexcel() {
-			if(!this.DataHarian.length) return this.notifikasi("warning", 'Gagal Export Excel, Data belum tersedia !', "1")
-			const totalPages = Math.ceil(this.pageSummary.total / 50)
-			console.log(totalPages);
-			let link = process.env.VUE_APP_NODE_ENV === "production" ? process.env.VUE_APP_PROD_API_URL : process.env.VUE_APP_DEV_API_URL
-			this.isLoadingExport = true
-			fetch(`${link}kmart/exportExcel?startdate=${this.input.StartDate}&enddate=${this.input.EndDate}&totalPages=${totalPages}&limit=50`, {
-				method: 'GET',
-				dataType: "xml",
-			})
-			.then(response => response.arrayBuffer())
-			.then(async response => {
-				// console.log(response)
-				this.isLoadingExport = false
-				let blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
-				this.downloadBlob(blob,`DataOrder_${this.convertDateToPicker2(new Date())}.xlsx`)
-				this.notifikasi("success", 'Sukses Export Excel', "1")
-			})
-		},
-		downloadBlob(blob, name = '') {
-			const blobUrl = URL.createObjectURL(blob);
-			const link = document.createElement("a");
-			link.href = blobUrl;
-			link.download = name;
-			document.body.appendChild(link);
-			link.dispatchEvent(
-				new MouseEvent('click', { 
-					bubbles: true, 
-					cancelable: true, 
-					view: window 
-				})
-			);
-			document.body.removeChild(link);
-		},
+		copyText(text, nomeklatur) {
+      let testingCodeToCopy = document.querySelector('#testing-code-on')
+			let code = document.getElementById('testing-code-on').value = text
+			testingCodeToCopy.setAttribute('type', 'text') 
+			testingCodeToCopy.select()
+
+			try {
+				var successful = document.execCommand('copy');
+				var msg = successful ? 'berhasil' : 'gagal';
+				alert(nomeklatur + ' ' + code + ' ' + msg +' disalin');
+			} catch (err) {
+				alert('Oops, tidak bisa disalin');
+			}
+			
+			testingCodeToCopy.setAttribute('type', 'hidden')
+			window.getSelection().removeAllRanges()
+    },
 		notifikasi(kode, text, proses){
       this.dialogNotifikasi = true
       this.notifikasiKode = kode

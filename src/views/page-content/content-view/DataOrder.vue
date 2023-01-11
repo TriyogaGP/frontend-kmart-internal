@@ -386,12 +386,6 @@ export default {
 			total: '',
 			totalPages: ''
 		},
-		query: {
-      limit: 10,
-      sort: ["-created_at"],
-      page: 1,
-      filter: "",
-    },
 		headersDataOrder: [
       // { text: "No.", value: "number", sortable: false, width: "7%" },
       { text: "", value: "data-table-expand", sortable: false, width: "5%" },
@@ -515,6 +509,7 @@ export default {
 			this.fetchData(payload)
 			.then((res) => {
 				this.DialogUbahStatus = false
+				this.getData(1, this.limit, this.invoice)
 				this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {

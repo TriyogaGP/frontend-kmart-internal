@@ -239,7 +239,6 @@
 					loading-text="Sedang memuat... Harap tunggu"
 					no-data-text="Tidak ada data yang tersedia"
 					no-results-text="Tidak ada catatan yang cocok ditemukan"
-					:options.sync="query"
 					:headers="headersDataProductOrderSummary"
 					:loading="isLoadingDataProductOrderSummary"
 					:items="DataProductOrderSummary"
@@ -345,12 +344,6 @@ export default {
 		page: 1,
     pageCount: 0,
     itemsPerPage: 25,
-		query: {
-      limit: 10,
-      sort: ["-created_at"],
-      page: 1,
-      filter: "",
-    },
 		headersDataProductOrderSummary: [
       { text: "No.", value: "number", sortable: false, width: "7%" },
       { text: "ID Product", value: "idProductSync", sortable: false },
