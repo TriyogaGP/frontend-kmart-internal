@@ -17,6 +17,16 @@ const actions = {
               reject(err);
             });
           break;
+        case "put":
+          // ApiService.put(`${payload.url}`, payload.body)
+          ApiService.put(`${payload.url}`, payload.authToken, payload.body)
+            .then((res) => {
+              resolve(res);
+            })
+            .catch((err) => {
+              reject(err);
+            });
+          break;
         case "get":
           // ApiService.get(`${payload.url}`)
           ApiService.get(`${payload.url}`, payload.authToken)

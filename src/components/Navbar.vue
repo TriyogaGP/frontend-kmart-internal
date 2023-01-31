@@ -85,7 +85,7 @@
           </template>
 
 					<v-list-item
-						v-for="(link) in linksNav"
+						v-for="(link) in sortLinksNav"
 						:key="link.menuRoute"
 						router :to="link.menuRoute"
 						class="SelectedTile"
@@ -110,7 +110,7 @@
           </template>
 
 					<v-list-item
-						v-for="(linkKmart) in linksNavKmart"
+						v-for="(linkKmart) in sortLinksNavKmart"
 						:key="linkKmart.menuRoute"
 						router :to="linkKmart.menuRoute"
 						class="SelectedTile"
@@ -191,6 +191,30 @@ export default {
     notifikasiText: '',
     notifikasiButton: '',
 	}),
+	computed: {
+		sortLinksNav: function() {
+			function compare(a, b) {
+				if (a.menuSequence < b.menuSequence)
+					return -1;
+				if (a.menuSequence > b.menuSequence)
+					return 1;
+				return 0;
+			}
+
+			return this.linksNav.sort(compare);
+		},
+		sortLinksNavKmart: function() {
+			function compare(a, b) {
+				if (a.menuSequence < b.menuSequence)
+					return -1;
+				if (a.menuSequence > b.menuSequence)
+					return 1;
+				return 0;
+			}
+
+			return this.linksNavKmart.sort(compare);
+		},
+	},
 	mounted() {
 		if(!localStorage.getItem('user_token')) return this.$router.push({name: 'Login'});
 		this.nama = localStorage.getItem('nama')

@@ -11,7 +11,17 @@
 					class="ma-2 white--text text--darken-2"
 					@click.stop="bukaDialog(null, 0)"
 				>
-					<v-icon small>add</v-icon>	Tambah
+					<v-icon small>add</v-icon> Tambah
+				</v-btn>
+				<v-btn
+					color="light-blue darken-3"
+					small
+					dense
+					depressed
+					class="ma-2 white--text text--darken-2"
+					@click.stop="bukaDialogSet()"
+				>
+					<v-icon small>settings</v-icon>	Set Urutan Menu
 				</v-btn>
 			</v-col>
 			<v-col cols="12" md="6">
@@ -295,6 +305,125 @@
       </v-card>
     </v-dialog>
 		<v-dialog
+      v-model="DialogSet"
+      max-width="800px"
+      persistent
+      transition="dialog-bottom-transition"
+    >
+      <v-card>
+        <v-toolbar
+          dark
+          color="light-blue darken-3"
+        >
+          <v-toolbar-title>Set Urutan Menu</v-toolbar-title>
+          <v-spacer />
+          <v-toolbar-items>
+            <v-btn
+              icon
+              dark
+              @click="() => { DialogSet = false }"
+            >
+              <v-icon>close</v-icon>
+            </v-btn>
+          </v-toolbar-items>
+        </v-toolbar>
+        <v-card>
+          <div class="scrollText">
+            <div class="px-5">
+              <v-divider />
+            </div>
+            <v-card-text>
+              <v-tabs
+							 	v-model="tab"
+								fixed-tabs
+								background-color="light-blue darken-3"
+								dark
+							>
+								<v-tab key="utama">
+									MENU UTAMA
+								</v-tab>
+								<v-tab key="DNM">
+									MENU DNM
+								</v-tab>
+							</v-tabs>
+							<v-tabs-items v-model="tab">
+								<v-tab-item key="utama">
+									<v-card class="pa-1" elevation="0">
+                    <v-container>
+                      <v-flex>
+                        <v-toolbar color="light-blue darken-3" dark>
+                          <v-toolbar-title>Menu Utama</v-toolbar-title>
+                          <v-spacer></v-spacer>
+                          <v-btn icon @click="actionUtama('edit')" v-if="!editingUtama">
+                            <v-icon>sort</v-icon>
+                          </v-btn>
+                          <v-btn icon @click="actionUtama('done')" v-if="editingUtama">
+                            <v-icon>done</v-icon>
+                          </v-btn>
+                          <v-btn icon @click="actionUtama('undo')" v-if="editingUtama">
+                            <v-icon>close</v-icon>
+                          </v-btn>
+                        </v-toolbar>
+                        <v-list two-line>
+                          <draggable v-bind="optionsUtama" v-model="Utama" class="kotakDrag">
+                            <v-list-item v-for="v in Utama" :key="v.menuSequence" class="kotak">
+                              <v-list-item-avatar color="white">
+                                <v-icon small>{{ v.menuIcon }}</v-icon>
+                              </v-list-item-avatar>
+                              <v-list-item-content>
+                                <v-list-item-title v-html="v.menuText"></v-list-item-title>
+                                <v-list-item-subtitle style="color: white !important;" v-html="v.menuRoute"></v-list-item-subtitle>
+                              </v-list-item-content>
+                            </v-list-item>
+                          </draggable>
+                        </v-list>
+                      </v-flex>
+                    </v-container>
+                  </v-card>
+                </v-tab-item>
+								<v-tab-item key="DNM">
+                  <v-card class="mt-2 mb-2 pa-1" elevation="0">
+                    <v-container>
+                      <v-flex>
+                        <v-toolbar color="light-blue darken-3" dark>
+                          <v-toolbar-title>Menu DNM</v-toolbar-title>
+                          <v-spacer></v-spacer>
+                          <v-btn icon @click="actionDNM('edit')" v-if="!editingDNM">
+                            <v-icon>sort</v-icon>
+                          </v-btn>
+                          <v-btn icon @click="actionDNM('done')" v-if="editingDNM">
+                            <v-icon>done</v-icon>
+                          </v-btn>
+                          <v-btn icon @click="actionDNM('undo')" v-if="editingDNM">
+                            <v-icon>close</v-icon>
+                          </v-btn>
+                        </v-toolbar>
+                        <v-list two-line>
+                          <draggable v-bind="optionsDNM" v-model="DNM" class="kotakDrag">
+                            <v-list-item v-for="v in DNM" :key="v.menuSequence" class="kotak">
+                              <v-list-item-avatar color="white">
+                                <v-icon small>{{ v.menuIcon }}</v-icon>
+                              </v-list-item-avatar>
+                              <v-list-item-content>
+                                <v-list-item-title v-html="v.menuText"></v-list-item-title>
+                                <v-list-item-subtitle style="color: white !important;" v-html="v.menuRoute"></v-list-item-subtitle>
+                              </v-list-item-content>
+                            </v-list-item>
+                          </draggable>
+                        </v-list>
+                      </v-flex>
+                    </v-container>
+                  </v-card>
+                </v-tab-item>
+              </v-tabs-items>
+            </v-card-text>
+          </div>
+          <v-divider />
+          <v-card-actions class="pa-5"/>
+        </v-card>
+      </v-card>
+    </v-dialog>
+		<v-dialog
       v-model="dialogNotifikasi"
       transition="dialog-bottom-transition"
       persistent
@@ -313,10 +442,12 @@
 <script>
 import { mapActions } from "vuex";
 import PopUpNotifikasiVue from "../Layout/PopUpNotifikasi.vue";
+import draggable from "vuedraggable";
 export default {
   name: 'Menu',
-	components: { PopUpNotifikasiVue },
+	components: { PopUpNotifikasiVue, draggable },
   data: () => ({
+		tab: "",
     isLoading: false,
 		DataMenu: [],
 		page: 1,
@@ -346,16 +477,23 @@ export default {
 			{ value: "dnm", text: "DNM" },
 		],
 		DialogMenu: false,
+		DialogSet: false,
 		kondisiTombol: true,
 		editedIndex: 0,
 		inputMenu: {
-			id_menu: '',
+      id_menu: '',
 			kategori: '',
 			menu_text: '',
 			menu_route: '',
 			menu_icon: '',
 		},
-
+    Utama: [],
+    DNM: [],
+    beforeUtama: null,
+		editingUtama: false,
+    beforeDNM: null,
+		editingDNM: false,
+    
 		//notifikasi
     dialogNotifikasi: false,
     notifikasiKode: '',
@@ -369,6 +507,18 @@ export default {
 			amp: true,
 		},
 	},
+  computed: {
+		optionsUtama () {
+			return {
+				disabled: !this.editingUtama
+			}
+		},
+		optionsDNM () {
+			return {
+				disabled: !this.editingDNM
+			}
+		}
+  },
 	watch: {
     inputMenu: {
       deep: true,
@@ -393,6 +543,8 @@ export default {
 		...mapActions(["fetchData"]),
 		getMenu() {
 			this.isLoading = true
+      this.Utama = []
+      this.DNM = []
 			let payload = {
 				method: "get",
 				url: `settings/getMenu`,
@@ -402,6 +554,13 @@ export default {
 			.then((res) => {
 				this.DataMenu = res.data.result;
 				this.isLoading = false
+        this.DataMenu.map(val => { 
+          if(val.kategori === 'utama'){
+            this.Utama.push(val)
+          }else if(val.kategori === 'dnm'){
+            this.DNM.push(val)
+          }
+        })
 			})
 			.catch((err) => {
 				this.isLoading = false
@@ -424,6 +583,9 @@ export default {
         this.inputMenu.menu_icon = item.menuIcon
       }
       this.DialogMenu = true
+    },
+    bukaDialogSet(){
+      this.DialogSet = true
     },
 		tutupDialog(){
 			this.inputMenu.id_menu = ''
@@ -501,6 +663,52 @@ export default {
 				this.notifikasi("error", err.response.data.message, "1")
 			});
     },
+    SimpanSequenceMenu(kategori) {
+      let payload = {
+				method: "post",
+				url: `settings/postSequenceMenu`,
+        body: {
+          Menu : kategori === 'utama' ? this.Utama : this.DNM
+        },
+				authToken: localStorage.getItem('user_token')
+			};
+			this.fetchData(payload)
+			.then((res) => {
+        this.getMenu()
+        this.notifikasi("success", res.data.message, "1")
+			})
+			.catch((err) => {
+				this.notifikasi("error", err.response.data.message, "1")
+			});
+    },
+    actionUtama (e) {
+      if (e === 'edit') {
+        this.beforeUtama = Object.assign([],this.Utama)
+      }      
+      if (e === 'undo') {
+        this.Utama = this.beforeUtama
+        this.beforeUtama = null
+      }
+      if (e === 'done') {
+        this.SimpanSequenceMenu('utama')
+        this.beforeUtama = null
+      }
+      this.editingUtama = !this.editingUtama
+    },
+    actionDNM (e) {
+      if (e === 'edit') {
+        this.beforeDNM = Object.assign([],this.DNM)
+      }      
+      if (e === 'undo') {
+        this.DNM = this.beforeDNM
+        this.beforeDNM = null
+      }
+      if (e === 'done') {
+        this.SimpanSequenceMenu('dnm')
+        this.beforeDNM = null
+      }
+      this.editingDNM = !this.editingDNM
+    },
 		notifikasi(kode, text, proses){
       this.dialogNotifikasi = true
       this.notifikasiKode = kode
@@ -512,7 +720,28 @@ export default {
 </script>
 
 <style>
+.scrollText{
+  max-height: 450px !important;
+  overflow-y: auto !important;
+}
 .v-pagination {
   justify-content: flex-end !important;
+}
+.kotak {
+	border: 2px dashed #000;
+	border-radius: 10px;
+	text-align: justify;
+	background: rgb(98, 97, 97);
+	color: rgb(255, 255, 255) !important;
+	margin: 2px;
+  /* padding: 2px; */
+  font-size: 12pt;
+}
+.kotakDrag {
+	border: 2px solid #000;
+	border-radius: 10px;
+	background: #FFF;
+	margin: 2px;
+  font-size: 12pt;
 }
 </style>

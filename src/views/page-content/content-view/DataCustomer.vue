@@ -151,7 +151,10 @@
 				>
 					<template #[`item.Refcode`]="{ item }">
 						<input type="hidden" id="testing-code-on" :value="item.Refcode">
-					 	<span ref="myinputon" v-html="item.Refcode ? item.Refcode : '-'" /> <v-icon v-if="item.Refcode" @click.stop.prevent="copyText(item.Refcode, 'Kode Referal')" small>copy_all</v-icon>
+					 	<span ref="myinputon" v-html="item.Refcode ? item.Refcode : '-'" /> <v-icon v-if="item.Refcode" @click.stop.prevent="copyText(item.Refcode, 'Kode Referal')" small>copy_all</v-icon><br>
+						 <strong>{{ item.dataMember.fullname }}</strong><br>
+						{{ item.dataMember.email }}<br>
+						{{ item.dataMember.devicenumber }}
 					</template>
 					<template #[`item.identitas`]="{ item }">
 						<strong>{{ item.fullname }}</strong><br>

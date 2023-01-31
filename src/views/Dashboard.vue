@@ -2,20 +2,45 @@
   <div>
     <h1 class="subheading grey--text">Dashboard</h1>
     <v-card class="mt-2 mb-2 pa-1" outlined elevation="0">
-      <h3 class="text-center"><u>TRANSACTION {{ new Date().getFullYear() }}</u></h3>
-      <div class="text-right">
-        <v-btn
-          color="light-blue darken-3"
-          x-small
-          dense
-          depressed
-          class="ma-2 white--text text--darken-2"
-          :loading="isLoadingRefresh"
-          @click="getReloadDashboardTransaksi()"
+      <h3 class="text-center"><u>TRANSACTION {{ tahun }}</u></h3>
+      <v-row 
+        no-gutters
+        class="mt-1 mr-3"
+      >
+        <v-col
+          class="text-start"
+          cols="6"
         >
-        <v-icon small>refresh</v-icon> refresh
-        </v-btn> 
-      </div>
+          <v-autocomplete
+            v-model="tahun"
+            :items="tahunOptions"
+            item-text="value"
+            item-value="value"
+            placeholder="pilih tahun"
+            label="pilih tahun"
+            outlined
+            dense
+            hide-details
+            @change="getDataTransaksi(tahun)"
+          />
+        </v-col>
+        <v-col
+          class="text-end"
+          cols="6"
+        >
+          <v-btn
+            color="light-blue darken-3"
+            x-small
+            dense
+            depressed
+            class="ma-2 white--text text--darken-2"
+            :loading="isLoadingRefresh"
+            @click="getReloadDashboardTransaksi(tahun)"
+          >
+            <v-icon small>refresh</v-icon> refresh
+          </v-btn>
+        </v-col>
+      </v-row>
       <v-container>
         <v-layout row wrap>
           <v-flex sm6 xs12 md6 lg6>
@@ -413,6 +438,7 @@ export default {
       { value: 'November' }, 
       { value: 'Desember' }
     ],
+    tahunOptions: [],
     podiumOptions: [
       { value: '10 Best Seller Product Basic' }, 
       { value: '10 Best Seller Product Package' }, 
@@ -425,6 +451,7 @@ export default {
     judul: '',
     kategori: '',
     podium: '',
+    tahun: '2023',
     member: '',
     customer: '',
     bulanNow: '',
@@ -479,16 +506,19 @@ export default {
     this.customer = this.bulanNow,
     this.getDataUserMember(this.bulanNow)
     this.getDataUserCustomer(this.bulanNow)
-    this.getDataTransaksi()
+    this.getDataTransaksi(d.getFullYear())
     this.judul = '10 Best Seller Product Basic'
     this.podium = '10 Best Seller Product Basic'
     this.url = 'kategori=ALL&is_package=0'
     this.kategori = 'product'
     this.getDataProduct(this.url)
+    for (let tahun = 2021; tahun <= d.getFullYear(); tahun++) {
+      this.tahunOptions.push({value: tahun.toString()})
+    }
   },  
 	methods: {
 		...mapActions(["fetchData"]),
-    getDataTransaksi() {
+    getDataTransaksi(tahun) {
       this.record = {
         labels: [],
         datasets: []
@@ -499,7 +529,7 @@ export default {
       }
       let payload = {
 				method: "get",
-				url: `kmart/getDashboardTransaksi`,
+				url: `kmart/getDashboardTransaksi?tahun=${tahun}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -623,17 +653,17 @@ export default {
 				this.notifikasi("error", err.response.data.message, "1")
 			});
 		},
-    getReloadDashboardTransaksi() {
+    getReloadDashboardTransaksi(tahun) {
       this.isLoadingRefresh = true
       let payload = {
 				method: "get",
-				url: `kmart/reloadDashboardTransaksi`,
+				url: `kmart/reloadDashboardTransaksi?tahun=${tahun}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
 			.then((res) => {
         this.isLoadingRefresh = false
-        this.getDataTransaksi()
+        this.getDataTransaksi(tahun)
         this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {

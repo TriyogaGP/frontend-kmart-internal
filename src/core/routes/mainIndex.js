@@ -49,9 +49,24 @@ export default [
         component: () => import('@/views/page-content/content-view/DataVariantProduct.vue')
       },
       {
+        path: '/dataTopicMember',
+        name: 'DataTopicMember',
+        component: () => import('@/views/page-content/content-view/DataTopicMember.vue')
+      },
+      {
+        path: '/dataTopicCustomer',
+        name: 'DataTopicCustomer',
+        component: () => import('@/views/page-content/content-view/DataTopicCustomer.vue')
+      },
+      {
         path: '/hitManualOrder',
         name: 'DataHitManualOrder',
         component: () => import('@/views/page-content/content-view/DataHitManual.vue')
+      },
+      {
+        path: '/blastNotifikasi',
+        name: 'BlastNotifikasi',
+        component: () => import('@/views/page-content/content-view/BlastNotifikasi.vue')
       },
 
       {

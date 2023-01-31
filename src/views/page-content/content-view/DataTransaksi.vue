@@ -25,6 +25,62 @@
             </v-list-item>
           </v-card>
         </v-flex>
+        <v-flex sm6 xs12 md3 lg3>
+          <v-card class="ma-3">
+            <v-list-item>
+              <v-list-item-content>
+                <div class="overline text-right">Total Member DP</div>
+                <v-list-item-title class="headline mb-1 text-right">
+									<div v-if="isLoadingDataDPBV"><v-progress-circular indeterminate size="20" /></div>
+									<div v-else>Rp.{{ Member.dp ? currencyDotFormatNumber(Member.dp) : 0 }}</div>
+								</v-list-item-title>
+                <div><v-divider /></div>
+              </v-list-item-content>
+            </v-list-item>
+          </v-card>
+        </v-flex>
+        <v-flex sm6 xs12 md3 lg3>
+          <v-card class="ma-3">
+            <v-list-item>
+              <v-list-item-content>
+                <div class="overline text-right">Total Member BV</div>
+                <v-list-item-title class="headline mb-1 text-right">
+									<div v-if="isLoadingDataDPBV"><v-progress-circular indeterminate size="20" /></div>
+									<div v-else>{{ Member.bv ? Member.bv : 0 }}</div>
+								</v-list-item-title>
+                <div><v-divider /></div>
+              </v-list-item-content>
+            </v-list-item>
+          </v-card>
+        </v-flex>
+        <v-flex sm6 xs12 md3 lg3>
+          <v-card class="ma-3">
+            <v-list-item>
+              <v-list-item-content>
+                <div class="overline text-right">Total Non Member DP</div>
+                <v-list-item-title class="headline mb-1 text-right">
+									<div v-if="isLoadingDataDPBV"><v-progress-circular indeterminate size="20" /></div>
+									<div v-else>Rp.{{ NonMember.dp ? currencyDotFormatNumber(NonMember.dp) : 0 }}</div>
+								</v-list-item-title>
+								<div><v-divider /></div>
+              </v-list-item-content>
+            </v-list-item>
+          </v-card>
+        </v-flex>
+        <v-flex sm6 xs12 md3 lg3>
+          <v-card class="ma-3">
+            <v-list-item>
+              <v-list-item-content>
+                <div class="overline text-right">Total Non Member BV</div>
+                <v-list-item-title class="headline mb-1 text-right">
+									<div v-if="isLoadingDataDPBV"><v-progress-circular indeterminate size="20" /></div>
+									<div v-else>{{ NonMember.bv ? NonMember.bv : 0 }}</div>
+								</v-list-item-title>
+                <div><v-divider /></div>
+              </v-list-item-content>
+            </v-list-item>
+          </v-card>
+        </v-flex>
 			</v-layout>
 		</v-container>
 		<v-card class="mt-2 mb-2 pa-1" outlined elevation="0">
@@ -133,7 +189,7 @@
 							dense
 							depressed
 							:loading="loadingButtonDataTransaksiDetail"
-							@click="getData()"
+							@click="() => { getData(); getData2(); }"
 						>
 							Get Data
 						</v-btn>
@@ -230,6 +286,7 @@ export default {
 		DataJumTransaksiDetail: '',
     loadingButtonDataTransaksiDetail: false,
     isLoadingDataTransaksiDetail: false,
+    isLoadingDataDPBV: false,
 		page: 1,
     pageCount: 0,
     itemsPerPage: 25,
@@ -246,6 +303,16 @@ export default {
     ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
+		Member: {
+			Transaksi: [],
+			dp: 0,
+			bv: 0,
+		},
+		NonMember: {
+			Transaksi: [],
+			dp: 0,
+			bv: 0,
+		},
 
 		//notifikasi
     dialogNotifikasi: false,
@@ -310,6 +377,55 @@ export default {
 				this.DataTransaksiDetail = []
 				this.loadingButtonDataTransaksiDetail = false
 				this.isLoadingDataTransaksiDetail = false
+				this.notifikasi("error", err.response.data.message, "1")
+			});
+		},
+		getData2() {
+			this.isLoadingDataDPBV = true
+			this.Member = {
+				Transaksi: [],
+				dp: 0,
+				bv: 0,
+			}
+			this.NonMember = {
+				Transaksi: [],
+				dp: 0,
+				bv: 0,
+			}
+      let payload = {
+				method: "get",
+				url: `kmart/getTransaksiDetail?startdate=${this.input.StartDate}&enddate=${this.input.EndDate}`,
+				authToken: localStorage.getItem('user_token')
+			};
+			this.fetchData(payload)
+			.then((res) => {
+				this.isLoadingDataDPBV = false
+				let member_resdata = res.data.result.Member
+				let nonmember_resdata = res.data.result.NonMember
+				this.Member = {
+					Transaksi: member_resdata.dataTransaksi,
+					dp: member_resdata.dataJumlah.dp,
+					bv: member_resdata.dataJumlah.bv,
+				}
+				this.NonMember = {
+					Transaksi: nonmember_resdata.dataTransaksi,
+					dp: nonmember_resdata.dataJumlah.dp,
+					bv: nonmember_resdata.dataJumlah.bv,
+				}
+				// this.notifikasi("success", res.data.message, "1")
+			})
+			.catch((err) => {
+				this.isLoadingDataDPBV = false
+				this.Member = {
+					Transaksi: [],
+					dp: 0,
+					bv: 0,
+				}
+				this.NonMember = {
+					Transaksi: [],
+					dp: 0,
+					bv: 0,
+				}
 				this.notifikasi("error", err.response.data.message, "1")
 			});
 		},

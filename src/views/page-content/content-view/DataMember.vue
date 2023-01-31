@@ -387,9 +387,6 @@ export default {
 				this.isLoadingDataMember = false
 				let resdata = res.data.result
 				this.DataMember = resdata.records
-				this.DataMember.map(valData => {
-
-				})
 				this.pageSummary = {
 					page: resdata.pageSummary.page,
 					limit: resdata.pageSummary.limit,
