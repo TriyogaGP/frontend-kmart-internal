@@ -123,25 +123,25 @@
 						<v-icon>edit</v-icon>	Ubah Status
 						</v-btn> 
 						<v-divider class="mb-2" />
-						<table class="table" border="2" cellspacing="0" cellpadding="0">
+						<v-simple-table dark dense>
 							<thead>
 								<tr>
-									<th>Status Order</th>
-									<th>Remark</th>
-									<th>Tanggal</th>
+									<th class="text-left">Status Order</th>
+									<th class="text-left">Remark</th>
+									<th class="text-left">Tanggal</th>
 								</tr>
 							</thead>
 							<tbody>
 								<tr
-								v-for="(data, index) in item.dataTrack"
-								:key="index"
+									v-for="(data, index) in item.dataTrack"
+									:key="index"
 								>
 									<td>{{ data.orderStatus }}</td>
-									<td>{{ data.remarks }}</td>
+									<td>{{ data.remarks ? data.remarks : '-' }}</td>
 									<td>{{ convertDateTime(data.createdAt) }}</td>
 								</tr>
 							</tbody>
-						</table>
+						</v-simple-table>
 						<v-divider class="mt-2" />
 					</td>
 				</template>

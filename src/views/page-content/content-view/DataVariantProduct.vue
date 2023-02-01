@@ -22,13 +22,17 @@
 						@change="HitPilihan($event)"
 					>
 						<v-radio
-							label="Package Product"
+							label="Package Product Combination"
 							value="1"
-						></v-radio>
+						/>
 						<v-radio
 							label="Invoice"
 							value="2"
-						></v-radio>
+						/>
+						<v-radio
+							label="ID Package Product"
+							value="3"
+						/>
 					</v-radio-group>
 					</v-col>
 				</v-row>
@@ -38,7 +42,7 @@
 						md="4"
 						class="pt-2 d-flex align-center font-weight-bold"
 					>
-						Package Product
+						Package Product Combination
 					</v-col>
 					<v-col
 						cols="12"
@@ -46,11 +50,11 @@
 						class="pt-3"
 					>
 					<v-text-field
-						v-model="productPackage"
-						placeholder="Package Product"
+						v-model="productPackageCombination"
+						placeholder="Package Product Combination"
 						outlined
 						dense
-						label="Package Product"
+						label="Package Product Combination"
 						color="light-blue darken-3"
 						hide-details
 						clearable
@@ -77,6 +81,33 @@
 						dense
 						rows="4"
 						label="Invoice (INV-1INV-2INV-3...)"
+						color="light-blue darken-3"
+						hide-details
+						clearable
+						no-resize
+					/>
+					</v-col>
+				</v-row>
+				<v-row v-if="pilihan == 3" no-gutters>
+					<v-col
+						cols="12"
+						md="4"
+						class="pt-2 d-flex align-center font-weight-bold"
+					>
+						ID Product Package
+					</v-col>
+					<v-col
+						cols="12"
+						md="8"
+						class="pt-3"
+					>
+					<v-textarea
+						v-model="idProductPackage"
+						placeholder="ID Product Package (PPKG1,PPKG2,PPKG3...)"
+						outlined
+						dense
+						rows="4"
+						label="ID Product Package (PPKG1,PPKG2,PPKG3...)"
 						color="light-blue darken-3"
 						hide-details
 						clearable
@@ -115,10 +146,10 @@
 					no-data-text="Tidak ada data yang tersedia"
 					no-results-text="Tidak ada catatan yang cocok ditemukan"
 					:options.sync="query"
-					:headers="pilihan == 1 ?headersDataVariantProductPP : headersDataVariantProductINV"
+					:headers="pilihan == 1 ? headersDataVariantProductPackageCombination : pilihan == 2 ? headersDataVariantProductINV : headersDataVariantIDProductPackage"
 					:loading="isLoadingDataVariantProduct"
 					:items="DataVariantProduct"
-					item-key="orderNumber"
+					:item-key="pilihan == 1 ? 'idPackageCombinationSync' : pilihan == 2 ? 'orderNumber' : 'idProductPackage'"
 					hide-default-footer
 					class="elevation-1"
 					:page.sync="page"
@@ -136,13 +167,13 @@
 							<template v-slot:activator="{ on, attrs }">
                 Detail <v-icon small v-bind="attrs" v-on="on">info</v-icon>
               </template>
-							<h6 style="font-weight: bold;">Detail Order</h6>
+							<h4 style="font-weight: bold;">Detail Order</h4>
 							<div
 								class="mb-2"
 								v-for="(data, index) in item.OrderDetails"
 								:key="index"
 							>
-								<strong>Package :</strong> {{ data.productName }}
+								<strong>Package :</strong> {{ data.productName }} ({{ data.quantity }})
 								<ol>
 									<li
 										v-for="(data1) in data.packages"
@@ -160,6 +191,37 @@
 									</li>
 								</ol>
 							</div>			
+            </v-tooltip>
+					</template>
+					<template #[`item.varian`]="{ item }">
+						<v-tooltip bottom>
+							<template v-slot:activator="{ on, attrs }">
+                Detail <v-icon small v-bind="attrs" v-on="on">info</v-icon>
+              </template>
+							<h4 style="font-weight: bold;">Detail Varian Product</h4>
+							<v-simple-table dark dense>
+								<thead>
+									<tr>
+										<th class="text-left">ID Product Sync</th>
+										<th class="text-left">Attribute</th>
+										<th class="text-left">Color</th>
+										<th class="text-left">Quantity</th>
+										<th class="text-left">Images</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr
+										v-for="(data, index) in item.hasil"
+										:key="index"
+									>
+										<td>{{ data.idProductSync }}</td>
+										<td>{{ data.name ? data.name : '-' }}</td>
+										<td>{{ data.groupInputType ? data.groupInputType : '-' }}</td>
+										<td>{{ data.quantity }}</td>
+										<td><img class="gambar" :src="data.images" width="80"/></td>
+									</tr>
+								</tbody>
+							</v-simple-table>			
             </v-tooltip>
 					</template>
 				</v-data-table>
@@ -202,7 +264,8 @@ export default {
 	data: () => ({
 		pilihan: 1,
 		invoice: '',
-		productPackage: '',
+		productPackageCombination: '',
+		idProductPackage: '',
 		DataVariantProduct: [],
     loadingButtonDataVariantProduct: false,
     isLoadingDataVariantProduct: false,
@@ -215,9 +278,9 @@ export default {
       page: 1,
       filter: "",
     },
-		headersDataVariantProductPP: [
+		headersDataVariantProductPackageCombination: [
       { text: "No.", value: "number", sortable: false, width: "7%" },
-      { text: "Product Package", value: "idPackageCombinationSync", sortable: false },
+      { text: "Product Package Combination", value: "idPackageCombinationSync", sortable: false },
       { text: "Name", value: "name", sortable: false },
       { text: "Attribute", value: "groupInputType", sortable: false },
       { text: "Image", value: "images", sortable: false },
@@ -226,6 +289,11 @@ export default {
       { text: "No.", value: "number", sortable: false, width: "7%" },
       { text: "Invoice", value: "orderNumber", sortable: false },
       { text: "Product Detail", value: "OrderDetails", sortable: false },
+    ],
+		headersDataVariantIDProductPackage: [
+      { text: "No.", value: "number", sortable: false, width: "7%" },
+      { text: "Product Package", value: "idProductPackage", sortable: false },
+      { text: "Varian", value: "varian", sortable: false },
     ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
@@ -253,22 +321,35 @@ export default {
 				}
 			}
 		},
-		productPackage: {
+		productPackageCombination: {
 			deep: true,
 			handler(value) {
 				if(value == null){
 					this.DataVariantProduct = []
-					this.productPackage = ''
+					this.productPackageCombination = ''
 				}
 			}
-		}
+		},
+		idProductPackage: {
+			deep: true,
+			handler(value) {
+				if(value == null){
+					this.DataVariantProduct = []
+					this.idProductPackage = ''
+				}
+			}
+		},
 	},
 	mounted() {
 	},
 	methods: {
 		...mapActions(["fetchData"]),
 		getData() {
-			let url = this.pilihan == 1 ? `kondisi=${this.pilihan}&productPackage=${this.productPackage}` : `kondisi=${this.pilihan}&inv=${this.invoice}`
+			let url = this.pilihan == 1
+				? `kondisi=${this.pilihan}&productPackageCombination=${this.productPackageCombination}`
+				: this.pilihan == 2
+					? `kondisi=${this.pilihan}&inv=${this.invoice}`
+					: `kondisi=${this.pilihan}&idProductPackage=${this.idProductPackage}`
 			this.DataVariantProduct = []
 			this.loadingButtonDataVariantProduct = true
 			this.isLoadingDataVariantProduct = true
@@ -295,8 +376,13 @@ export default {
 			this.DataVariantProduct = []
 			if(data == 1){
 				this.invoice = ''
+				this.idProductPackage = ''
 			}else if(data == 2){
-				this.productPackage = ''
+				this.productPackageCombination = ''
+				this.idProductPackage = ''
+			}else if(data == 3){
+				this.productPackageCombination = ''
+				this.invoice = ''
 			}
 		},
 		notifikasi(kode, text, proses){
