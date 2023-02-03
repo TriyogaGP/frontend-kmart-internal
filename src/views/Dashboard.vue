@@ -93,6 +93,16 @@
                       >
                         <v-icon small>refresh</v-icon> refresh
                       </v-btn>
+                      <v-btn
+                        color="light-blue darken-3"
+                        x-small
+                        dense
+                        depressed
+                        class="ma-2 white--text text--darken-2"
+                        @click="bukaDetailDialog(1)"
+                      >
+                        <v-icon small>info</v-icon> detail
+                      </v-btn>
                       <v-autocomplete
                         v-model="member"
                         :items="bulanOptions"
@@ -134,6 +144,16 @@
                         @click="getReloadDashboardUserActive('0', '0')"
                       >
                         <v-icon small>refresh</v-icon> refresh
+                      </v-btn>
+                      <v-btn
+                        color="light-blue darken-3"
+                        x-small
+                        dense
+                        depressed
+                        class="ma-2 white--text text--darken-2"
+                        @click="bukaDetailDialog(0)"
+                      >
+                        <v-icon small>info</v-icon> detail
                       </v-btn>
                       <v-autocomplete
                         v-model="customer"
@@ -244,9 +264,7 @@
                 loading-text="Sedang memuat... Harap tunggu"
                 no-data-text="Tidak ada data yang tersedia"
                 no-results-text="Tidak ada catatan yang cocok ditemukan"
-                :options.sync="query"
                 :headers="headers"
-                :search="searchData"
                 :loading="isLoading"
                 :items="DataProduct"
                 item-key="idProduct"
@@ -314,6 +332,150 @@
         </v-card>
       </v-card>
 		</v-dialog>
+    <v-dialog
+			v-model="detailUser"
+			transition="dialog-bottom-transition"
+			persistent
+			width="1000px"
+		>
+      <v-card>
+        <v-toolbar
+          dark
+          color="light-blue darken-3"
+        >
+          <v-toolbar-title>Detail User Active</v-toolbar-title>
+          <v-spacer />
+          <v-toolbar-items>
+            <v-btn
+              icon
+              dark
+              @click="() => { detailUser = false; limit = 20; consumerType = 1 }"
+            >
+              <v-icon>close</v-icon>
+            </v-btn>
+          </v-toolbar-items>
+        </v-toolbar>
+        <v-card>
+          <div class="scrollText">
+            <div class="px-5">
+              <v-divider />
+            </div>
+            <v-card-text>
+              <v-data-table
+                loading-text="Sedang memuat... Harap tunggu"
+                no-data-text="Tidak ada data yang tersedia"
+                no-results-text="Tidak ada catatan yang cocok ditemukan"
+                :headers="headersDetail"
+                :loading="isLoading"
+                :items="DataDetailUser"
+                item-key="idUser"
+                hide-default-footer
+                class="elevation-1"
+                :page.sync="page1"
+                :items-per-page="itemsPerPage1"
+                @page-count="pageCount1 = $event"
+              >
+                <template #[`item.order`]="{ item }">
+                  <v-btn
+                    color="light-blue darken-3"
+                    class="white--text text--darken-2"
+                    small
+                    dense
+                    depressed
+                    @click="viewDataOrder(item.idUser, consumerType, item.fullname)"
+                  >
+                    Lihat Order
+                  </v-btn>
+                </template>
+              </v-data-table>
+            </v-card-text>
+          </div>
+          <v-divider />
+          <v-card-actions>
+            <v-row 
+              no-gutters
+              class="mt-1 mr-3"
+            >
+            <v-col cols="10" class="mt-2 d-flex justify-start align-center">
+              <span>Halaman <strong>{{ pageSummary.page ? pageSummary.page : 0 }}</strong> dari Total Halaman <strong>{{ pageSummary.totalPages ? pageSummary.totalPages : 0 }}</strong> (Records {{ pageSummary.total ? pageSummary.total : 0 }})</span>
+            </v-col>
+            <v-col cols="2" class="mt-2 text-right">
+              <div class="d-flex justify-end">
+                <v-autocomplete
+                  v-model="limit"
+                  :items="limitPage"
+                  item-text="value"
+                  item-value="value"
+                  outlined
+                  dense
+                  hide-details
+                  :disabled="DataDetailUser.length ? false : true"
+                />
+                <v-icon
+                  style="cursor: pointer;"
+                  large
+                  :disabled="DataDetailUser.length ? pageSummary.page != 1 ? false : true : true"
+                  @click="getDetailUserActive(pageSummary.page - 1, limit, member, 1)"
+                >
+                  keyboard_arrow_left
+                </v-icon>
+                <v-icon
+                  style="cursor: pointer;"
+                  large
+                  :disabled="DataDetailUser.length ? pageSummary.page != pageSummary.totalPages ? false : true : true"
+                  @click="getDetailUserActive(pageSummary.page + 1, limit, member, 1)"
+                >
+                  keyboard_arrow_right
+                </v-icon>
+              </div>
+            </v-col>
+            </v-row>
+          </v-card-actions>
+        </v-card>
+      </v-card>
+		</v-dialog>
+    <v-bottom-sheet
+      v-model="detailOrderUser"
+      persistent
+    >
+      <v-sheet class="text-center">
+        <div class="text-right">
+          <v-btn  
+            icon
+            @click="() => { detailOrderUser = false; DataDetailOrderUser = []; namaUser = ''; }"
+          >
+            <v-icon large>close</v-icon>
+          </v-btn>
+        </div>
+        <v-card class="mx-2" elavation="1">
+          Nama user : <strong>{{ namaUser }}</strong>
+          <div class="scrollText">
+            <v-card-text>
+              <v-data-table
+                loading-text="Sedang memuat... Harap tunggu"
+                no-data-text="Tidak ada data yang tersedia"
+                no-results-text="Tidak ada catatan yang cocok ditemukan"
+                :headers="headersOrderDetail"
+                :loading="isLoadingDetailOrder"
+                :items="DataDetailOrderUser"
+                item-key="orderNumber"
+                hide-default-footer
+              >
+                <template #[`item.createdAt`]="{ item }">
+                  <span v-html="convertDateTime(item.createdAt)" /> 
+                </template>
+                <template #[`item.product`]="{ item }">
+                  <ul v-for="(data, index) in item.OrderDetails" :key="index">
+                    <li>{{ data.productName }} ({{ data.quantity }})</li>
+                  </ul> 
+                </template>
+              </v-data-table>
+            </v-card-text>
+          </div>
+        </v-card>
+        <br>
+      </v-sheet>
+    </v-bottom-sheet>
     <v-dialog
 			v-model="isLoadingRefresh"
 			transition="dialog-bottom-transition"
@@ -456,22 +618,40 @@ export default {
     customer: '',
     bulanNow: '',
     isLoading: false,
+    isLoadingDetailOrder: false,
     isLoadingRefresh: false,
     isLoadingRefresh1: false,
     isLoadingRefresh2: false,
     detailProduct: false,
+    detailUser: false,
+    detailOrderUser: false,
     
+    namaUser: '',
+    DataDetailOrderUser: [],
+    DataDetailUser: [],
     DataProduct: [],
     page: 1,
     pageCount: 0,
     itemsPerPage: 25,
+    page1: 1,
+    pageCount1: 0,
+    itemsPerPage1: 100,
+    limit: 20,
+		limitPage: [
+      { value: 5 },
+			{ value: 10 },
+			{ value: 20 },
+			{ value: 50 },
+			{ value: 100 },
+		],
+		pageSummary: {
+			page: '',
+			limit: '',
+			total: '',
+			totalPages: ''
+		},
+    consumerType: 1,
 		searchData: "",
-    query: {
-      limit: 10,
-      sort: ["-created_at"],
-      page: 1,
-      filter: "",
-    },
 		headers: [
       { text: "No", value: "number", sortable: false, width: "7%" },
       { text: "Nama Product", value: "name", sortable: false },
@@ -481,6 +661,18 @@ export default {
       { text: "Published", value: "isPublished", sortable: false },
       { text: "Hidden", value: "isHidden", sortable: false },
       { text: "Status", value: "status", sortable: false },
+    ],
+		headersDetail: [
+      { text: "ID User", value: "idUser", sortable: false },
+      { text: "ID Member", value: "idMember", sortable: false },
+      { text: "Nama", value: "fullname", sortable: false },
+      { text: "Total Order", value: "jmlData", sortable: false },
+      { text: "Data Order", value: "order", sortable: false },
+    ],
+		headersOrderDetail: [
+      { text: "Invoice", value: "orderNumber", sortable: false },
+      { text: "Tanggal Order", value: "createdAt", sortable: false },
+      { text: "Product", value: "product", sortable: false },
     ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
@@ -498,6 +690,14 @@ export default {
 			amp: true,
 		},
 	},
+  watch: {
+    limit: {
+			deep: true,
+			handler(value) {
+				this.getDetailUserActive(1, value, this.consumerType === 1 ? this.member : this.customer, this.consumerType)
+			}
+		},
+  },
   mounted() {
     const month = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
     const d = new Date();
@@ -653,6 +853,43 @@ export default {
 				this.notifikasi("error", err.response.data.message, "1")
 			});
 		},
+    getDetailUserActive(page, limit, bulan, isMember) {
+      this.DataDetailUser = []
+      this.isLoading = true
+      this.pageSummary = {
+				page: '',
+				limit: '',
+				total: '',
+				totalPages: ''
+			}
+      let payload = {
+				method: "get",
+				url: `kmart/getDetailUserActive?page=${page}&limit=${limit}&bulan=${bulan}&isMember=${isMember}&detail=1`,
+				authToken: localStorage.getItem('user_token')
+			};
+			this.fetchData(payload)
+			.then(async (res) => {
+        this.isLoading = false
+        this.DataDetailUser = res.data.result.records
+        let pageSummary = res.data.result.pageSummary
+        this.pageSummary = {
+          page: pageSummary.page,
+          limit: pageSummary.limit,
+          total: pageSummary.total,
+          totalPages: pageSummary.totalPages
+        }
+			})
+			.catch((err) => {
+        this.isLoading = false
+        this.pageSummary = {
+          page: '',
+          limit: '',
+          total: '',
+          totalPages: ''
+        }
+        this.notifikasi("error", err.response.data.message, "1")
+			});
+		},
     getReloadDashboardTransaksi(tahun) {
       this.isLoadingRefresh = true
       let payload = {
@@ -713,6 +950,45 @@ export default {
       }
       this.getDataProduct(this.url)
       this.detailProduct = true
+    },
+    bukaDetailDialog(kondisi){
+      this.detailUser = true
+      this.consumerType = kondisi
+      this.headersDetail = [
+        { text: "ID User", value: "idUser", sortable: false },
+        { text: "ID Member", value: "idMember", sortable: false },
+        { text: "Nama", value: "fullname", sortable: false },
+        { text: "Total Order", value: "jmlData", sortable: false },
+        { text: "Data Order", value: "order", sortable: false },
+      ]
+      if(kondisi === 0){
+        this.headersDetail.splice(1,1);
+      }
+      this.getDetailUserActive(1, 20, kondisi === 1 ? this.member : this.customer, kondisi)
+    },
+    viewDataOrder(idUser, consumerType, namaUser){
+      // console.log(idUser, consumerType);
+      this.isLoadingDetailOrder = true
+      this.DataDetailOrderUser = []
+      this.namaUser = ''
+      let payload = {
+				method: "get",
+				url: `kmart/getDetailOrderUserActive?bulan=${consumerType === 1 ? this.member : this.customer }&isMember=${consumerType}&idUser=${idUser}`,
+				authToken: localStorage.getItem('user_token')
+			};
+			this.fetchData(payload)
+			.then(async (res) => {
+        this.detailOrderUser = true
+        this.isLoadingDetailOrder = false
+        this.namaUser = namaUser
+        this.DataDetailOrderUser = res.data.result
+			})
+			.catch((err) => {
+        this.isLoadingDetailOrder = false
+        this.namaUser = ''
+        this.DataDetailOrderUser = []
+        this.notifikasi("error", err.response.data.message, "1")
+			});
     },
     HitMember(bulan){
       this.getDataUserMember(bulan)
