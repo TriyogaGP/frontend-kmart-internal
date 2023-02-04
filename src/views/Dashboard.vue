@@ -672,6 +672,7 @@ export default {
 		headersOrderDetail: [
       { text: "Invoice", value: "orderNumber", sortable: false },
       { text: "Tanggal Order", value: "createdAt", sortable: false },
+      { text: "Shipping Type", value: "shippingType", sortable: false },
       { text: "Product", value: "product", sortable: false },
     ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },

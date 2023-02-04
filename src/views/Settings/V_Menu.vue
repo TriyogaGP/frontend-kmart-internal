@@ -340,10 +340,10 @@
 								dark
 							>
 								<v-tab key="utama">
-									MENU UTAMA
+									MENU UTAMA ({{ Utama.length }})
 								</v-tab>
 								<v-tab key="DNM">
-									MENU DNM
+									MENU DNM ({{ DNM.length }})
 								</v-tab>
 							</v-tabs>
 							<v-tabs-items v-model="tab">
@@ -366,7 +366,7 @@
                         </v-toolbar>
                         <v-list two-line>
                           <draggable v-bind="optionsUtama" v-model="Utama" class="kotakDrag">
-                            <v-list-item v-for="v in Utama" :key="v.menuSequence" class="kotak">
+                            <v-list-item v-for="v in Utama" :key="v.idMenu" class="kotak">
                               <v-list-item-avatar color="white">
                                 <v-icon small>{{ v.menuIcon }}</v-icon>
                               </v-list-item-avatar>
@@ -400,7 +400,7 @@
                         </v-toolbar>
                         <v-list two-line>
                           <draggable v-bind="optionsDNM" v-model="DNM" class="kotakDrag">
-                            <v-list-item v-for="v in DNM" :key="v.menuSequence" class="kotak">
+                            <v-list-item v-for="v in DNM" :key="v.idMenu" class="kotak">
                               <v-list-item-avatar color="white">
                                 <v-icon small>{{ v.menuIcon }}</v-icon>
                               </v-list-item-avatar>

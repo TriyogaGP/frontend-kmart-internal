@@ -348,6 +348,16 @@ export default {
 						StartDate: '',
 						EndDate: ''
 					}
+					this.Member = {
+						Transaksi: [],
+						dp: 0,
+						bv: 0,
+					}
+					this.NonMember = {
+						Transaksi: [],
+						dp: 0,
+						bv: 0,
+					}
 				}
 			}
 		}

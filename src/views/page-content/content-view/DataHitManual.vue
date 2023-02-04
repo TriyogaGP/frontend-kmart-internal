@@ -44,6 +44,7 @@
 							small
 							dense
 							depressed
+							:loading="isLoading"
 							@click="hitManual()"
 						>
 							Hit Manual
@@ -78,6 +79,7 @@ export default {
   },
 	data: () => ({
 		orderNumber: '',
+    isLoading: false,
 
 		//notifikasi
     dialogNotifikasi: false,
@@ -98,6 +100,7 @@ export default {
 		...mapActions(["fetchData"]),
 		hitManual() {
 			if(this.orderNumber == null || this.orderNumber == '') return this.notifikasi("warning", 'Order Number kosong !', "1")
+			this.isLoading = true
 			let bodyData = {
         orderNumber: this.orderNumber
       }
@@ -109,9 +112,11 @@ export default {
 			};
 			this.fetchData(payload)
 			.then((res) => {
+				this.isLoading = false
 				this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
+				this.isLoading = false
 				this.notifikasi("error", err.response.data.message, "1")
 			});
 		},

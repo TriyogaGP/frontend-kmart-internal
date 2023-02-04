@@ -80,7 +80,7 @@
 				>
           <template v-slot:activator>
             <v-list-item-content style="color: white;">
-              <v-list-item-title>Proses Data</v-list-item-title>
+              <v-list-item-title class="menufont">Proses Data</v-list-item-title>
             </v-list-item-content>
           </template>
 
@@ -105,7 +105,7 @@
 				>
           <template v-slot:activator>
             <v-list-item-content style="color: white;">
-              <v-list-item-title>Menu DNM</v-list-item-title>
+              <v-list-item-title class="menufont">Menu DNM</v-list-item-title>
             </v-list-item-content>
           </template>
 
