@@ -25,6 +25,7 @@
             solo
             color="light-blue darken-3"
             clearable
+            @keyup.enter="getAdministrator(1, limit, searchData)"
           />
         </v-col>
       </v-row>
@@ -34,7 +35,6 @@
           no-data-text="Tidak ada data yang tersedia"
           no-results-text="Tidak ada catatan yang cocok ditemukan"
           :headers="headers"
-          :search="searchData"
           :loading="isLoading"
           :items="DataAdmin"
           :single-expand="singleExpand"
@@ -43,7 +43,6 @@
           item-key="idAdmin"
           hide-default-footer
           class="elevation-1"
-          :page.sync="page"
           :items-per-page="itemsPerPage"
           @page-count="pageCount = $event"
         >
@@ -128,14 +127,47 @@
         </v-data-table>
       </div>
       <v-row>
-        <v-col cols="12" class="mt-2 pa-2 px-5">
+        <!-- <v-col cols="12" class="mt-2 pa-2 px-5">
           <v-pagination
             v-if="DataAdmin.length > 0"
             v-model="page"
             :length="pageCount"
             :total-visible="7"
           />
-        </v-col>
+        </v-col> -->
+        <v-col cols="10" class="mt-2 d-flex justify-start align-center">
+				<span>Halaman <strong>{{ pageSummary.page ? pageSummary.page : 0 }}</strong> dari Total Halaman <strong>{{ pageSummary.totalPages ? pageSummary.totalPages : 0 }}</strong> (Records {{ pageSummary.total ? pageSummary.total : 0 }})</span>
+			</v-col>
+			<v-col cols="2" class="mt-2 text-right">
+				<div class="d-flex justify-end">
+					<v-autocomplete
+						v-model="limit"
+						:items="limitPage"
+						item-text="value"
+						item-value="value"
+						outlined
+						dense
+						hide-details
+						:disabled="DataAdmin.length ? false : true"
+					/>
+					<v-icon
+						style="cursor: pointer;"
+						large
+						:disabled="DataAdmin.length ? pageSummary.page != 1 ? false : true : true"
+						@click="getAdministrator(pageSummary.page - 1, limit, searchData)"
+					>
+						keyboard_arrow_left
+					</v-icon>
+					<v-icon
+						style="cursor: pointer;"
+						large
+						:disabled="DataAdmin.length ? pageSummary.page != pageSummary.totalPages ? false : true : true"
+						@click="getAdministrator(pageSummary.page + 1, limit, searchData)"
+					>
+						keyboard_arrow_right
+					</v-icon>
+				</div>
+			</v-col>
       </v-row>
     </v-card>
     <v-dialog
@@ -221,34 +253,6 @@
                   />
                 </v-col>
               </v-row>
-              <v-row v-if="inputDataAdmin.level == 3 && roleID == 1" no-gutters>
-								<v-col
-									cols="12"
-									md="4"
-									class="pt-2 d-flex align-center font-weight-bold"
-								>
-									Downline Admin Mall
-								</v-col>
-								<v-col
-									cols="12"
-									md="8"
-									class="pt-3"
-								>
-									<v-autocomplete
-										v-model="inputDataAdmin.downline_tenant"
-										:items="AdminOptions"
-										item-text="nama"
-										item-value="idAdmin"
-										placeholder="Downline Admin Mall"
-										label="Downline Admin Mall"
-										outlined
-										dense
-										hide-details
-										:clearable="editedIndex != 2"
-										:readonly="editedIndex == 2"
-									/>
-								</v-col>
-							</v-row>
               <v-row no-gutters>
                 <v-col
                   cols="12"
@@ -498,12 +502,26 @@ export default {
     isLoading: false,
 		DataAdmin: [],
 		AdminOptions: [],
-		page: 1,
-    pageCount: 0,
-    itemsPerPage: 10,
     expanded: [],
     singleExpand: true,
 		searchData: "",
+    page: 1,
+    pageCount: 0,
+    itemsPerPage: 100,
+    limit: 20,
+		limitPage: [
+			{ value: 5 },
+			{ value: 10 },
+			{ value: 20 },
+			{ value: 50 },
+			{ value: 100 },
+		],
+		pageSummary: {
+			page: '',
+			limit: '',
+			total: '',
+			totalPages: ''
+		},
 		headers: [
       { text: "No", value: "number", sortable: false, width: "7%" },
       { text: "", value: "data-table-expand", sortable: false, width: "5%" },
@@ -519,7 +537,6 @@ export default {
     DialogAdmin: false,
     inputDataAdmin: {
       id_admin: '',
-      downline_tenant: '',
       nama_lengkap: '',
       username: '',
       email: '',
@@ -567,12 +584,6 @@ export default {
 				if(value.kota == null){ this.inputDataAdmin.kota = '' }
 				if(value.level == null){ this.inputDataAdmin.level = '' }
 				if(value.alamat == null){ this.inputDataAdmin.alamat = '' }
-        
-        if(this.roleID == 1 && value.level == 3) {
-          if (!this.inputDataAdmin.downline_tenant) return this.getAdminTenant()
-        }else{
-          this.inputDataAdmin.downline_tenant = ''
-        }
 
         const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
         if(value.nama_lengkap != '' && value.username != '' && value.email.match(pattern) && value.password != '' && value.noHP != '' && value.kota != '' && value.level != '' && value.alamat != ''){
@@ -582,33 +593,56 @@ export default {
         }
       }
     },
+    limit: {
+			deep: true,
+			handler(value) {
+				this.getAdministrator(1, value, this.searchData)
+			}
+		},
   },
   mounted() {
     this.roleID = localStorage.getItem('roleID')
     this.idLog = localStorage.getItem('idLogin')
-		this.getAdministrator();
+		this.getAdministrator(1, this.limit, this.searchData);
 	},
 	methods: {
 		...mapActions(["fetchData"]),
-		getAdministrator() {
-      this.isLoading = true
+		getAdministrator(page = 1, limit, keyword) {
+      this.itemsPerPage = limit
+			this.isLoading = true
+      this.DataAdmin = []
+			this.pageSummary = {
+				page: '',
+				limit: '',
+				total: '',
+				totalPages: ''
+			}
 			let payload = {
         method: "get",
-				url: `admin/getAdmin`,
+				url: `admin/getAdmin?page=${page}&limit=${limit}${keyword ? `&keyword=${keyword}` : ''}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
 			.then((res) => {
-        let dataAdminOptions = res.data.result;
-				if (this.roleID == 1) {
-					this.DataAdmin = dataAdminOptions
-				}else{
-					this.DataAdmin = dataAdminOptions.filter(val => val.downlineTenant == this.idLog)
+        let resdata = res.data.result
+				this.DataAdmin = resdata.records
+				this.pageSummary = {
+					page: resdata.pageSummary.page,
+					limit: resdata.pageSummary.limit,
+					total: resdata.pageSummary.total,
+					totalPages: resdata.pageSummary.totalPages
 				}
         this.isLoading = false
 			})
 			.catch((err) => {
         this.isLoading = false
+        this.DataAdmin = []
+        this.pageSummary = {
+          page: '',
+          limit: '',
+          total: '',
+          totalPages: ''
+        }
         this.notifikasi("error", err.response.data.message, "1")
 			});
 		},
@@ -629,7 +663,7 @@ export default {
 		getLevel() {
 			let payload = {
 				method: "get",
-				url: `settings/getRole`,
+				url: `settings/getRole?pilihan=ALL`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -645,28 +679,6 @@ export default {
 				this.notifikasi("error", err.response.data.message, "1")
 			});
 		},
-    getAdminTenant() {
-			this.isLoading = true
-			let payload = {
-				method: "get",
-				url: `admin/getAdmin?level=2`,
-				authToken: localStorage.getItem('user_token')
-			};
-			this.fetchData(payload)
-			.then((res) => {
-				let dataAdminOptions = res.data.result;
-				if (this.roleID == 1) {
-					this.AdminOptions = dataAdminOptions
-				}else{
-					this.AdminOptions = dataAdminOptions.filter(val => val.downlineTenant == this.idLog)
-				}
-				this.isLoading = false
-			})
-			.catch((err) => {
-				this.isLoading = false
-				this.notifikasi("error", err.response.data.message, "1")
-			});
-		},
     bukaDialog(item, index){
       this.editedIndex = index
       this.passType = false
@@ -677,7 +689,6 @@ export default {
         this.clearForm()
       }else{
         this.inputDataAdmin.id_admin = item.idAdmin
-        this.inputDataAdmin.downline_tenant = item.downlineTenant
         this.inputDataAdmin.nama_lengkap = item.nama
         this.inputDataAdmin.username = item.username
         this.inputDataAdmin.email = item.email
@@ -697,7 +708,6 @@ export default {
       let bodyData = {
         jenis: index == 0 ? 'ADD' : 'EDIT',
         id_admin: index == 0 ? '' : this.inputDataAdmin.id_admin,
-        downline_tenant: this.roleID == 1 ? this.inputDataAdmin.level == 3 ? this.inputDataAdmin.downline_tenant : 0 : localStorage.getItem('idLogin'),
         nama: this.inputDataAdmin.nama_lengkap,
         username: this.inputDataAdmin.username,
         email: this.inputDataAdmin.email,
@@ -717,7 +727,7 @@ export default {
 			this.fetchData(payload)
 			.then((res) => {
         this.DialogAdmin = false
-        this.getAdministrator()
+        this.getAdministrator(1, this.limit, this.searchData)
         this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
@@ -741,7 +751,7 @@ export default {
 			this.fetchData(payload)
 			.then((res) => {
         this.DialogAdmin = false
-        this.getAdministrator()
+        this.getAdministrator(1, this.limit, this.searchData)
         this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
@@ -765,7 +775,7 @@ export default {
 			this.fetchData(payload)
 			.then((res) => {
         this.DialogAdmin = false
-        this.getAdministrator()
+        this.getAdministrator(1, this.limit, this.searchData)
         this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
@@ -774,7 +784,6 @@ export default {
     },
     clearForm() {
       this.inputDataAdmin.id_admin = ''
-      this.inputDataAdmin.downline_tenant = ''
       this.inputDataAdmin.nama_lengkap = ''
       this.inputDataAdmin.username = ''
       this.inputDataAdmin.email = ''

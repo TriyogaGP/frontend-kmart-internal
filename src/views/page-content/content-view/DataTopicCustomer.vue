@@ -246,7 +246,16 @@
 							<v-tabs-items v-model="tab">
 								<v-tab-item key="Belanja">
 									<v-card class="mt-2 mb-2 pa-1" elevation="0">
-										<v-icon style="cursor: pointer;" large @click="exportExcelConsumer(titleDialog, OrderMemberBelanja, 'Belanja')">fas fa-file-excel</v-icon>
+										<v-btn
+											color="light-blue darken-3"
+											class="white--text text--darken-2"
+											small
+											dense
+											depressed
+											@click="exportExcelConsumer(titleDialog, OrderMemberBelanja, 'Belanja')"
+										>
+											<v-icon style="cursor: pointer;" small>fas fa-file-excel</v-icon>&nbsp;Export Excel
+										</v-btn>
 										<v-data-table
 											loading-text="Sedang memuat... Harap tunggu"
 											no-data-text="Tidak ada data yang tersedia"
@@ -291,7 +300,16 @@
 								</v-tab-item>
 								<v-tab-item key="TidakBelanja">
 									<v-card class="mt-2 mb-2 pa-1" elevation="0">
-										<v-icon style="cursor: pointer;" large @click="exportExcelConsumer(titleDialog, OrderMemberTidakBelanja, 'Tidak Belanja')">fas fa-file-excel</v-icon>
+										<v-btn
+											color="light-blue darken-3"
+											class="white--text text--darken-2"
+											small
+											dense
+											depressed
+											@click="exportExcelConsumer(titleDialog, OrderMemberTidakBelanja, 'Tidak Belanja')"
+										>
+											<v-icon style="cursor: pointer;" small>fas fa-file-excel</v-icon>&nbsp;Export Excel
+										</v-btn>
 										<v-data-table
 											loading-text="Sedang memuat... Harap tunggu"
 											no-data-text="Tidak ada data yang tersedia"

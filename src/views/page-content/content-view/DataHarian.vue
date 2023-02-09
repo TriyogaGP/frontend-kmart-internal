@@ -300,7 +300,7 @@ export default {
 			console.log(totalPages);
 			let link = process.env.VUE_APP_NODE_ENV === "production" ? process.env.VUE_APP_PROD_API_URL : process.env.VUE_APP_DEV_API_URL
 			this.isLoadingExport = true
-			fetch(`${link}kmart/exportExcel?startdate=${this.input.StartDate}&enddate=${this.input.EndDate}&totalPages=${totalPages}&limit=50`, {
+			fetch(`${link}kmart/exportExcel?startdate=${this.tanggal.length ? this.convertDateToPicker2(this.tanggal[0]) : ''}&enddate=${this.tanggal.length ? this.convertDateToPicker2(this.tanggal[1]) : ''}&totalPages=${totalPages}&limit=50`, {
 				method: 'GET',
 				dataType: "xml",
 			})

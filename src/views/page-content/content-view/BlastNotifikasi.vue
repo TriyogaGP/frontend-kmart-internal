@@ -249,7 +249,7 @@
 		</v-card>
 		<v-dialog
       v-model="DialogSetupConsumer"
-      max-width="800px"
+      max-width="1000px"
       persistent
       transition="dialog-bottom-transition"
     >
@@ -264,7 +264,7 @@
             <v-btn
               icon
               dark
-              @click="() => { DialogSetupConsumer = false; input = { StartDate: '', EndDate: '', consumerType: '' } }"
+              @click="() => { DialogSetupConsumer = false; consumerType = ''; tanggal = []; }"
             >
               <v-icon>close</v-icon>
             </v-btn>
@@ -276,86 +276,41 @@
               <v-divider />
             </div>
             <v-card-text>
+							<v-alert
+								icon="info"
+								border="left"
+								color="light-blue darken-3"
+								text
+								dense
+							>
+								<span style="font-size: 12px;">Filter range date maksimal 1 bulan</span>
+							</v-alert>
 							<v-row no-gutters>
 								<v-col
 									cols="12"
 									md="4"
 									class="pt-2 d-flex align-center font-weight-bold"
 								>
-									Start Date
+									Range Date
 								</v-col>
 								<v-col
 									cols="12"
 									md="8"
 									class="pt-3"
 								>
-									<v-menu
-										v-model="menu1"
-										:close-on-content-click="false"
-										:nudge-right="40"
-										transition="scale-transition"
-										offset-y
-										min-width="290px"
-										outlined
-									>
-										<template #activator="{ on, attrs }">
-											<v-text-field
-												v-model="input.StartDate"
-												:value="input.StartDate"
-												placeholder="Start Date (YYYY-MM-DD)"
-												v-bind="attrs"
-												v-on="on"
-												outlined
-												dense
-												label="Start Date (YYYY-MM-DD)"
-												color="light-blue darken-3"
-												hide-details
-												clearable
-											/>
-										</template>
-										<v-date-picker v-model="input.StartDate" :max="GetEndDate" @input="menu1 = false" />
-									</v-menu>
-								</v-col>
-							</v-row>
-							<v-row no-gutters>
-								<v-col
-									cols="12"
-									md="4"
-									class="pt-2 d-flex align-center font-weight-bold"
-								>
-									End Date
-								</v-col>
-								<v-col
-									cols="12"
-									md="8"
-									class="pt-3"
-								>
-									<v-menu
-										v-model="menu2"
-										:close-on-content-click="false"
-										:nudge-right="40"
-										transition="scale-transition"
-										offset-y
-										min-width="290px"
-										outlined
-									>
-										<template #activator="{ on, attrs }">
-											<v-text-field
-												v-model="input.EndDate"
-												:value="input.EndDate"
-												placeholder="End Date (YYYY-MM-DD)"
-												v-bind="attrs"
-												v-on="on"
-												outlined
-												dense
-												label="End Date (YYYY-MM-DD)"
-												color="light-blue darken-3"
-												hide-details
-												clearable
-											/>
-										</template>
-										<v-date-picker v-model="input.EndDate" :min="GetMinDate" :max="GetEndDate30" @input="menu2 = false" />
-									</v-menu>
+								<DatePicker
+									v-model="tanggal" 
+									range
+									circle
+									lang="id"
+									position="center bottom"
+									:date-format="{
+										day: '2-digit',
+										month: '2-digit',
+										year: 'numeric'
+									}"
+									placeholder="Start Date ~ End Date"
+								/>
 								</v-col>
 							</v-row>
 							<v-row no-gutters>
@@ -372,7 +327,7 @@
 									class="pt-3"
 								>
 									<v-autocomplete
-										v-model="input.consumerType"
+										v-model="consumerType"
 										:items="[{ value: '1', text: 'Member' }, { value: '0', text: 'Non-Member' }]"
 										item-text="text"
 										item-value="value"
@@ -385,8 +340,6 @@
 									/>
 								</v-col>
 							</v-row>
-							<br>
-							<strong>NB: Range StartDate dengan EndDate hanya bisa 3 bulan</strong> 
             </v-card-text>
           </div>
 					<v-divider />
@@ -453,16 +406,9 @@ export default {
     PopUpNotifikasiVue
   },
 	data: () => ({
-		input: {
-			StartDate: '',
-			EndDate: '',
-			consumerType: ''
-		},
-		menu1: false,
-		menu2: false,
-		nowDate: new Date().toISOString().slice(0,10),
-		Hariini: new Date(),
-    DialogSetupConsumer: false,
+		tanggal: [],
+		consumerType: '1',
+		DialogSetupConsumer: false,
     loadingButtonBlastNotifikasi: false,
     isLoadingUpdateSetup: false,
     kondisiTombol: true,
@@ -495,37 +441,6 @@ export default {
 			amp: true,
 		},
 	},
-	computed: {
-    GetMinDate() {
-      var awal = this.input.StartDate
-      return awal
-    },
-    GetEndDate() {
-      var endDate = new Date(this.Hariini.getFullYear(), this.Hariini.getMonth() + 1, null);
-      return endDate.toISOString().slice(0,null)
-    },
-    GetEndDate30() {
-			if(this.GetMinDate){
-				var date = new Date(this.GetMinDate)
-				var endDate = new Date(date.getFullYear(), date.getMonth() + 3, date.getDate());
-				return endDate.toISOString()
-			}
-    },
-  },
-	watch: {
-		input: {
-			deep: true,
-			handler(value) {
-				if(value.StartDate == null || value.EndDate == null){
-					this.input = {
-						StartDate: '',
-						EndDate: '',
-						consumerType: ''
-					}
-				}
-			}
-		},
-	},
 	mounted() {
 		this.getData()
 	},
@@ -549,22 +464,20 @@ export default {
 			});
 		},
 		SetupConsumer() {
+			if(!this.tanggal.length) return this.notifikasi("warning", 'Range Date tidak boleh kosong !', "1")
 			this.isLoadingUpdateSetup = true
 			this.inputData.idUser = []
       let payload = {
 				method: "get",
-				url: `kmart/setupConsumer?startdate=${this.input.StartDate}&enddate=${this.input.EndDate}&is_consumer=${this.input.consumerType}&is_null=0`,
+				url: `kmart/setupConsumer?startdate=${this.tanggal[0]}&enddate=${this.tanggal[1]}&is_consumer=${this.consumerType}&is_null=0`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
 			.then((res) => {
 				this.isLoadingUpdateSetup = false
 				this.DialogSetupConsumer = false
-				this.input = {
-					StartDate: '',
-					EndDate: '',
-					consumerType: ''
-				}
+				this.tanggal = []
+				this.consumerType = '1'
 				this.getData()
 				this.notifikasi("success", res.data.message, "1")
 			})
@@ -572,11 +485,8 @@ export default {
 				this.inputData.idUser = []
 				this.isLoadingUpdateSetup = false
 				this.DialogSetupConsumer = false
-				this.input = {
-					StartDate: '',
-					EndDate: '',
-					consumerType: ''
-				}
+				this.tanggal = []
+				this.consumerType = '1'
 				this.notifikasi("error", err.response.data.message, "1")
 			});
 		},

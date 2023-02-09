@@ -158,7 +158,7 @@
 							range
 							circle
 							lang="id"
-							position="bottom right"
+							position="top right"
 							:date-format="{
 								day: '2-digit',
 								month: '2-digit',
