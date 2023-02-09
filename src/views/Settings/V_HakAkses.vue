@@ -24,6 +24,7 @@
 					solo
 					color="light-blue darken-3"
 					clearable
+					@keyup.enter="getHakAkses(1, limit, searchData)"
 				/>
 			</v-col>
     </v-row>
@@ -32,9 +33,7 @@
 				loading-text="Sedang memuat... Harap tunggu"
 				no-data-text="Tidak ada data yang tersedia"
 				no-results-text="Tidak ada catatan yang cocok ditemukan"
-				:options.sync="query"
 				:headers="headers"
-				:search="searchData"
 				:loading="isLoading"
 				:items="DataHakAkses"
 				:single-expand="singleExpand"
@@ -43,7 +42,6 @@
 				item-key="idRole"
 				hide-default-footer
 				class="elevation-1"
-				:page.sync="page"
 				:items-per-page="itemsPerPage"
 				@page-count="pageCount = $event"
 			>
@@ -110,13 +108,46 @@
 			</v-data-table>
 		</div>
 		<v-row>
-			<v-col cols="12" class="mt-2 pa-2 px-5">
+			<!-- <v-col cols="12" class="mt-2 pa-2 px-5">
 				<v-pagination
 					v-if="DataHakAkses.length > 0"
 					v-model="page"
 					:length="pageCount"
 					:total-visible="5"
 				/>
+			</v-col> -->
+			<v-col cols="10" class="mt-2 d-flex justify-start align-center">
+				<span>Halaman <strong>{{ pageSummary.page ? pageSummary.page : 0 }}</strong> dari Total Halaman <strong>{{ pageSummary.totalPages ? pageSummary.totalPages : 0 }}</strong> (Records {{ pageSummary.total ? pageSummary.total : 0 }})</span>
+			</v-col>
+			<v-col cols="2" class="mt-2 text-right">
+				<div class="d-flex justify-end">
+					<v-autocomplete
+						v-model="limit"
+						:items="limitPage"
+						item-text="value"
+						item-value="value"
+						outlined
+						dense
+						hide-details
+						:disabled="DataHakAkses.length ? false : true"
+					/>
+					<v-icon
+						style="cursor: pointer;"
+						large
+						:disabled="DataHakAkses.length ? pageSummary.page != 1 ? false : true : true"
+						@click="getHakAkses(pageSummary.page - 1, limit, searchData)"
+					>
+						keyboard_arrow_left
+					</v-icon>
+					<v-icon
+						style="cursor: pointer;"
+						large
+						:disabled="DataHakAkses.length ? pageSummary.page != pageSummary.totalPages ? false : true : true"
+						@click="getHakAkses(pageSummary.page + 1, limit, searchData)"
+					>
+						keyboard_arrow_right
+					</v-icon>
+				</div>
 			</v-col>
 		</v-row>
 		<v-dialog
@@ -239,18 +270,26 @@ export default {
   data: () => ({
     isLoading: false,
 		DataHakAkses: [],
-		page: 1,
-    pageCount: 0,
-    itemsPerPage: 5,
-    expanded: [],
+		expanded: [],
     singleExpand: true,
 		searchData: "",
-    query: {
-			limit: 10,
-      sort: ["-created_at"],
-      page: 1,
-      filter: "",
-    },
+    page: 1,
+    pageCount: 0,
+    itemsPerPage: 100,
+    limit: 20,
+		limitPage: [
+			{ value: 5 },
+			{ value: 10 },
+			{ value: 20 },
+			{ value: 50 },
+			{ value: 100 },
+		],
+		pageSummary: {
+			page: '',
+			limit: '',
+			total: '',
+			totalPages: ''
+		},
 		headers: [
       { text: "No", value: "number", sortable: false, width: "7%" },
       { text: "", value: "data-table-expand", sortable: false, width: "5%" },
@@ -285,7 +324,6 @@ export default {
       deep: true,
       handler(value){
 				if(value.nama_role == null){ this.inputRole.nama_role = '' }
-        
         if(value.nama_role != ''){
           this.kondisiTombol = false
         }else{
@@ -293,26 +331,54 @@ export default {
         }
       }
     },
+		limit: {
+			deep: true,
+			handler(value) {
+				this.getHakAkses(1, value, this.searchData)
+			}
+		},
   },
 	mounted() {
-		this.getHakAkses();
+		this.getHakAkses(1, this.limit, this.searchData);
 	},
 	methods: {
 		...mapActions(["fetchData"]),
-		getHakAkses() {
+		getHakAkses(page = 1, limit, keyword) {
+			this.itemsPerPage = limit
 			this.isLoading = true
+			this.DataHakAkses = []
+			this.pageSummary = {
+				page: '',
+				limit: '',
+				total: '',
+				totalPages: ''
+			}
 			let payload = {
 				method: "get",
-				url: `settings/getRole`,
+				url: `settings/getRole?page=${page}&limit=${limit}${keyword ? `&keyword=${keyword}` : ''}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
 			.then((res) => {
-				this.DataHakAkses = res.data.result;
+				let resdata = res.data.result
+				this.DataHakAkses = resdata.records
+				this.pageSummary = {
+					page: resdata.pageSummary.page,
+					limit: resdata.pageSummary.limit,
+					total: resdata.pageSummary.total,
+					totalPages: resdata.pageSummary.totalPages
+				}
 				this.isLoading = false
 			})
 			.catch((err) => {
 				this.isLoading = false
+				this.DataHakAkses = []
+				this.pageSummary = {
+					page: '',
+					limit: '',
+					total: '',
+					totalPages: ''
+				}
 				this.notifikasi("error", err.response.data.message, "1")
 			});
 		},
@@ -347,7 +413,7 @@ export default {
 			this.fetchData(payload)
 			.then((res) => {
         this.DialogRole = false
-        this.getHakAkses()
+        this.getHakAkses(1, this.limit, this.searchData);
         this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
@@ -368,7 +434,7 @@ export default {
 			this.fetchData(payload)
 			.then((res) => {
         this.DialogRole = false
-        this.getHakAkses()
+        this.getHakAkses(1, this.limit, this.searchData);
         this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
@@ -390,7 +456,7 @@ export default {
 			this.fetchData(payload)
 			.then((res) => {
         this.DialogRole = false
-        this.getHakAkses()
+        this.getHakAkses(1, this.limit, this.searchData);
         this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {

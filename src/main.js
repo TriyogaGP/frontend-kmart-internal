@@ -10,6 +10,8 @@ import { InlineSvgPlugin } from "vue-inline-svg";
 import Helper from '@/core/plugins/globalHelper';
 import VueMask from 'v-mask';
 import VuetifyMoney from 'vuetify-money';
+import VueDatePickerUi from 'vue-datepicker-ui';
+import 'vue-datepicker-ui/lib/vuedatepickerui.css'
 // import JwtService from '@/core/services/jwt.service';
 
 
@@ -26,6 +28,7 @@ Vue.use(InlineSvgPlugin);
 Vue.use(VueGeolocation);
 Vue.use(VueMask);
 Vue.use(VuetifyMoney);
+Vue.component('DatePicker', VueDatePickerUi);
 // API service init
 ApiService.init();
 // Global Helper

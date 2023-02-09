@@ -1,140 +1,70 @@
 <template>
 	<div>
 		<h1 class="subheading grey--text">Panel Data Customer</h1>
+		<v-alert
+			class="mt-2"
+			icon="info"
+			border="left"
+			color="light-blue darken-3"
+			text
+			dense
+		>
+			<span style="font-size: 12px;">Filter range date maksimal 1 bulan</span>
+		</v-alert>
 		<v-card class="mt-2 mb-2 pa-1" outlined elevation="0">
-			<v-card-text>
-				<v-row no-gutters>
-					<v-col
-						cols="12"
-						md="4"
-						class="pt-2 d-flex align-center font-weight-bold"
-					>
-						Pencarian
-					</v-col>
-					<v-col
-						cols="12"
-						md="8"
-						class="pt-3"
-					>
+			<v-row no-gutters class="pa-2">
+				<v-col cols="12" md="6" class="d-flex justify-center align-center">
 					<v-text-field
-						v-model="input.keyword"
+						v-model="keyword"
 						placeholder="Nama / kode referal"
-						outlined
-						dense
 						label="Nama / kode referal"
 						color="light-blue darken-3"
+						single-line
 						hide-details
+						solo
 						clearable
 					/>
-					</v-col>
-				</v-row>
-				<v-row no-gutters>
-					<v-col
-						cols="12"
-						md="4"
-						class="pt-2 d-flex align-center font-weight-bold"
+				</v-col>
+				<v-col cols="12" md="4" class="d-flex justify-center">
+					<DatePicker
+						v-model="tanggal" 
+						range
+						circle
+						lang="id"
+						position="bottom right"
+						:date-format="{
+							day: '2-digit',
+							month: '2-digit',
+							year: 'numeric'
+						}"
+						placeholder="Start Date ~ End Date"
+					/>
+						<!-- :show-clear-button="tanggal.length ? true : false" -->
+				</v-col>
+				<v-col cols="12" md="2" class="d-flex justify-center align-center">
+					<v-btn
+						color="light-blue darken-3"
+						class="white--text text--darken-2 mr-2"
+						small
+						dense
+						depressed
+						:loading="loadingButtonDataCustomer"
+						@click="getData(1, limit)"
 					>
-						Start Date
-					</v-col>
-					<v-col
-						cols="12"
-						md="8"
-						class="pt-3"
+						Cari
+					</v-btn>
+					<v-btn
+						color="light-blue darken-3"
+						class="white--text text--darken-2"
+						small
+						dense
+						depressed
+						@click="() => { tanggal = []; getData(1, limit); keyword = ''; pageSummary = { page: '', limit: '', totalRecord: '', totalPages: '' }; DataCustomer = []; }"
 					>
-						<v-menu
-							v-model="menu1"
-							:close-on-content-click="false"
-							:nudge-right="40"
-							transition="scale-transition"
-							offset-y
-							min-width="290px"
-							outlined
-						>
-							<template #activator="{ on, attrs }">
-								<v-text-field
-									v-model="input.StartDate"
-									:value="input.StartDate"
-									placeholder="Start Date (YYYY-MM-DD)"
-									v-bind="attrs"
-									v-on="on"
-									outlined
-									dense
-									label="Start Date (YYYY-MM-DD)"
-									color="light-blue darken-3"
-									hide-details
-									clearable
-								/>
-							</template>
-							<v-date-picker v-model="input.StartDate" :max="GetEndDate" @input="menu1 = false" />
-						</v-menu>
-					</v-col>
-				</v-row>
-				<v-row no-gutters>
-					<v-col
-						cols="12"
-						md="4"
-						class="pt-2 d-flex align-center font-weight-bold"
-					>
-						End Date
-					</v-col>
-					<v-col
-						cols="12"
-						md="8"
-						class="pt-3"
-					>
-						<v-menu
-							v-model="menu2"
-							:close-on-content-click="false"
-							:nudge-right="40"
-							transition="scale-transition"
-							offset-y
-							min-width="290px"
-							outlined
-						>
-							<template #activator="{ on, attrs }">
-								<v-text-field
-									v-model="input.EndDate"
-									:value="input.EndDate"
-									placeholder="End Date (YYYY-MM-DD)"
-									v-bind="attrs"
-									v-on="on"
-									outlined
-									dense
-									label="End Date (YYYY-MM-DD)"
-									color="light-blue darken-3"
-									hide-details
-									clearable
-								/>
-							</template>
-							<v-date-picker v-model="input.EndDate" :min="GetMinDate" :max="nowDate" @input="menu2 = false" />
-						</v-menu>
-					</v-col>
-				</v-row>
-			</v-card-text>
-			<v-card-actions>
-				<v-row 
-					no-gutters
-					class="mt-1 mr-3"
-				>
-					<v-col
-						class="text-end"
-						cols="12"
-					>
-						<v-btn
-							color="light-blue darken-3"
-							class="white--text text--darken-2"
-							small
-							dense
-							depressed
-							:loading="loadingButtonDataCustomer"
-							@click="getData(1, limit)"
-						>
-							Cari Data
-						</v-btn>
-					</v-col>
-				</v-row>
-			</v-card-actions>
-
+						Reset
+					</v-btn>
+				</v-col>
+			</v-row>
 			<div class="px-1">
 				<v-data-table
 					loading-text="Sedang memuat... Harap tunggu"
@@ -262,15 +192,8 @@ export default {
     PopUpNotifikasiVue
   },
 	data: () => ({
-		input: {
-			keyword: '',
-			StartDate: '',
-			EndDate: ''
-		},
-		menu1: false,
-		menu2: false,
-		nowDate: new Date().toISOString().slice(0,10),
-		Hariini: new Date(),
+		tanggal: [],
+		keyword: '',
 		DataCustomer: [],
     loadingButtonDataCustomer: false,
     isLoadingDataCustomer: false,
@@ -315,37 +238,7 @@ export default {
 			amp: true,
 		},
 	},
-	computed: {
-    GetMinDate() {
-      var awal = this.input.StartDate
-      return awal
-    },
-    GetEndDate() {
-      var endDate = new Date(this.Hariini.getFullYear(), this.Hariini.getMonth() + 1, null);
-      return endDate.toISOString().slice(0,null)
-    },
-  },
 	watch: {
-		input: {
-			deep: true,
-			handler(value) {
-				if(value.StartDate == null || value.EndDate == null || value.keyword == null){
-					this.getData(1, this.limit)
-					this.pageSummary = {
-						page: '',
-						limit: '',
-						totalRecord: '',
-						totalPages: ''
-					}
-					this.DataCustomer = []
-					this.input = {
-						keyword: '',
-						StartDate: '',
-						EndDate: '',
-					}
-				}
-			}
-		},
 		limit: {
 			deep: true,
 			handler(value) {
@@ -360,11 +253,11 @@ export default {
 		...mapActions(["fetchData"]),
 		getData(last, limit) {
 			var url = ''
-			if(this.input.StartDate && this.input.EndDate){ 
-				let gabung = `${this.input.StartDate},${this.input.EndDate}`
+			if(this.tanggal.length){ 
+				let gabung = `${this.tanggal[0]},${this.tanggal[1]}`
 				url += `&dateRange=${gabung}`
 			}
-			if(this.input.keyword){ url += `&keyword=${this.input.keyword}&` }
+			if(this.keyword){ url += `&keyword=${this.keyword}&` }
 			this.itemsPerPage = limit
 			this.pageSummary = {
 				page: '',

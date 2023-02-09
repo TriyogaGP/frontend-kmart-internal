@@ -27,6 +27,17 @@
         </v-flex>
 			</v-layout>
 		</v-container>
+		<v-divider />
+		<v-alert
+			class="mt-2"
+      icon="info"
+			border="left"
+			color="light-blue darken-3"
+      text
+			dense
+    >
+      <span style="font-size: 12px;">Parameter ID Product Package, Payment Status, Shipping Type harus diisi</span> 
+    </v-alert>
 		<v-card class="mt-2 mb-2 pa-1" outlined elevation="0">
 			<v-card-text>
 				<v-row no-gutters>
@@ -35,89 +46,7 @@
 						md="4"
 						class="pt-2 d-flex align-center font-weight-bold"
 					>
-						Start Date
-					</v-col>
-					<v-col
-						cols="12"
-						md="8"
-						class="pt-3"
-					>
-						<v-menu
-							v-model="menu1"
-							:close-on-content-click="false"
-							:nudge-right="40"
-							transition="scale-transition"
-							offset-y
-							min-width="290px"
-							outlined
-						>
-							<template #activator="{ on, attrs }">
-								<v-text-field
-									v-model="input.StartDate"
-									:value="input.StartDate"
-									placeholder="Start Date (YYYY-MM-DD)"
-									v-bind="attrs"
-									v-on="on"
-									outlined
-									dense
-									label="Start Date (YYYY-MM-DD)"
-									color="light-blue darken-3"
-									hide-details
-									clearable
-								/>
-							</template>
-							<v-date-picker v-model="input.StartDate" :max="GetEndDate" @input="menu1 = false" />
-						</v-menu>
-					</v-col>
-				</v-row>
-				<v-row no-gutters>
-					<v-col
-						cols="12"
-						md="4"
-						class="pt-2 d-flex align-center font-weight-bold"
-					>
-						End Date
-					</v-col>
-					<v-col
-						cols="12"
-						md="8"
-						class="pt-3"
-					>
-						<v-menu
-							v-model="menu2"
-							:close-on-content-click="false"
-							:nudge-right="40"
-							transition="scale-transition"
-							offset-y
-							min-width="290px"
-							outlined
-						>
-							<template #activator="{ on, attrs }">
-								<v-text-field
-									v-model="input.EndDate"
-									:value="input.EndDate"
-									placeholder="End Date (YYYY-MM-DD)"
-									v-bind="attrs"
-									v-on="on"
-									outlined
-									dense
-									label="End Date (YYYY-MM-DD)"
-									color="light-blue darken-3"
-									hide-details
-									clearable
-								/>
-							</template>
-							<v-date-picker v-model="input.EndDate" :min="GetMinDate" :max="nowDate" @input="menu2 = false" />
-						</v-menu>
-					</v-col>
-				</v-row>
-				<v-row no-gutters>
-					<v-col
-						cols="12"
-						md="4"
-						class="pt-2 d-flex align-center font-weight-bold"
-					>
-						ID Product
+						ID Product Package
 					</v-col>
 					<v-col
 						cols="12"
@@ -126,11 +55,11 @@
 					>
 					<v-textarea
 						v-model="input.idProductName"
-						placeholder="ID Product (PPKG1;PPKG2;PPKG3;...)"
+						placeholder="ID Product Package (PPKG1;PPKG2;PPKG3;...)"
 						outlined
 						dense
 						rows="4"
-						label="ID Product (PPKG1;PPKG2;PPKG3;...)"
+						label="ID Product Package (PPKG1;PPKG2;PPKG3;...)"
 						color="light-blue darken-3"
 						hide-details
 						clearable
@@ -144,7 +73,7 @@
 						md="4"
 						class="pt-2 d-flex align-center font-weight-bold"
 					>
-						Payment
+						Payment Status
 					</v-col>
 					<v-col
 						cols="12"
@@ -154,8 +83,8 @@
 						<v-autocomplete
 							v-model="input.payment"
 							:items="paymentOptions"
-							placeholder="Pilih Payment"
-							label="Pilih Payment"
+							placeholder="Pilih Payment Status"
+							label="Pilih Payment Status"
 							item-text="value"
 							item-value="value"
 							outlined
@@ -209,32 +138,59 @@
 					</v-col>
 				</v-row>
 			</v-card-text>
-			<v-card-actions>
-				<v-row 
-					no-gutters
-					class="mt-1 mr-3"
-				>
-					<v-col
-						class="text-end"
-						cols="12"
-					>
-						<v-btn
+			<div class="px-1">
+				<v-row no-gutters class="pa-2">
+					<v-col cols="12" md="6" class="d-flex align-center">
+						<!-- <v-btn
 							color="light-blue darken-3"
 							class="white--text text--darken-2"
+							small
+							dense
+							depressed
+							@click="exportexcel()"
+						>
+							<v-icon style="cursor: pointer;" small>fas fa-file-excel</v-icon>&nbsp;Export Excel
+						</v-btn> -->
+					</v-col>
+					<v-col cols="12" md="4" class="d-flex justify-center">
+						<DatePicker
+							v-model="tanggal" 
+							range
+							circle
+							lang="id"
+							position="bottom right"
+							:date-format="{
+								day: '2-digit',
+								month: '2-digit',
+								year: 'numeric'
+							}"
+							placeholder="Start Date ~ End Date"
+						/>
+					</v-col>
+					<v-col cols="12" md="2" class="d-flex justify-center align-center">
+						<v-btn
+							color="light-blue darken-3"
+							class="white--text text--darken-2 mr-2"
 							small
 							dense
 							depressed
 							:loading="loadingButtonDataProductOrderSummary"
 							@click="getData()"
 						>
-							Get Data
+							Cari
+						</v-btn>
+						<v-btn
+							color="light-blue darken-3"
+							class="white--text text--darken-2"
+							small
+							dense
+							depressed
+							@click="() => { tanggal = []; input = { idProductName: '', shippingType: '', payment: '' }; DataProductOrderSummary = []; DataJumTransaksiDetail = { quantity: 0, total: 0 } }"
+						>
+							Reset
 						</v-btn>
 					</v-col>
 				</v-row>
-			</v-card-actions>
-
-			<div class="px-1">
-				<!-- <v-icon style="cursor: pointer;" large @click="exportexcel()">fas fa-file-excel</v-icon> -->
 				<v-data-table
 					loading-text="Sedang memuat... Harap tunggu"
 					no-data-text="Tidak ada data yang tersedia"
@@ -306,9 +262,8 @@ export default {
     PopUpNotifikasiVue
   },
 	data: () => ({
+		tanggal: [],
 		input: {
-			StartDate: '',
-			EndDate: '',
 			idProductName: '',
 			shippingType: '',
 			payment: '',
@@ -317,10 +272,6 @@ export default {
 			quantity: 0,
 			total: 0
 		},
-		menu1: false,
-		menu2: false,
-		nowDate: new Date().toISOString().slice(0,10),
-		Hariini: new Date(),
 		DataProductOrderSummary: [],
     loadingButtonDataProductOrderSummary: false,
     isLoadingDataProductOrderSummary: false,
@@ -367,50 +318,22 @@ export default {
 			amp: true,
 		},
 	},
-	computed: {
-    GetMinDate() {
-      var awal = this.input.StartDate
-      return awal
-    },
-    GetEndDate() {
-      var endDate = new Date(this.Hariini.getFullYear(), this.Hariini.getMonth() + 1, null);
-      return endDate.toISOString().slice(0,null)
-    },
-  },
-	watch: {
-		input: {
-			deep: true,
-			handler(value) {
-				if(value.StartDate == null || value.EndDate == null || value.idProductName == null || value.shippingType == null || value.payment == null){
-					this.DataProductOrderSummary = []
-					this.DataJumTransaksiDetail = {
-						quantity: 0,
-						total: 0
-					}
-					this.input = {
-						StartDate: '',
-						EndDate: '',
-						idProductName: '',
-						shippingType: '',
-						payment: '',
-					}
-				}
-			}
-		}
-	},
 	mounted() {
 	},
 	methods: {
 		...mapActions(["fetchData"]),
 		getData() {
+			if(!this.input.idProductName || !this.input.shippingType || !this.input.payment) {
+				return this.notifikasi("warning", 'Parameter kosong !', "1")
+			}
 			var url = ''
-			if(this.input.StartDate && this.input.EndDate){ url += `startdate=${this.input.StartDate}&enddate=${this.input.EndDate}&` }
-			if(this.input.idProductName){ url += `idProductName=${this.input.idProductName}&` }
-			if(this.input.payment){ url += `payment=${this.input.payment}&` }
+			if(this.input.idProductName){ url += `idProductName=${this.input.idProductName}` }
+			if(this.input.payment){ url += `&payment=${this.input.payment}` }
 			if(this.input.shippingType){
 				let shipping = this.input.shippingType.join(',')
-				url += `shippingType=${shipping}&`
+				url += `&shippingType=${shipping}`
 			}
+			if(this.tanggal.length === 2){ url += `&startdate=${this.tanggal.length ? this.convertDateToPicker2(this.tanggal[0]) : ''}&enddate=${this.tanggal.length ? this.convertDateToPicker2(this.tanggal[1]) : ''}` }
 			// console.log(url);
 			this.DataProductOrderSummary = []
 			this.loadingButtonDataProductOrderSummary = true

@@ -1,117 +1,69 @@
 <template>
 	<div>
 		<h1 class="subheading grey--text">Panel Data Harian</h1>
+		<v-alert
+      icon="info"
+			border="left"
+			color="light-blue darken-3"
+      text
+			dense
+    >
+			<span style="font-size: 12px;">Filter range date maksimal 1 minggu</span>
+    </v-alert>
 		<v-card class="mt-2 mb-2 pa-1" outlined elevation="0">
-			<v-card-text>
-				<v-row no-gutters>
-					<v-col
-						cols="12"
-						md="4"
-						class="pt-2 d-flex align-center font-weight-bold"
-					>
-						Start Date
-					</v-col>
-					<v-col
-						cols="12"
-						md="8"
-						class="pt-3"
-					>
-						<v-menu
-							v-model="menu1"
-							:close-on-content-click="false"
-							:nudge-right="40"
-							transition="scale-transition"
-							offset-y
-							min-width="290px"
-							outlined
-						>
-							<template #activator="{ on, attrs }">
-								<v-text-field
-									v-model="input.StartDate"
-									:value="input.StartDate"
-									placeholder="Start Date (YYYY-MM-DD)"
-									v-bind="attrs"
-									v-on="on"
-									outlined
-									dense
-									label="Start Date (YYYY-MM-DD)"
-									color="light-blue darken-3"
-									hide-details
-									clearable
-								/>
-							</template>
-							<v-date-picker v-model="input.StartDate" :max="GetEndDate" @input="menu1 = false" />
-						</v-menu>
-					</v-col>
-				</v-row>
-				<v-row no-gutters>
-					<v-col
-						cols="12"
-						md="4"
-						class="pt-2 d-flex align-center font-weight-bold"
-					>
-						End Date
-					</v-col>
-					<v-col
-						cols="12"
-						md="8"
-						class="pt-3"
-					>
-						<v-menu
-							v-model="menu2"
-							:close-on-content-click="false"
-							:nudge-right="40"
-							transition="scale-transition"
-							offset-y
-							min-width="290px"
-							outlined
-						>
-							<template #activator="{ on, attrs }">
-								<v-text-field
-									v-model="input.EndDate"
-									:value="input.EndDate"
-									placeholder="End Date (YYYY-MM-DD)"
-									v-bind="attrs"
-									v-on="on"
-									outlined
-									dense
-									label="End Date (YYYY-MM-DD)"
-									color="light-blue darken-3"
-									hide-details
-									clearable
-								/>
-							</template>
-							<v-date-picker v-model="input.EndDate" :min="GetMinDate" :max="nowDate" @input="menu2 = false" />
-						</v-menu>
-					</v-col>
-				</v-row>
-			</v-card-text>
-			<v-card-actions>
-				<v-row 
-					no-gutters
-					class="mt-1 mr-3"
-				>
-					<v-col
-						class="text-end"
-						cols="12"
-					>
+			<div class="px-1">
+				<v-row no-gutters class="pa-2">
+					<v-col cols="12" md="6" class="d-flex align-center">
 						<v-btn
 							color="light-blue darken-3"
 							class="white--text text--darken-2"
 							small
 							dense
 							depressed
+							@click="exportexcel()"
+						>
+							<v-icon style="cursor: pointer;" small>fas fa-file-excel</v-icon>&nbsp;Export Excel
+						</v-btn>
+					</v-col>
+					<v-col cols="12" md="4" class="d-flex justify-center">
+						<DatePicker
+							v-model="tanggal" 
+							range
+							circle
+							lang="id"
+							position="bottom right"
+							:date-format="{
+								day: '2-digit',
+								month: '2-digit',
+								year: 'numeric'
+							}"
+							placeholder="Start Date ~ End Date"
+						/>
+					</v-col>
+					<v-col cols="12" md="2" class="d-flex justify-center align-center">
+						<v-btn
+							color="light-blue darken-3"
+							class="white--text text--darken-2 mr-2"
+							small
+							dense
+							depressed
 							:loading="loadingButtonDataHarian"
 							@click="getData(1, limit)"
 						>
-							Get Data
+							Cari
+						</v-btn>
+						<v-btn
+							color="light-blue darken-3"
+							class="white--text text--darken-2"
+							small
+							dense
+							depressed
+							@click="() => { limit = 20; tanggal = []; DataHarian = []; }"
+						>
+							Reset
 						</v-btn>
 					</v-col>
 				</v-row>
-			</v-card-actions>
-
-			<div class="px-1">
-				<v-icon style="cursor: pointer;" large @click="exportexcel()">fas fa-file-excel</v-icon>
 				<v-data-table
 					loading-text="Sedang memuat... Harap tunggu"
 					no-data-text="Tidak ada data yang tersedia"
@@ -134,18 +86,18 @@
 					<template #[`item.product`]="{ item }">
 						<v-tooltip bottom>
 							<template v-slot:activator="{ on, attrs }">
-                <v-icon small v-bind="attrs" v-on="on">info</v-icon>
-              </template>
+								<v-icon small v-bind="attrs" v-on="on">info</v-icon>
+							</template>
 							<div v-for="(data, i) in item.productDetails" :key="i">
 								<span v-html="data.name" /> (<span v-html="data.quantity" />)<br>
 							</div>
-            </v-tooltip>
-          </template>
+						</v-tooltip>
+					</template>
 					<template #[`item.user`]="{ item }">
 						<v-tooltip bottom>
 							<template v-slot:activator="{ on, attrs }">
-                <v-icon small v-bind="attrs" v-on="on">info</v-icon>
-              </template>
+								<v-icon small v-bind="attrs" v-on="on">info</v-icon>
+							</template>
 							<div>
 								Data User<br>
 								fullname / devicenumber : <span v-html="item.dataUser.fullname" /> / <span v-html="item.dataUser.devicenumber" /><br>
@@ -154,8 +106,8 @@
 								Data Member<br>
 								fullname / devicenumber : <span v-html="item.dataUser.consumerType != 'MEMBER' ? item.dataMember.fullname : item.dataUser.fullname" /> / <span v-html="item.dataUser.consumerType != 'MEMBER' ? item.dataMember.devicenumber : item.dataUser.devicenumber" /><br>
 							</div>
-            </v-tooltip>
-          </template>
+						</v-tooltip>
+					</template>
 				</v-data-table>
 			</div>
 			<v-row>
@@ -238,14 +190,7 @@ export default {
     PopUpNotifikasiVue
   },
 	data: () => ({
-		input: {
-			StartDate: '',
-			EndDate: ''
-		},
-		menu1: false,
-		menu2: false,
-		nowDate: new Date().toISOString().slice(0,10),
-		Hariini: new Date(),
+		tanggal: [],
 		DataHarian: [],
     loadingButtonDataHarian: false,
     isLoadingDataHarian: false,
@@ -294,35 +239,7 @@ export default {
 			amp: true,
 		},
 	},
-	computed: {
-    GetMinDate() {
-      var awal = this.input.StartDate
-      return awal
-    },
-    GetEndDate() {
-      var endDate = new Date(this.Hariini.getFullYear(), this.Hariini.getMonth() + 1, null);
-      return endDate.toISOString().slice(0,null)
-    },
-  },
 	watch: {
-		input: {
-			deep: true,
-			handler(value) {
-				if(value.StartDate == null || value.EndDate == null){
-					this.pageSummary = {
-						page: '',
-						limit: '',
-						total: '',
-						totalPages: ''
-					}
-					this.DataHarian = []
-					this.input = {
-						StartDate: '',
-						EndDate: ''
-					}
-				}
-			}
-		},
 		limit: {
 			deep: true,
 			handler(value) {
@@ -347,7 +264,7 @@ export default {
 			this.isLoadingDataHarian = true
       let payload = {
 				method: "get",
-				url: `kmart/getdataHarian?startdate=${this.input.StartDate}&enddate=${this.input.EndDate}&page=${page}&limit=${limit}`,
+				url: `kmart/getdataHarian?startdate=${this.tanggal.length ? this.convertDateToPicker2(this.tanggal[0]) : ''}&enddate=${this.tanggal.length ? this.convertDateToPicker2(this.tanggal[1]) : ''}&page=${page}&limit=${limit}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)

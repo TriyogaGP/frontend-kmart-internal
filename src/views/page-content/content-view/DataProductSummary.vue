@@ -82,119 +82,63 @@
         </v-flex>
 			</v-layout>
 		</v-container>
+		<v-divider />
+		<v-alert
+			class="mt-2"
+			icon="info"
+			border="left"
+			color="light-blue darken-3"
+			text
+			dense
+		>
+			<span style="font-size: 12px;">
+				Range Date jika kosong default h-7 dari tanggal hari ini<br>
+				Filter range date maksimal 1 minggu
+			</span>
+		</v-alert>
 		<v-card class="mt-2 mb-2 pa-1" outlined elevation="0">
-			<v-card-text>
-				<v-row no-gutters>
-					<v-col
-						cols="12"
-						md="4"
-						class="pt-2 d-flex align-center font-weight-bold"
+			<v-row no-gutters class="pa-2">
+				<v-col cols="12" md="6" />
+				<v-col cols="12" md="4" class="d-flex justify-center">
+					<DatePicker
+						v-model="tanggal" 
+						range
+						circle
+						lang="id"
+						position="top right"
+						:date-format="{
+							day: '2-digit',
+							month: '2-digit',
+							year: 'numeric'
+						}"
+						placeholder="Start Date ~ End Date"
+					/>
+						<!-- :show-clear-button="tanggal.length ? true : false" -->
+				</v-col>
+				<v-col cols="12" md="2" class="d-flex justify-center align-center">
+					<v-btn
+						color="light-blue darken-3"
+						class="white--text text--darken-2 mr-2"
+						small
+						dense
+						depressed
+						:loading="loadingButtonDataProductSummary"
+						@click="getData()"
 					>
-						Start Date
-					</v-col>
-					<v-col
-						cols="12"
-						md="8"
-						class="pt-3"
+						Cari
+					</v-btn>
+					<v-btn
+						color="light-blue darken-3"
+						class="white--text text--darken-2"
+						small
+						dense
+						depressed
+						@click="() => { tanggal = []; DataProductSummary = []; DataJumProduct = ''; }"
 					>
-						<v-menu
-							v-model="menu1"
-							:close-on-content-click="false"
-							:nudge-right="40"
-							transition="scale-transition"
-							offset-y
-							min-width="290px"
-							outlined
-						>
-							<template #activator="{ on, attrs }">
-								<v-text-field
-									v-model="input.StartDate"
-									:value="input.StartDate"
-									placeholder="Start Date (YYYY-MM-DD)"
-									v-bind="attrs"
-									v-on="on"
-									outlined
-									dense
-									label="Start Date (YYYY-MM-DD)"
-									color="light-blue darken-3"
-									hide-details
-									clearable
-								/>
-							</template>
-							<v-date-picker v-model="input.StartDate" :max="GetEndDate" @input="menu1 = false" />
-						</v-menu>
-					</v-col>
-				</v-row>
-				<v-row no-gutters>
-					<v-col
-						cols="12"
-						md="4"
-						class="pt-2 d-flex align-center font-weight-bold"
-					>
-						End Date
-					</v-col>
-					<v-col
-						cols="12"
-						md="8"
-						class="pt-3"
-					>
-						<v-menu
-							v-model="menu2"
-							:close-on-content-click="false"
-							:nudge-right="40"
-							transition="scale-transition"
-							offset-y
-							min-width="290px"
-							outlined
-						>
-							<template #activator="{ on, attrs }">
-								<v-text-field
-									v-model="input.EndDate"
-									:value="input.EndDate"
-									placeholder="End Date (YYYY-MM-DD)"
-									v-bind="attrs"
-									v-on="on"
-									outlined
-									dense
-									label="End Date (YYYY-MM-DD)"
-									color="light-blue darken-3"
-									hide-details
-									clearable
-								/>
-							</template>
-							<v-date-picker v-model="input.EndDate" :min="GetMinDate" :max="nowDate" @input="menu2 = false" />
-						</v-menu>
-					</v-col>
-				</v-row>
-			</v-card-text>
-			<v-card-actions>
-				<v-row 
-					no-gutters
-					class="mt-1 mr-3"
-				>
-					<v-col
-						cols="6"
-					>
-						<b style="font-size: 12px;">Info: - StartDate dan EndData jika kosong default h-7 dari tanggal hari ini.</b>
-					</v-col>
-					<v-col
-						class="text-end"
-						cols="6"
-					>
-						<v-btn
-							color="light-blue darken-3"
-							class="white--text text--darken-2"
-							small
-							dense
-							depressed
-							:loading="loadingButtonDataProductSummary"
-							@click="getData()"
-						>
-							Get Data
-						</v-btn>
-					</v-col>
-				</v-row>
-			</v-card-actions>
+						Reset
+					</v-btn>
+				</v-col>
+			</v-row>
 
 			<div class="px-1">
 				<v-data-table
@@ -279,14 +223,7 @@ export default {
     PopUpNotifikasiVue
   },
 	data: () => ({
-		input: {
-			StartDate: '',
-			EndDate: ''
-		},
-		menu1: false,
-		menu2: false,
-		nowDate: new Date().toISOString().slice(0,10),
-		Hariini: new Date(),
+		tanggal: [],
 		DataProductSummary: [],
 		DataJumProduct: '',
     loadingButtonDataProductSummary: false,
@@ -323,31 +260,6 @@ export default {
 			amp: true,
 		},
 	},
-	computed: {
-    GetMinDate() {
-      var awal = this.input.StartDate
-      return awal
-    },
-    GetEndDate() {
-      var endDate = new Date(this.Hariini.getFullYear(), this.Hariini.getMonth() + 1, null);
-      return endDate.toISOString().slice(0,null)
-    },
-  },
-	watch: {
-		input: {
-			deep: true,
-			handler(value) {
-				if(value.StartDate == null || value.EndDate == null){
-					this.DataJumProduct = ''
-					this.DataProductSummary = []
-					this.input = {
-						StartDate: '',
-						EndDate: ''
-					}
-				}
-			}
-		}
-	},
 	mounted() {
 	},
 	methods: {
@@ -358,7 +270,7 @@ export default {
 			this.isLoadingDataProductSummary = true
       let payload = {
 				method: "get",
-				url: `kmart/getdataKmart?kode=Transaksi Detail By Product Summary&startdate=${this.input.StartDate}&enddate=${this.input.EndDate}`,
+				url: `kmart/getdataKmart?kode=Transaksi Detail By Product Summary&startdate=${this.tanggal.length ? this.convertDateToPicker2(this.tanggal[0]) : ''}&enddate=${this.tanggal.length ? this.convertDateToPicker2(this.tanggal[1]) : ''}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)

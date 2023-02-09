@@ -113,10 +113,12 @@ export default {
 			this.fetchData(payload)
 			.then((res) => {
 				this.isLoading = false
+				this.orderNumber == ''
 				this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
 				this.isLoading = false
+				this.orderNumber == ''
 				this.notifikasi("error", err.response.data.message, "1")
 			});
 		},

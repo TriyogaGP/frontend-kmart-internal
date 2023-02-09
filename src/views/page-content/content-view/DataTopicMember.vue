@@ -1,262 +1,206 @@
 <template>
 	<div>
 		<h1 class="subheading grey--text">Panel Data Topic Member</h1>
+		<v-alert
+      icon="info"
+			border="left"
+			color="light-blue darken-3"
+      text
+			dense
+    >
+			<span style="font-size: 12px;">Filter range date maksimal 1 bulan</span>
+    </v-alert>
 		<v-card class="mt-2 mb-2 pa-1" outlined elevation="0">
-			<v-card-text>
-				<v-row no-gutters>
-					<v-col
-						cols="12"
-						md="4"
-						class="pt-2 d-flex align-center font-weight-bold"
+			<v-row no-gutters class="pa-2">
+				<v-col cols="12" md="6" />
+				<v-col cols="12" md="4" class="d-flex justify-center">
+					<DatePicker
+						v-model="tanggal" 
+						range
+						circle
+						lang="id"
+						position="bottom right"
+						:date-format="{
+							day: '2-digit',
+							month: '2-digit',
+							year: 'numeric'
+						}"
+						placeholder="Start Date ~ End Date"
+					/>
+						<!-- :show-clear-button="tanggal.length ? true : false" -->
+				</v-col>
+				<v-col cols="12" md="2" class="d-flex justify-center align-center">
+					<v-btn
+						color="light-blue darken-3"
+						class="white--text text--darken-2 mr-2"
+						small
+						dense
+						depressed
+						:loading="loadingButtonDataTopicMember"
+						@click="getData()"
 					>
-						Start Date
-					</v-col>
-					<v-col
-						cols="12"
-						md="8"
-						class="pt-3"
+						Cari
+					</v-btn>
+					<v-btn
+						color="light-blue darken-3"
+						class="white--text text--darken-2"
+						small
+						dense
+						depressed
+						@click="() => { tanggal = []; clearForm(); OrderMemberBelanja = []; OrderMemberTidakBelanja = []; }"
 					>
-						<v-menu
-							v-model="menu1"
-							:close-on-content-click="false"
-							:nudge-right="40"
-							transition="scale-transition"
-							offset-y
-							min-width="290px"
-							outlined
-						>
-							<template #activator="{ on, attrs }">
-								<v-text-field
-									v-model="input.StartDate"
-									:value="input.StartDate"
-									placeholder="Start Date (YYYY-MM-DD)"
-									v-bind="attrs"
-									v-on="on"
-									outlined
-									dense
-									label="Start Date (YYYY-MM-DD)"
-									color="light-blue darken-3"
-									hide-details
-									clearable
-								/>
-							</template>
-							<v-date-picker v-model="input.StartDate" :max="GetEndDate" @input="menu1 = false" />
-						</v-menu>
-					</v-col>
-				</v-row>
-				<v-row no-gutters>
-					<v-col
-						cols="12"
-						md="4"
-						class="pt-2 d-flex align-center font-weight-bold"
-					>
-						End Date
-					</v-col>
-					<v-col
-						cols="12"
-						md="8"
-						class="pt-3"
-					>
-						<v-menu
-							v-model="menu2"
-							:close-on-content-click="false"
-							:nudge-right="40"
-							transition="scale-transition"
-							offset-y
-							min-width="290px"
-							outlined
-						>
-							<template #activator="{ on, attrs }">
-								<v-text-field
-									v-model="input.EndDate"
-									:value="input.EndDate"
-									placeholder="End Date (YYYY-MM-DD)"
-									v-bind="attrs"
-									v-on="on"
-									outlined
-									dense
-									label="End Date (YYYY-MM-DD)"
-									color="light-blue darken-3"
-									hide-details
-									clearable
-								/>
-							</template>
-							<v-date-picker v-model="input.EndDate" :min="GetMinDate" :max="nowDate" @input="menu2 = false" />
-						</v-menu>
-					</v-col>
-				</v-row>
-			</v-card-text>
-			<v-card-actions>
-				<v-row 
-					no-gutters
-					class="mt-1 mr-3"
-				>
-					<v-col
-						class="text-end"
-						cols="12"
-					>
-						<v-btn
-							color="light-blue darken-3"
-							class="white--text text--darken-2"
-							small
-							dense
-							depressed
-							:loading="loadingButtonDataTopicMember"
-							@click="getData()"
-						>
-							Cari Data
-						</v-btn>
-					</v-col>
-				</v-row>
-			</v-card-actions>
+						Reset
+					</v-btn>
+				</v-col>
+			</v-row>
+			<v-container>
+				<v-layout row wrap>
+					<v-flex sm6 xs12 md3 lg3>
+						<v-card class="ma-3" height="100" @click="totalTopic.totalAksesories !== 0 && viewDataUserTopic(DataTopicMember.Aksesories, 'Aksesories')">
+							<v-list-item>
+								<v-list-item-content>
+									<div class="overline text-right">Aksesories</div>
+									<v-list-item-title class="headline mb-1 text-right">{{ totalTopic ? totalTopic.totalAksesories : 0 }}</v-list-item-title>
+									<div><v-divider /></div>
+								</v-list-item-content>
+							</v-list-item>
+						</v-card>
+					</v-flex>
+					<v-flex sm6 xs12 md3 lg3>
+						<v-card class="ma-3" height="100" @click="totalTopic.totalAnakAnak !== 0 && viewDataUserTopic(DataTopicMember.AnakAnak, 'Anak - Anak')">
+							<v-list-item>
+								<v-list-item-content>
+									<div class="overline text-right">Anak - Anak</div>
+									<v-list-item-title class="headline mb-1 text-right">{{ totalTopic ? totalTopic.totalAnakAnak : 0 }}</v-list-item-title>
+									<div><v-divider /></div>
+								</v-list-item-content>
+							</v-list-item>
+						</v-card>
+					</v-flex>
+					<v-flex sm6 xs12 md3 lg3>
+						<v-card class="ma-3" height="100" @click="totalTopic.totalAyurveda !== 0 && viewDataUserTopic(DataTopicMember.Ayurveda, 'Ayurveda')">
+							<v-list-item>
+								<v-list-item-content>
+									<div class="overline text-right">Ayurveda</div>
+									<v-list-item-title class="headline mb-1 text-right">{{ totalTopic ? totalTopic.totalAyurveda : 0 }}</v-list-item-title>
+									<div><v-divider /></div>
+								</v-list-item-content>
+							</v-list-item>
+						</v-card>
+					</v-flex>
+					<v-flex sm6 xs12 md3 lg3>
+						<v-card class="ma-3" height="100" @click="totalTopic.totalKosmetik !== 0 && viewDataUserTopic(DataTopicMember.Kosmetik, 'Kosmetik')">
+							<v-list-item>
+								<v-list-item-content>
+									<div class="overline text-right">Kosmetik</div>
+									<v-list-item-title class="headline mb-1 text-right">{{ totalTopic ? totalTopic.totalKosmetik : 0 }}</v-list-item-title>
+									<div><v-divider /></div>
+								</v-list-item-content>
+							</v-list-item>
+						</v-card>
+					</v-flex>
+					<v-flex sm6 xs12 md3 lg3>
+						<v-card class="ma-3" height="100" @click="totalTopic.totalMinumanKesehatan !== 0 && viewDataUserTopic(DataTopicMember.MinumanKesehatan, 'Minuman Kesehatan')">
+							<v-list-item>
+								<v-list-item-content>
+									<div class="overline text-right">Minuman Kesehatan</div>
+									<v-list-item-title class="headline mb-1 text-right">{{ totalTopic ? totalTopic.totalMinumanKesehatan : 0 }}</v-list-item-title>
+									<div><v-divider /></div>
+								</v-list-item-content>
+							</v-list-item>
+						</v-card>
+					</v-flex>
+					<v-flex sm6 xs12 md3 lg3>
+						<v-card class="ma-3" height="100" @click="totalTopic.totalMusiman !== 0 && viewDataUserTopic(DataTopicMember.Musiman, 'Musiman')">
+							<v-list-item>
+								<v-list-item-content>
+									<div class="overline text-right">Musiman</div>
+									<v-list-item-title class="headline mb-1 text-right">{{ totalTopic ? totalTopic.totalMusiman : 0 }}</v-list-item-title>
+									<div><v-divider /></div>
+								</v-list-item-content>
+							</v-list-item>
+						</v-card>
+					</v-flex>
+					<v-flex sm6 xs12 md3 lg3>
+						<v-card class="ma-3" height="100" @click="totalTopic.totalOlahraga !== 0 && viewDataUserTopic(DataTopicMember.Olahraga, 'Olahraga')">
+							<v-list-item>
+								<v-list-item-content>
+									<div class="overline text-right">Olahraga</div>
+									<v-list-item-title class="headline mb-1 text-right">{{ totalTopic ? totalTopic.totalOlahraga : 0 }}</v-list-item-title>
+									<div><v-divider /></div>
+								</v-list-item-content>
+							</v-list-item>
+						</v-card>
+					</v-flex>
+					<v-flex sm6 xs12 md3 lg3>
+						<v-card class="ma-3" height="100" @click="totalTopic.totalPakaian !== 0 && viewDataUserTopic(DataTopicMember.Pakaian, 'Pakaian')">
+							<v-list-item>
+								<v-list-item-content>
+									<div class="overline text-right">Pakaian</div>
+									<v-list-item-title class="headline mb-1 text-right">{{ totalTopic ? totalTopic.totalPakaian : 0 }}</v-list-item-title>
+									<div><v-divider /></div>
+								</v-list-item-content>
+							</v-list-item>
+						</v-card>
+					</v-flex>
+					<v-flex sm6 xs12 md3 lg3>
+						<v-card class="ma-3" height="100" @click="totalTopic.totalPerawatanKulit !== 0 && viewDataUserTopic(DataTopicMember.PerawatanKulit, 'Perawatan Kulit')">
+							<v-list-item>
+								<v-list-item-content>
+									<div class="overline text-right">Perawatan Kulit</div>
+									<v-list-item-title class="headline mb-1 text-right">{{ totalTopic ? totalTopic.totalPerawatanKulit : 0 }}</v-list-item-title>
+									<div><v-divider /></div>
+								</v-list-item-content>
+							</v-list-item>
+						</v-card>
+					</v-flex>
+					<v-flex sm6 xs12 md3 lg3>
+						<v-card class="ma-3" height="100" @click="totalTopic.totalPerlengkapanMandi !== 0 && viewDataUserTopic(DataTopicMember.PerlengkapanMandi, 'Perlengkapan Mandi')">
+							<v-list-item>
+								<v-list-item-content>
+									<div class="overline text-right">Perlengkapan Mandi</div>
+									<v-list-item-title class="headline mb-1 text-right">{{ totalTopic ? totalTopic.totalPerlengkapanMandi : 0 }}</v-list-item-title>
+									<div><v-divider /></div>
+								</v-list-item-content>
+							</v-list-item>
+						</v-card>
+					</v-flex>
+					<v-flex sm6 xs12 md3 lg3>
+						<v-card class="ma-3" height="100" @click="totalTopic.totalPerlengkapanRumahTangga !== 0 && viewDataUserTopic(DataTopicMember.PerlengkapanRumahTangga, 'Perlengkapan Rumah Tangga')">
+							<v-list-item>
+								<v-list-item-content>
+									<div class="overline text-right">Perlengkapan Rumah Tangga</div>
+									<v-list-item-title class="headline mb-1 text-right">{{ totalTopic ? totalTopic.totalPerlengkapanRumahTangga : 0 }}</v-list-item-title>
+									<div><v-divider /></div>
+								</v-list-item-content>
+							</v-list-item>
+						</v-card>
+					</v-flex>
+					<v-flex sm6 xs12 md3 lg3>
+						<v-card class="ma-3" height="100" @click="totalTopic.totalPertumbuhanRambut !== 0 && viewDataUserTopic(DataTopicMember.PertumbuhanRambut, 'Pertumbuhan Rambut')">
+							<v-list-item>
+								<v-list-item-content>
+									<div class="overline text-right">Pertumbuhan Rambut</div>
+									<v-list-item-title class="headline mb-1 text-right">{{ totalTopic ? totalTopic.totalPertumbuhanRambut : 0 }}</v-list-item-title>
+									<div><v-divider /></div>
+								</v-list-item-content>
+							</v-list-item>
+						</v-card>
+					</v-flex>
+					<v-flex sm6 xs12 md3 lg3>
+						<v-card class="ma-3" height="100" @click="totalTopic.totalSuplemen !== 0 && viewDataUserTopic(DataTopicMember.Suplemen, 'Suplemen')">
+							<v-list-item>
+								<v-list-item-content>
+									<div class="overline text-right">Suplemen</div>
+									<v-list-item-title class="headline mb-1 text-right">{{ totalTopic ? totalTopic.totalSuplemen : 0 }}</v-list-item-title>
+									<div><v-divider /></div>
+								</v-list-item-content>
+							</v-list-item>
+						</v-card>
+					</v-flex>
+				</v-layout>
+			</v-container>
 		</v-card>
-		<v-container>
-      <v-layout row wrap>
-        <v-flex sm6 xs12 md3 lg3>
-          <v-card class="ma-3" height="100" @click="totalTopic.totalAksesories !== 0 && viewDataUserTopic(DataTopicMember.Aksesories, 'Aksesories')">
-            <v-list-item>
-              <v-list-item-content>
-                <div class="overline text-right">Aksesories</div>
-                <v-list-item-title class="headline mb-1 text-right">{{ totalTopic ? totalTopic.totalAksesories : 0 }}</v-list-item-title>
-                <div><v-divider /></div>
-              </v-list-item-content>
-            </v-list-item>
-          </v-card>
-        </v-flex>
-        <v-flex sm6 xs12 md3 lg3>
-          <v-card class="ma-3" height="100" @click="totalTopic.totalAnakAnak !== 0 && viewDataUserTopic(DataTopicMember.AnakAnak, 'Anak - Anak')">
-            <v-list-item>
-              <v-list-item-content>
-                <div class="overline text-right">Anak - Anak</div>
-                <v-list-item-title class="headline mb-1 text-right">{{ totalTopic ? totalTopic.totalAnakAnak : 0 }}</v-list-item-title>
-                <div><v-divider /></div>
-              </v-list-item-content>
-            </v-list-item>
-          </v-card>
-        </v-flex>
-        <v-flex sm6 xs12 md3 lg3>
-          <v-card class="ma-3" height="100" @click="totalTopic.totalAyurveda !== 0 && viewDataUserTopic(DataTopicMember.Ayurveda, 'Ayurveda')">
-            <v-list-item>
-              <v-list-item-content>
-                <div class="overline text-right">Ayurveda</div>
-                <v-list-item-title class="headline mb-1 text-right">{{ totalTopic ? totalTopic.totalAyurveda : 0 }}</v-list-item-title>
-                <div><v-divider /></div>
-              </v-list-item-content>
-            </v-list-item>
-          </v-card>
-        </v-flex>
-        <v-flex sm6 xs12 md3 lg3>
-          <v-card class="ma-3" height="100" @click="totalTopic.totalKosmetik !== 0 && viewDataUserTopic(DataTopicMember.Kosmetik, 'Kosmetik')">
-            <v-list-item>
-              <v-list-item-content>
-                <div class="overline text-right">Kosmetik</div>
-                <v-list-item-title class="headline mb-1 text-right">{{ totalTopic ? totalTopic.totalKosmetik : 0 }}</v-list-item-title>
-                <div><v-divider /></div>
-              </v-list-item-content>
-            </v-list-item>
-          </v-card>
-        </v-flex>
-        <v-flex sm6 xs12 md3 lg3>
-          <v-card class="ma-3" height="100" @click="totalTopic.totalMinumanKesehatan !== 0 && viewDataUserTopic(DataTopicMember.MinumanKesehatan, 'Minuman Kesehatan')">
-            <v-list-item>
-              <v-list-item-content>
-                <div class="overline text-right">Minuman Kesehatan</div>
-                <v-list-item-title class="headline mb-1 text-right">{{ totalTopic ? totalTopic.totalMinumanKesehatan : 0 }}</v-list-item-title>
-                <div><v-divider /></div>
-              </v-list-item-content>
-            </v-list-item>
-          </v-card>
-        </v-flex>
-        <v-flex sm6 xs12 md3 lg3>
-          <v-card class="ma-3" height="100" @click="totalTopic.totalMusiman !== 0 && viewDataUserTopic(DataTopicMember.Musiman, 'Musiman')">
-            <v-list-item>
-              <v-list-item-content>
-                <div class="overline text-right">Musiman</div>
-                <v-list-item-title class="headline mb-1 text-right">{{ totalTopic ? totalTopic.totalMusiman : 0 }}</v-list-item-title>
-                <div><v-divider /></div>
-              </v-list-item-content>
-            </v-list-item>
-          </v-card>
-        </v-flex>
-        <v-flex sm6 xs12 md3 lg3>
-          <v-card class="ma-3" height="100" @click="totalTopic.totalOlahraga !== 0 && viewDataUserTopic(DataTopicMember.Olahraga, 'Olahraga')">
-            <v-list-item>
-              <v-list-item-content>
-                <div class="overline text-right">Olahraga</div>
-                <v-list-item-title class="headline mb-1 text-right">{{ totalTopic ? totalTopic.totalOlahraga : 0 }}</v-list-item-title>
-                <div><v-divider /></div>
-              </v-list-item-content>
-            </v-list-item>
-          </v-card>
-        </v-flex>
-        <v-flex sm6 xs12 md3 lg3>
-          <v-card class="ma-3" height="100" @click="totalTopic.totalPakaian !== 0 && viewDataUserTopic(DataTopicMember.Pakaian, 'Pakaian')">
-            <v-list-item>
-              <v-list-item-content>
-                <div class="overline text-right">Pakaian</div>
-                <v-list-item-title class="headline mb-1 text-right">{{ totalTopic ? totalTopic.totalPakaian : 0 }}</v-list-item-title>
-                <div><v-divider /></div>
-              </v-list-item-content>
-            </v-list-item>
-          </v-card>
-        </v-flex>
-        <v-flex sm6 xs12 md3 lg3>
-          <v-card class="ma-3" height="100" @click="totalTopic.totalPerawatanKulit !== 0 && viewDataUserTopic(DataTopicMember.PerawatanKulit, 'Perawatan Kulit')">
-            <v-list-item>
-              <v-list-item-content>
-                <div class="overline text-right">Perawatan Kulit</div>
-                <v-list-item-title class="headline mb-1 text-right">{{ totalTopic ? totalTopic.totalPerawatanKulit : 0 }}</v-list-item-title>
-                <div><v-divider /></div>
-              </v-list-item-content>
-            </v-list-item>
-          </v-card>
-        </v-flex>
-        <v-flex sm6 xs12 md3 lg3>
-          <v-card class="ma-3" height="100" @click="totalTopic.totalPerlengkapanMandi !== 0 && viewDataUserTopic(DataTopicMember.PerlengkapanMandi, 'Perlengkapan Mandi')">
-            <v-list-item>
-              <v-list-item-content>
-                <div class="overline text-right">Perlengkapan Mandi</div>
-                <v-list-item-title class="headline mb-1 text-right">{{ totalTopic ? totalTopic.totalPerlengkapanMandi : 0 }}</v-list-item-title>
-                <div><v-divider /></div>
-              </v-list-item-content>
-            </v-list-item>
-          </v-card>
-        </v-flex>
-        <v-flex sm6 xs12 md3 lg3>
-          <v-card class="ma-3" height="100" @click="totalTopic.totalPerlengkapanRumahTangga !== 0 && viewDataUserTopic(DataTopicMember.PerlengkapanRumahTangga, 'Perlengkapan Rumah Tangga')">
-            <v-list-item>
-              <v-list-item-content>
-                <div class="overline text-right">Perlengkapan Rumah Tangga</div>
-                <v-list-item-title class="headline mb-1 text-right">{{ totalTopic ? totalTopic.totalPerlengkapanRumahTangga : 0 }}</v-list-item-title>
-                <div><v-divider /></div>
-              </v-list-item-content>
-            </v-list-item>
-          </v-card>
-        </v-flex>
-        <v-flex sm6 xs12 md3 lg3>
-          <v-card class="ma-3" height="100" @click="totalTopic.totalPertumbuhanRambut !== 0 && viewDataUserTopic(DataTopicMember.PertumbuhanRambut, 'Pertumbuhan Rambut')">
-            <v-list-item>
-              <v-list-item-content>
-                <div class="overline text-right">Pertumbuhan Rambut</div>
-                <v-list-item-title class="headline mb-1 text-right">{{ totalTopic ? totalTopic.totalPertumbuhanRambut : 0 }}</v-list-item-title>
-                <div><v-divider /></div>
-              </v-list-item-content>
-            </v-list-item>
-          </v-card>
-        </v-flex>
-        <v-flex sm6 xs12 md3 lg3>
-          <v-card class="ma-3" height="100" @click="totalTopic.totalSuplemen !== 0 && viewDataUserTopic(DataTopicMember.Suplemen, 'Suplemen')">
-            <v-list-item>
-              <v-list-item-content>
-                <div class="overline text-right">Suplemen</div>
-                <v-list-item-title class="headline mb-1 text-right">{{ totalTopic ? totalTopic.totalSuplemen : 0 }}</v-list-item-title>
-                <div><v-divider /></div>
-              </v-list-item-content>
-            </v-list-item>
-          </v-card>
-        </v-flex>
-			</v-layout>
-		</v-container>
 		<v-dialog
       v-model="DialogTopic"
       max-width="1000px"
@@ -508,14 +452,7 @@ export default {
     PopUpNotifikasiVue
   },
 	data: () => ({
-		input: {
-			StartDate: '',
-			EndDate: ''
-		},
-		menu1: false,
-		menu2: false,
-		nowDate: new Date().toISOString().slice(0,10),
-		Hariini: new Date(),
+		tanggal: [],
 		totalTopic: {
 			totalAksesories: 0,
 			totalAnakAnak: 0,
@@ -597,34 +534,7 @@ export default {
 			amp: true,
 		},
 	},
-	computed: {
-    GetMinDate() {
-      var awal = this.input.StartDate
-      return awal
-    },
-    GetEndDate() {
-      var endDate = new Date(this.Hariini.getFullYear(), this.Hariini.getMonth() + 1, null);
-      return endDate.toISOString().slice(0,null)
-    },
-  },
-	watch: {
-		input: {
-			deep: true,
-			handler(value) {
-				if(value.StartDate == null || value.EndDate == null){
-					this.clearForm()
-					this.OrderMemberBelanja = []
-					this.OrderMemberTidakBelanja = []
-					this.input = {
-						StartDate: '',
-						EndDate: '',
-					}
-				}
-			}
-		},
-	},
 	mounted() {
-		// this.getData()
 	},
 	methods: {
 		...mapActions(["fetchData"]),
@@ -634,7 +544,7 @@ export default {
 			this.isLoadingDataTopicMember = true
       let payload = {
 				method: "get",
-				url: `kmart/getdataTopicConsumer?startdate=${this.input.StartDate}&enddate=${this.input.EndDate}&is_consumer=1&is_null=0`,
+				url: `kmart/getdataTopicConsumer?startdate=${this.tanggal.length ? this.convertDateToPicker2(this.tanggal[0]) : ''}&enddate=${this.tanggal.length ? this.convertDateToPicker2(this.tanggal[1]) : ''}&is_consumer=1&is_null=0`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)

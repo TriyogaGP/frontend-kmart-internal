@@ -232,7 +232,8 @@ export default {
 			this.fetchData(payload)
 			.then((res) => {
 				let resdata = res.data.result
-				let menu = resdata[0].menu
+				let records = resdata.records
+				let menu = records[0].menu
 				menu.map(val => {
 					if(val.kategori == 'utama'){
 						this.linksNav.push(val)

@@ -59,6 +59,11 @@ export default [
         component: () => import('@/views/page-content/content-view/DataTopicCustomer.vue')
       },
       {
+        path: '/dataPLBBO',
+        name: 'DataPLBBO',
+        component: () => import('@/views/page-content/content-view/DataPLBBO.vue')
+      },
+      {
         path: '/hitManualOrder',
         name: 'DataHitManualOrder',
         component: () => import('@/views/page-content/content-view/DataHitManual.vue')
