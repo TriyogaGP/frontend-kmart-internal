@@ -231,13 +231,9 @@
 								item-key="orderNumber"
 								hide-default-footer
 								class="elevation-1"
-								:page.sync="page2"
-								:items-per-page="itemsPerPage2"
-								@page-count="pageCount2 = $event"
+								:items-per-page="itemsPerPage1"
+								@page-count="pageCount1 = $event"
 							>
-								<template #[`item.number`]="{ item }">
-									{{ DataTransaksiDetailOrder.indexOf(item) + 1 }}
-								</template>
 								<template #[`item.date`]="{ item }">
 									<span v-html="item.date" /> 
 								</template>
@@ -252,19 +248,44 @@
           </div>
 					<v-divider />
 					<v-card-actions>
-						<v-row
-							no-gutters
-              class="mr-3 text-end"
-						>
-							<v-col cols="12" class="d-flex justify-end align-center">
-								<v-pagination
-									v-if="DataTransaksiDetailOrder.length > 0"
-									v-model="page2"
-									:length="pageCount2"
-									:total-visible="7"
-								/>
-							</v-col>
-						</v-row>
+						<v-row 
+              no-gutters
+              class="mt-1 mr-3"
+            >
+              <v-col cols="10" class="mt-2 d-flex justify-start align-center">
+                <span>Halaman <strong>{{ pageSummary.page ? pageSummary.page : 0 }}</strong> dari Total Halaman <strong>{{ pageSummary.totalPages ? pageSummary.totalPages : 0 }}</strong> (Records {{ pageSummary.total ? pageSummary.total : 0 }})</span>
+              </v-col>
+              <v-col cols="2" class="mt-2 text-right">
+                <div class="d-flex justify-end">
+                  <v-autocomplete
+                    v-model="limit"
+                    :items="limitPage"
+                    item-text="value"
+                    item-value="value"
+                    outlined
+                    dense
+                    hide-details
+                    :disabled="DataTransaksiDetailOrder.length ? false : true"
+                  />
+                  <v-icon
+                    style="cursor: pointer;"
+                    large
+                    :disabled="DataTransaksiDetailOrder.length ? pageSummary.page != 1 ? false : true : true"
+                    @click="postData(pageSummary.page - 1, limit, dataDetail)"
+                  >
+                    keyboard_arrow_left
+                  </v-icon>
+                  <v-icon
+                    style="cursor: pointer;"
+                    large
+                    :disabled="DataTransaksiDetailOrder.length ? pageSummary.page != pageSummary.totalPages ? false : true : true"
+                    @click="postData(pageSummary.page + 1, limit, dataDetail)"
+                  >
+                    keyboard_arrow_right
+                  </v-icon>
+                </div>
+              </v-col>
+            </v-row>
 					</v-card-actions>
         </v-card>
       </v-card>
@@ -304,9 +325,27 @@ export default {
     isLoadingDataTransaksiDetail: false,
     isLoadingTransaksiDetail: false,
     isLoadingDataDPBV: false,
-		page2: 1,
-    pageCount2: 0,
-    itemsPerPage2: 10,
+		page1: 1,
+    pageCount1: 0,
+    itemsPerPage1: 100,
+    limit: 20,
+		limitPage: [
+      { value: 5 },
+			{ value: 10 },
+			{ value: 20 },
+			{ value: 50 },
+			{ value: 100 },
+		],
+		pageSummary: {
+			page: '',
+			limit: '',
+			total: '',
+			totalPages: ''
+		},
+		dataDetail: {
+			id_userNorder_number: [],
+			data_transaksi: [],
+		},
 		page: 1,
     pageCount: 0,
     itemsPerPage: 25,
@@ -322,7 +361,6 @@ export default {
       { text: "BV", value: "bv", sortable: false },
     ],
 		headersTransaksiDetail: [
-			{ text: "No.", value: "number", sortable: false, width: "7%" },
       { text: "Invoice", value: "orderNumber", sortable: false },
       { text: "Tanggal Order", value: "date", sortable: false },
       { text: "Nama", value: "fullname", sortable: false },
@@ -357,6 +395,14 @@ export default {
 			amp: true,
 		},
 	},
+	watch: {
+    limit: {
+			deep: true,
+			handler(value) {
+				this.postData(1, value, this.dataDetail)
+			}
+		},
+  },
 	mounted() {
 	},
 	methods: {
@@ -437,13 +483,17 @@ export default {
 		openDialog(kondisi) {
 			if(!this.Member.Transaksi.length && !this.NonMember.Transaksi.length) return this.notifikasi("warning", 'Proses masih berjalan !', "1")
 			this.kondisi = kondisi
-			let bodyData = ''
-			let id_user = []
-			let data_transaksi = []
+			this.dataDetail = {
+				id_userNorder_number: [],
+				data_transaksi: [],
+			}
 			if(kondisi === 'Member') {
 				this.Member.Transaksi.map(val => {
-					id_user.push(val.idUser)
-					data_transaksi.push({
+					this.dataDetail.id_userNorder_number.push({
+						idUser: val.idUser,
+						orderNumber: val.orderNumber,
+					})
+					this.dataDetail.data_transaksi.push({
 						id_user: val.idUser,
 						orderNumber: val.orderNumber,
             date: val.transaksi.date,
@@ -451,11 +501,13 @@ export default {
             bv: val.total.bv
 					})
 				})
-				bodyData = { id_user, data_transaksi }
 			}else if(kondisi === 'Customer') {
 				this.NonMember.Transaksi.map(val => {
-					id_user.push(val.idUser)
-					data_transaksi.push({
+					this.dataDetail.id_userNorder_number.push({
+						idUser: val.idUser,
+						orderNumber: val.orderNumber,
+					})
+					this.dataDetail.data_transaksi.push({
 						id_user: val.idUser,
 						orderNumber: val.orderNumber,
             date: val.transaksi.date,
@@ -463,26 +515,48 @@ export default {
             bv: val.total.bv
 					})
 				})
-				bodyData = { id_user, data_transaksi }
 			}
+			this.postData(1, this.limit, this.dataDetail)
+		},
+		postData(page, limit, bodyData) {
 			this.DialogOrder = true
-			this.DataTransaksiDetailOrder = []
+			this.itemsPerPage1 = limit
 			this.isLoadingTransaksiDetail = true
+			this.DataTransaksiDetailOrder = []
+			this.pageSummary = {
+				page: '',
+				limit: '',
+				total: '',
+				totalPages: ''
+			}
 			let payload = {
-				method: "post",
-				url: `kmart/detailTransaksiOrder`,
+				method: "put",
+				url: `kmart/detailTransaksiOrder?page=${page}&limit=${limit}`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
 			.then((res) => {
 				this.isLoadingTransaksiDetail = false
-				this.DataTransaksiDetailOrder = res.data.result
+				this.DataTransaksiDetailOrder = res.data.result.records
+        let pageSummary = res.data.result.pageSummary
+        this.pageSummary = {
+          page: pageSummary.page,
+          limit: pageSummary.limit,
+          total: pageSummary.total,
+          totalPages: pageSummary.totalPages
+        }
 			})
 			.catch((err) => {
 				this.isLoadingTransaksiDetail = false
 				this.DialogOrder = false
 				this.DataTransaksiDetailOrder = []
+				this.pageSummary = {
+					page: '',
+					limit: '',
+					total: '',
+					totalPages: ''
+				}
 				this.notifikasi("error", err.response.data.message, "1")
 			});
 		},

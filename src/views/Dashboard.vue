@@ -396,39 +396,39 @@
               no-gutters
               class="mt-1 mr-3"
             >
-            <v-col cols="10" class="mt-2 d-flex justify-start align-center">
-              <span>Halaman <strong>{{ pageSummary.page ? pageSummary.page : 0 }}</strong> dari Total Halaman <strong>{{ pageSummary.totalPages ? pageSummary.totalPages : 0 }}</strong> (Records {{ pageSummary.total ? pageSummary.total : 0 }})</span>
-            </v-col>
-            <v-col cols="2" class="mt-2 text-right">
-              <div class="d-flex justify-end">
-                <v-autocomplete
-                  v-model="limit"
-                  :items="limitPage"
-                  item-text="value"
-                  item-value="value"
-                  outlined
-                  dense
-                  hide-details
-                  :disabled="DataDetailUser.length ? false : true"
-                />
-                <v-icon
-                  style="cursor: pointer;"
-                  large
-                  :disabled="DataDetailUser.length ? pageSummary.page != 1 ? false : true : true"
-                  @click="getDetailUserActive(pageSummary.page - 1, limit, member, 1)"
-                >
-                  keyboard_arrow_left
-                </v-icon>
-                <v-icon
-                  style="cursor: pointer;"
-                  large
-                  :disabled="DataDetailUser.length ? pageSummary.page != pageSummary.totalPages ? false : true : true"
-                  @click="getDetailUserActive(pageSummary.page + 1, limit, member, 1)"
-                >
-                  keyboard_arrow_right
-                </v-icon>
-              </div>
-            </v-col>
+              <v-col cols="10" class="mt-2 d-flex justify-start align-center">
+                <span>Halaman <strong>{{ pageSummary.page ? pageSummary.page : 0 }}</strong> dari Total Halaman <strong>{{ pageSummary.totalPages ? pageSummary.totalPages : 0 }}</strong> (Records {{ pageSummary.total ? pageSummary.total : 0 }})</span>
+              </v-col>
+              <v-col cols="2" class="mt-2 text-right">
+                <div class="d-flex justify-end">
+                  <v-autocomplete
+                    v-model="limit"
+                    :items="limitPage"
+                    item-text="value"
+                    item-value="value"
+                    outlined
+                    dense
+                    hide-details
+                    :disabled="DataDetailUser.length ? false : true"
+                  />
+                  <v-icon
+                    style="cursor: pointer;"
+                    large
+                    :disabled="DataDetailUser.length ? pageSummary.page != 1 ? false : true : true"
+                    @click="getDetailUserActive(pageSummary.page - 1, limit, member, 1)"
+                  >
+                    keyboard_arrow_left
+                  </v-icon>
+                  <v-icon
+                    style="cursor: pointer;"
+                    large
+                    :disabled="DataDetailUser.length ? pageSummary.page != pageSummary.totalPages ? false : true : true"
+                    @click="getDetailUserActive(pageSummary.page + 1, limit, member, 1)"
+                  >
+                    keyboard_arrow_right
+                  </v-icon>
+                </div>
+              </v-col>
             </v-row>
           </v-card-actions>
         </v-card>
@@ -855,6 +855,7 @@ export default {
 			});
 		},
     getDetailUserActive(page, limit, bulan, isMember) {
+      this.itemsPerPage1 = limit
       this.DataDetailUser = []
       this.isLoading = true
       this.pageSummary = {
