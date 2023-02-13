@@ -25,7 +25,7 @@
             </v-list-item>
           </v-card>
         </v-flex>
-        <v-flex sm6 xs12 md3 lg3>
+        <v-flex sm6 xs12 md3 lg3 @click="(Member.Transaksi.length && NonMember.Transaksi.length) ? openDialog('Member') : ''" style="cursor: pointer;">
           <v-card class="ma-3">
             <v-list-item>
               <v-list-item-content>
@@ -53,7 +53,7 @@
             </v-list-item>
           </v-card>
         </v-flex>
-        <v-flex sm6 xs12 md3 lg3>
+        <v-flex sm6 xs12 md3 lg3 @click="(Member.Transaksi.length && NonMember.Transaksi.length) ? openDialog('Customer') : ''" style="cursor: pointer;">
           <v-card class="ma-3">
             <v-list-item>
               <v-list-item-content>
@@ -193,6 +193,83 @@
 			</v-row>
 		</v-card>
 		<v-dialog
+      v-model="DialogOrder"
+      max-width="1000px"
+      persistent
+      transition="dialog-bottom-transition"
+    >
+      <v-card>
+        <v-toolbar
+          dark
+          color="light-blue darken-3"
+        >
+          <v-toolbar-title>Data Orders Detail {{ kondisi === 'Member' ? 'Member' : 'Customer' }}</v-toolbar-title>
+          <v-spacer />
+          <v-toolbar-items>
+            <v-btn
+              icon
+              dark
+              @click="() => { DialogOrder = false; }"
+            >
+              <v-icon>close</v-icon>
+            </v-btn>
+          </v-toolbar-items>
+        </v-toolbar>
+        <v-card>
+          <div class="scrollText">
+            <div class="px-5">
+              <v-divider />
+            </div>
+            <v-card-text>
+							<v-data-table
+								loading-text="Sedang memuat... Harap tunggu"
+								no-data-text="Tidak ada data yang tersedia"
+								no-results-text="Tidak ada catatan yang cocok ditemukan"
+								:headers="headersTransaksiDetail"
+								:loading="isLoadingTransaksiDetail"
+								:items="DataTransaksiDetailOrder"
+								item-key="orderNumber"
+								hide-default-footer
+								class="elevation-1"
+								:page.sync="page2"
+								:items-per-page="itemsPerPage2"
+								@page-count="pageCount2 = $event"
+							>
+								<template #[`item.number`]="{ item }">
+									{{ DataTransaksiDetailOrder.indexOf(item) + 1 }}
+								</template>
+								<template #[`item.date`]="{ item }">
+									<span v-html="item.date" /> 
+								</template>
+								<template #[`item.dp`]="{ item }">
+									Rp.<span v-html="currencyDotFormatNumber(item.dp)" /> 
+								</template>
+								<template #[`item.bv`]="{ item }">
+									<span v-html="item.bv" /> 
+								</template>
+							</v-data-table>
+            </v-card-text>
+          </div>
+					<v-divider />
+					<v-card-actions>
+						<v-row
+							no-gutters
+              class="mr-3 text-end"
+						>
+							<v-col cols="12" class="d-flex justify-end align-center">
+								<v-pagination
+									v-if="DataTransaksiDetailOrder.length > 0"
+									v-model="page2"
+									:length="pageCount2"
+									:total-visible="7"
+								/>
+							</v-col>
+						</v-row>
+					</v-card-actions>
+        </v-card>
+      </v-card>
+    </v-dialog>
+		<v-dialog
 			v-model="dialogNotifikasi"
 			transition="dialog-bottom-transition"
 			persistent
@@ -219,10 +296,17 @@ export default {
 	data: () => ({
 		tanggal: [],
 		DataTransaksiDetail: [],
+		DataTransaksiDetailOrder: [],
+		kondisi: '',
 		DataJumTransaksiDetail: '',
+    DialogOrder: false,
     loadingButtonDataTransaksiDetail: false,
     isLoadingDataTransaksiDetail: false,
+    isLoadingTransaksiDetail: false,
     isLoadingDataDPBV: false,
+		page2: 1,
+    pageCount2: 0,
+    itemsPerPage2: 10,
 		page: 1,
     pageCount: 0,
     itemsPerPage: 25,
@@ -236,6 +320,16 @@ export default {
       { text: "Nama Member", value: "nama", sortable: false },
       { text: "DP", value: "dp", sortable: false },
       { text: "BV", value: "bv", sortable: false },
+    ],
+		headersTransaksiDetail: [
+			{ text: "No.", value: "number", sortable: false, width: "7%" },
+      { text: "Invoice", value: "orderNumber", sortable: false },
+      { text: "Tanggal Order", value: "date", sortable: false },
+      { text: "Nama", value: "fullname", sortable: false },
+      { text: "No. telp", value: "devicenumber", sortable: false },
+      { text: "Email", value: "email", sortable: false },
+			{ text: "DP", value: "dp", sortable: false },
+			{ text: "BV", value: "bv", sortable: false },
     ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
@@ -340,6 +434,58 @@ export default {
 				this.notifikasi("error", err.response.data.message, "1")
 			});
 		},
+		openDialog(kondisi) {
+			if(!this.Member.Transaksi.length && !this.NonMember.Transaksi.length) return this.notifikasi("warning", 'Proses masih berjalan !', "1")
+			this.kondisi = kondisi
+			let bodyData = ''
+			let id_user = []
+			let data_transaksi = []
+			if(kondisi === 'Member') {
+				this.Member.Transaksi.map(val => {
+					id_user.push(val.idUser)
+					data_transaksi.push({
+						id_user: val.idUser,
+						orderNumber: val.orderNumber,
+            date: val.transaksi.date,
+            dp: val.total.dp,
+            bv: val.total.bv
+					})
+				})
+				bodyData = { id_user, data_transaksi }
+			}else if(kondisi === 'Customer') {
+				this.NonMember.Transaksi.map(val => {
+					id_user.push(val.idUser)
+					data_transaksi.push({
+						id_user: val.idUser,
+						orderNumber: val.orderNumber,
+            date: val.transaksi.date,
+            dp: val.total.dp,
+            bv: val.total.bv
+					})
+				})
+				bodyData = { id_user, data_transaksi }
+			}
+			this.DialogOrder = true
+			this.DataTransaksiDetailOrder = []
+			this.isLoadingTransaksiDetail = true
+			let payload = {
+				method: "post",
+				url: `kmart/detailTransaksiOrder`,
+        body: bodyData,
+				authToken: localStorage.getItem('user_token')
+			};
+			this.fetchData(payload)
+			.then((res) => {
+				this.isLoadingTransaksiDetail = false
+				this.DataTransaksiDetailOrder = res.data.result
+			})
+			.catch((err) => {
+				this.isLoadingTransaksiDetail = false
+				this.DialogOrder = false
+				this.DataTransaksiDetailOrder = []
+				this.notifikasi("error", err.response.data.message, "1")
+			});
+		},
 		notifikasi(kode, text, proses){
       this.dialogNotifikasi = true
       this.notifikasiKode = kode
@@ -351,6 +497,10 @@ export default {
 </script>
 
 <style>
+.scrollText{
+  max-height: 450px !important;
+  overflow-y: auto !important;
+}
 .v-pagination {
   justify-content: flex-end !important;
 }
