@@ -1,7 +1,7 @@
 <template>
   <div>
     <h1 class="subheading grey--text">Data {{roleID == 1 ? 'Admin' : 'Admin Tenant Mall'}}</h1>
-    <v-card :class="roleID == 2 && 'mt-2 mb-2 pa-1'" :outlined="roleID == 2" elevation="0">
+    <v-card class="mt-2 mb-2 pa-1" outlined elevation="0">
       <v-row no-gutters class="pa-2">
         <v-col cols="12" md="6">
           <v-btn
@@ -16,17 +16,34 @@
           </v-btn>
         </v-col>
         <v-col cols="12" md="6">
-          <v-text-field
-            v-model="searchData"
-            append-icon="mdi-magnify"
-            label="Pencarian..."
-            single-line
-            hide-details
-            solo
-            color="light-blue darken-3"
-            clearable
-            @keyup.enter="getAdministrator(1, limit, searchData)"
-          />
+          <v-row no-gutters>
+            <v-col cols="12" md="9">
+              <v-text-field
+                v-model="searchData"
+                append-icon="mdi-magnify"
+                label="Pencarian..."
+                single-line
+                hide-details
+                solo
+                color="light-blue darken-3"
+                clearable
+                @keyup.enter="getAdministrator(1, limit, searchData)"
+              />
+            </v-col>
+            <v-col cols="12" md="3" class="pl-2 d-flex justify-end align-center">
+              <v-autocomplete
+                v-model="page"
+                :items="pageOptions"
+                item-text="value"
+                item-value="value"
+                label="Page"
+                outlined
+                dense
+                hide-details
+                :disabled="DataAdmin.length ? false : true"
+              />
+            </v-col>
+          </v-row>
         </v-col>
       </v-row>
       <div class="px-1">
@@ -47,7 +64,7 @@
           @page-count="pageCount = $event"
         >
           <template #[`item.number`]="{ item }">
-            {{ DataAdmin.indexOf(item) + 1 }}
+            {{ page > 1 ? ((page - 1)*limit) + DataAdmin.indexOf(item) + 1 : DataAdmin.indexOf(item) + 1 }}
           </template>
           <template #[`item.namaRole`]="{ item }">
             <span v-html="item.namaRole" /> 
@@ -145,6 +162,7 @@
 						:items="limitPage"
 						item-text="value"
 						item-value="value"
+            label="Limit"
 						outlined
 						dense
 						hide-details
@@ -516,6 +534,9 @@ export default {
 			{ value: 50 },
 			{ value: 100 },
 		],
+    pageOptions: [
+      { value: 1 }
+    ],
 		pageSummary: {
 			page: '',
 			limit: '',
@@ -593,6 +614,12 @@ export default {
         }
       }
     },
+    page: {
+			deep: true,
+			handler(value) {
+				this.getAdministrator(value, this.limit, this.searchData)
+			}
+		},
     limit: {
 			deep: true,
 			handler(value) {
@@ -603,14 +630,16 @@ export default {
   mounted() {
     this.roleID = localStorage.getItem('roleID')
     this.idLog = localStorage.getItem('idLogin')
-		this.getAdministrator(1, this.limit, this.searchData);
+		this.getAdministrator(this.page, this.limit, this.searchData);
 	},
 	methods: {
 		...mapActions(["fetchData"]),
 		getAdministrator(page = 1, limit, keyword) {
       this.itemsPerPage = limit
+      this.page = page
 			this.isLoading = true
       this.DataAdmin = []
+      this.pageOptions = [{ value: 1 }]
 			this.pageSummary = {
 				page: '',
 				limit: '',
@@ -627,22 +656,28 @@ export default {
         let resdata = res.data.result
 				this.DataAdmin = resdata.records
 				this.pageSummary = {
-					page: resdata.pageSummary.page,
-					limit: resdata.pageSummary.limit,
-					total: resdata.pageSummary.total,
-					totalPages: resdata.pageSummary.totalPages
+					page: this.DataAdmin.length ? resdata.pageSummary.page : 0,
+					limit: this.DataAdmin.length ? resdata.pageSummary.limit : 0,
+					total: this.DataAdmin.length ? resdata.pageSummary.total : 0,
+					totalPages: this.DataAdmin.length ? resdata.pageSummary.totalPages : 0
 				}
+        for (let index = 1; index <= this.pageSummary.totalPages; index++) {
+          this.pageOptions.push({ value: index })
+        }
         this.isLoading = false
 			})
 			.catch((err) => {
-        this.isLoading = false
+        this.itemsPerPage = limit
+        this.page = page
         this.DataAdmin = []
+        this.pageOptions = [{ value: 1 }]
         this.pageSummary = {
           page: '',
           limit: '',
           total: '',
           totalPages: ''
         }
+        this.isLoading = false
         this.notifikasi("error", err.response.data.message, "1")
 			});
 		},

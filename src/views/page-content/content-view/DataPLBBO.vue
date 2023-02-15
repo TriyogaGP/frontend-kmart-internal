@@ -41,16 +41,32 @@
 		<v-card class="mt-2 mb-2 pa-1" outlined elevation="0">
 			<v-row no-gutters class="pa-2">
 				<v-col cols="12" md="6">
-					<v-text-field
-						v-model="searchData"
-						append-icon="mdi-magnify"
-						label="Pencarian..."
-						single-line
-						hide-details
-						solo
-						color="light-blue darken-3"
-					/>
-						<!-- clearable -->
+					<v-row no-gutters>
+						<v-col cols="12" md="9" class="d-flex justify-center align-center">
+							<v-text-field
+								v-model="searchData"
+								append-icon="mdi-magnify"
+								label="Pencarian..."
+								single-line
+								hide-details
+								solo
+								color="light-blue darken-3"
+							/>
+						</v-col>
+						<v-col cols="12" md="3" class="pl-2 d-flex justify-center align-center">
+							<v-autocomplete
+									v-model="page"
+									:items="pageOptions"
+									item-text="value"
+									item-value="value"
+									label="Page"
+									outlined
+									dense
+									hide-details
+									:disabled="DataPLBBO.length ? false : true"
+								/>
+						</v-col>
+					</v-row>
 				</v-col>
 				<v-col cols="12" md="4" class="d-flex justify-center">
 					<DatePicker
@@ -107,7 +123,7 @@
 					@page-count="pageCount = $event"
 				>
 					<template #[`item.number`]="{ item }">
-						{{ DataPLBBO.indexOf(item) + 1 }}
+						{{ page > 1 ? ((page - 1)*limit) + DataPLBBO.indexOf(item) + 1 : DataPLBBO.indexOf(item) + 1 }}
 					</template>
 				</v-data-table>
 			</div>
@@ -197,6 +213,9 @@ export default {
 			{ value: 50 },
 			{ value: 100 },
 		],
+		pageOptions: [
+			{ value: 1 },
+		],
 		pageSummary: {
 			page: '',
 			limit: '',
@@ -248,12 +267,18 @@ export default {
 				}
 			}
 		},
+		page: {
+			deep: true,
+			handler(value) {
+				this.getData(value, this.limit, this.searchData, this.tanggal)
+			}
+		},
 		limit: {
 			deep: true,
 			handler(value) {
 				this.getData(1, value, this.searchData, this.tanggal)
 			}
-		}
+		},
 	},
 	mounted() {
 		this.getData(1, this.limit, this.searchData, this.tanggal)
@@ -263,6 +288,8 @@ export default {
 		getData(page = 1, limit, keyword, range) {
 			if(keyword === null) { keyword = '' }
 			this.itemsPerPage = limit
+			this.page = page
+			this.pageOptions = [{ value: 1 }]
 			this.pageSummary = {
 				page: '',
 				limit: '',
@@ -288,16 +315,26 @@ export default {
 					this.Omzet += parseInt(val.nominal) + parseInt(val.admin_fee)
 				})
 				this.pageSummary = {
-					page: resdata.pageSummary.page,
-					limit: resdata.pageSummary.limit,
-					total: resdata.pageSummary.totalRecords,
-					totalPages: resdata.pageSummary.totalPages
+					page: this.DataPLBBO.length ? resdata.pageSummary.page : 0,
+					limit: this.DataPLBBO.length ? resdata.pageSummary.limit : 0,
+					total: this.DataPLBBO.length ? resdata.pageSummary.totalRecords : 0,
+					totalPages: this.DataPLBBO.length ? resdata.pageSummary.totalPages : 0
 				}
+				for (let index = 1; index <= this.pageSummary.totalPages; index++) {
+          this.pageOptions.push({ value: index })
+        }
 				// this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
 				this.Omzet = 0
+				this.pageOptions = [{ value: 1 }]
 				this.DataPLBBO = []
+				this.pageSummary = {
+					page: '',
+					limit: '',
+					total: '',
+					totalPages: ''
+				}
 				this.loadingButtonDataPLBBO = false
 				this.isLoadingDataPLBBO = false
 				this.notifikasi("error", err.response.data.message, "1")

@@ -14,16 +14,33 @@
 			<div class="px-1">
 				<v-row no-gutters class="pa-2">
 					<v-col cols="12" md="6" class="d-flex align-center">
-						<v-btn
-							color="light-blue darken-3"
-							class="white--text text--darken-2"
-							small
-							dense
-							depressed
-							@click="exportexcel()"
-						>
-							<v-icon style="cursor: pointer;" small>fas fa-file-excel</v-icon>&nbsp;Export Excel
-						</v-btn>
+						<v-row no-gutters>
+							<v-col cols="12" md="4" class="d-flex justify-start align-center">
+								<v-btn
+									color="light-blue darken-3"
+									class="white--text text--darken-2"
+									small
+									dense
+									depressed
+									@click="exportexcel()"
+								>
+									<v-icon style="cursor: pointer;" small>fas fa-file-excel</v-icon>&nbsp;Export Excel
+								</v-btn>
+							</v-col>
+							<v-col cols="12" md="3" class="pl-2 d-flex justify-start align-center">
+								<v-autocomplete
+									v-model="page"
+									:items="pageOptions"
+									item-text="value"
+									item-value="value"
+									label="Page"
+									outlined
+									dense
+									hide-details
+									:disabled="DataHarian.length ? false : true"
+								/>
+							</v-col>
+						</v-row>
 					</v-col>
 					<v-col cols="12" md="4" class="d-flex justify-center">
 						<DatePicker
@@ -58,7 +75,12 @@
 							small
 							dense
 							depressed
-							@click="() => { limit = 20; tanggal = []; DataHarian = []; }"
+							@click="() => {
+								limit = 20;
+								tanggal = [];
+								DataHarian = [];
+								pageSummary = { page: '', limit: '', total: '', totalPages: ''};
+							}"
 						>
 							Reset
 						</v-btn>
@@ -77,9 +99,9 @@
 					:items-per-page="itemsPerPage"
 					@page-count="pageCount = $event"
 				>
-					<!-- <template #[`item.number`]="{ item }">
-						{{ DataHarian.indexOf(item) + 1 }}
-					</template> -->
+					<template #[`item.number`]="{ item }">
+						{{ page > 1 ? ((page - 1)*limit) + DataHarian.indexOf(item) + 1 : DataHarian.indexOf(item) + 1 }}
+					</template>
 					<template #[`item.createdAt`]="{ item }">
 						<span v-html="convertDateTime(item.createdAt)" /> 
 					</template>
@@ -127,6 +149,7 @@
 							:items="limitPage"
 							item-text="value"
 							item-value="value"
+							label="Limit"
 							outlined
 							dense
 							hide-details
@@ -206,6 +229,9 @@ export default {
 			{ value: 50 },
 			{ value: 100 },
 		],
+		pageOptions: [
+			{ value: 1 },
+		],
 		pageSummary: {
 			page: '',
 			limit: '',
@@ -213,7 +239,7 @@ export default {
 			totalPages: ''
 		},
 		headersDataHarian: [
-      // { text: "No.", value: "number", sortable: false, width: "7%" },
+      { text: "No.", value: "number", sortable: false, width: "7%" },
       { text: "Invoice", value: "orderNumber", sortable: false },
       { text: "Tanggal Order", value: "createdAt", sortable: false },
       { text: "No.Resi", value: "shippingReceiptNumber", sortable: false },
@@ -240,6 +266,12 @@ export default {
 		},
 	},
 	watch: {
+		page: {
+			deep: true,
+			handler(value) {
+				this.getData(value, this.limit)
+			}
+		},
 		limit: {
 			deep: true,
 			handler(value) {
@@ -253,7 +285,9 @@ export default {
 		...mapActions(["fetchData"]),
 		getData(page = 1, limit) {
 			this.itemsPerPage = limit
+			this.page = page
 			this.DataHarian = []
+      this.pageOptions = [{ value: 1 }]
 			this.pageSummary = {
 				page: '',
 				limit: '',
@@ -274,15 +308,21 @@ export default {
 				let resdata = res.data.result
 				this.DataHarian = resdata.data
 				this.pageSummary = {
-					page: resdata.pageSummary.page,
-					limit: resdata.pageSummary.limit,
-					total: resdata.pageSummary.total,
-					totalPages: resdata.pageSummary.totalPages
+					page: this.DataHarian.length ? resdata.pageSummary.page : 0,
+					limit: this.DataHarian.length ? resdata.pageSummary.limit : 0,
+					total: this.DataHarian.length ? resdata.pageSummary.total : 0,
+					totalPages: this.DataHarian.length ? resdata.pageSummary.totalPages : 0
 				}
+				for (let index = 1; index <= this.pageSummary.totalPages; index++) {
+          this.pageOptions.push({ value: index })
+        }
 				// this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
+				this.itemsPerPage = limit
+				this.page = page
 				this.DataHarian = []
+      	this.pageOptions = [{ value: 1 }]
 				this.pageSummary = {
 					page: '',
 					limit: '',
@@ -297,7 +337,6 @@ export default {
 		exportexcel() {
 			if(!this.DataHarian.length) return this.notifikasi("warning", 'Gagal Export Excel, Data belum tersedia !', "1")
 			const totalPages = Math.ceil(this.pageSummary.total / 50)
-			console.log(totalPages);
 			let link = process.env.VUE_APP_NODE_ENV === "production" ? process.env.VUE_APP_PROD_API_URL : process.env.VUE_APP_DEV_API_URL
 			this.isLoadingExport = true
 			fetch(`${link}kmart/exportExcel?startdate=${this.tanggal.length ? this.convertDateToPicker2(this.tanggal[0]) : ''}&enddate=${this.tanggal.length ? this.convertDateToPicker2(this.tanggal[1]) : ''}&totalPages=${totalPages}&limit=50`, {

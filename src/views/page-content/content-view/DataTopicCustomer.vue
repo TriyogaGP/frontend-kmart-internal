@@ -346,8 +346,6 @@
 							</v-tabs-items>
             </v-card-text>
           </div>
-					<v-divider />
-					<v-card-actions class="pa-4"/>
         </v-card>
       </v-card>
     </v-dialog>

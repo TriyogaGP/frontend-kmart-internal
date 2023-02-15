@@ -221,6 +221,33 @@
               <v-divider />
             </div>
             <v-card-text>
+							<v-row no-gutters>
+								<v-col cols="12" md="10" class="d-flex justify-start align-center">
+									<v-btn
+										color="light-blue darken-3"
+										class="white--text text--darken-2"
+										small
+										dense
+										depressed
+										@click="exportExcelTransaksiFix(kondisi)"
+									>
+										<v-icon style="cursor: pointer;" small>fas fa-file-excel</v-icon>&nbsp;Export Excel
+									</v-btn>
+								</v-col>
+								<v-col cols="12" md="2" class="pl-2 d-flex justify-center align-center">
+									<v-autocomplete
+											v-model="page1"
+											:items="pageOptions"
+											item-text="value"
+											item-value="value"
+											label="Page"
+											outlined
+											dense
+											hide-details
+											:disabled="DataTransaksiDetailOrder.length ? false : true"
+										/>
+								</v-col>
+							</v-row>
 							<v-data-table
 								loading-text="Sedang memuat... Harap tunggu"
 								no-data-text="Tidak ada data yang tersedia"
@@ -234,6 +261,9 @@
 								:items-per-page="itemsPerPage1"
 								@page-count="pageCount1 = $event"
 							>
+								<template #[`item.number`]="{ item }">
+									{{ page1 > 1 ? ((page1 - 1)*limit) + DataTransaksiDetailOrder.indexOf(item) + 1 : DataTransaksiDetailOrder.indexOf(item) + 1 }}
+								</template>
 								<template #[`item.date`]="{ item }">
 									<span v-html="item.date" /> 
 								</template>
@@ -250,12 +280,12 @@
 					<v-card-actions>
 						<v-row 
               no-gutters
-              class="mt-1 mr-3"
+              class="mr-3"
             >
-              <v-col cols="10" class="mt-2 d-flex justify-start align-center">
+              <v-col cols="10" class="d-flex justify-start align-center">
                 <span>Halaman <strong>{{ pageSummary.page ? pageSummary.page : 0 }}</strong> dari Total Halaman <strong>{{ pageSummary.totalPages ? pageSummary.totalPages : 0 }}</strong> (Records {{ pageSummary.total ? pageSummary.total : 0 }})</span>
               </v-col>
-              <v-col cols="2" class="mt-2 text-right">
+              <v-col cols="2" class="text-right">
                 <div class="d-flex justify-end">
                   <v-autocomplete
                     v-model="limit"
@@ -291,6 +321,19 @@
       </v-card>
     </v-dialog>
 		<v-dialog
+			v-model="isLoadingExport"
+			transition="dialog-bottom-transition"
+			persistent
+			width="500px"
+		>
+			<v-progress-linear
+				class="pa-3"
+				indeterminate
+				color="light-blue darken-3"
+			/>
+			<h4 style="color: #000; text-align: center; background-color: #FFF;">Sedang proses export data, harap menunggu ...</h4>
+		</v-dialog>
+		<v-dialog
 			v-model="dialogNotifikasi"
 			transition="dialog-bottom-transition"
 			persistent
@@ -325,6 +368,7 @@ export default {
     isLoadingDataTransaksiDetail: false,
     isLoadingTransaksiDetail: false,
     isLoadingDataDPBV: false,
+    isLoadingExport: false,
 		page1: 1,
     pageCount1: 0,
     itemsPerPage1: 100,
@@ -335,6 +379,9 @@ export default {
 			{ value: 20 },
 			{ value: 50 },
 			{ value: 100 },
+		],
+		pageOptions: [
+			{ value: 1 },
 		],
 		pageSummary: {
 			page: '',
@@ -361,6 +408,7 @@ export default {
       { text: "BV", value: "bv", sortable: false },
     ],
 		headersTransaksiDetail: [
+			{ text: "No.", value: "number", sortable: false, width: "7%" },
       { text: "Invoice", value: "orderNumber", sortable: false },
       { text: "Tanggal Order", value: "date", sortable: false },
       { text: "Nama", value: "fullname", sortable: false },
@@ -396,6 +444,12 @@ export default {
 		},
 	},
 	watch: {
+		page1: {
+			deep: true,
+			handler(value) {
+				this.postData(value, this.limit, this.dataDetail)
+			}
+		},
     limit: {
 			deep: true,
 			handler(value) {
@@ -518,10 +572,12 @@ export default {
 			}
 			this.postData(1, this.limit, this.dataDetail)
 		},
-		postData(page, limit, bodyData) {
+		postData(page = 1, limit, bodyData) {
 			this.DialogOrder = true
 			this.itemsPerPage1 = limit
+			this.page1 = page
 			this.isLoadingTransaksiDetail = true
+			this.pageOptions = [{ value: 1 }]
 			this.DataTransaksiDetailOrder = []
 			this.pageSummary = {
 				page: '',
@@ -541,15 +597,21 @@ export default {
 				this.DataTransaksiDetailOrder = res.data.result.records
         let pageSummary = res.data.result.pageSummary
         this.pageSummary = {
-          page: pageSummary.page,
-          limit: pageSummary.limit,
-          total: pageSummary.total,
-          totalPages: pageSummary.totalPages
+          page: this.DataTransaksiDetailOrder.length ? pageSummary.page : 0,
+          limit: this.DataTransaksiDetailOrder.length ? pageSummary.limit : 0,
+          total: this.DataTransaksiDetailOrder.length ? pageSummary.total : 0,
+          totalPages: this.DataTransaksiDetailOrder.length ? pageSummary.totalPages : 0
+        }
+				for (let index = 1; index <= this.pageSummary.totalPages; index++) {
+          this.pageOptions.push({ value: index })
         }
 			})
 			.catch((err) => {
+				this.itemsPerPage1 = limit
+				this.page1 = page
 				this.isLoadingTransaksiDetail = false
 				this.DialogOrder = false
+				this.pageOptions = [{ value: 1 }]
 				this.DataTransaksiDetailOrder = []
 				this.pageSummary = {
 					page: '',
@@ -559,6 +621,40 @@ export default {
 				}
 				this.notifikasi("error", err.response.data.message, "1")
 			});
+		},
+		exportExcelTransaksiFix(kondisi) {
+			if(!this.DataTransaksiDetailOrder.length) return this.notifikasi("warning", 'Gagal Export Excel, Data belum tersedia !', "1")
+			const totalPages = Math.ceil(this.pageSummary.total / 50)
+			let link = process.env.VUE_APP_NODE_ENV === "production" ? process.env.VUE_APP_PROD_API_URL : process.env.VUE_APP_DEV_API_URL
+			this.isLoadingExport = true
+			fetch(`${link}kmart/exportExcelTransaksiFix?totalPages=${totalPages}&limit=50`, {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(this.dataDetail),
+			})
+			.then(response => response.arrayBuffer())
+			.then(async response => {
+				// console.log(response)
+				this.isLoadingExport = false
+				let blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+				this.downloadBlob(blob,`Data Transaksi ${kondisi} (${this.convertDateToPicker3(this.tanggal[0])} sampai ${this.convertDateToPicker3(this.tanggal[1])}).xlsx`)
+				this.notifikasi("success", 'Sukses Export Excel', "1")
+			})
+		},
+		downloadBlob(blob, name = '') {
+			const blobUrl = URL.createObjectURL(blob);
+			const link = document.createElement("a");
+			link.href = blobUrl;
+			link.download = name;
+			document.body.appendChild(link);
+			link.dispatchEvent(
+				new MouseEvent('click', { 
+					bubbles: true, 
+					cancelable: true, 
+					view: window 
+				})
+			);
+			document.body.removeChild(link);
 		},
 		notifikasi(kode, text, proses){
       this.dialogNotifikasi = true
@@ -572,7 +668,7 @@ export default {
 
 <style>
 .scrollText{
-  max-height: 450px !important;
+  max-height: 350px !important;
   overflow-y: auto !important;
 }
 .v-pagination {

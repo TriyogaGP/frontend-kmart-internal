@@ -14,16 +14,33 @@
 		<v-card class="mt-2 mb-2 pa-1" outlined elevation="0">
 			<v-row no-gutters class="pa-2">
 				<v-col cols="12" md="6" class="d-flex justify-center align-center">
-					<v-text-field
-						v-model="keyword"
-						placeholder="Nama / kode referal"
-						label="Nama / kode referal"
-						color="light-blue darken-3"
-						single-line
-						hide-details
-						solo
-						clearable
-					/>
+					<v-row no-gutters>
+						<v-col cols="12" md="9" class="d-flex justify-center align-center">
+							<v-text-field
+								v-model="keyword"
+								placeholder="Nama / kode referal"
+								label="Nama / kode referal"
+								color="light-blue darken-3"
+								single-line
+								hide-details
+								solo
+								clearable
+							/>
+						</v-col>
+						<v-col cols="12" md="3" class="pl-2 d-flex justify-center align-center">
+							<v-autocomplete
+									v-model="page"
+									:items="pageOptions"
+									item-text="value"
+									item-value="value"
+									label="Page"
+									outlined
+									dense
+									hide-details
+									:disabled="DataCustomer.length ? false : true"
+								/>
+						</v-col>
+					</v-row>
 				</v-col>
 				<v-col cols="12" md="4" class="d-flex justify-center">
 					<DatePicker
@@ -79,6 +96,9 @@
 					:items-per-page="itemsPerPage"
 					@page-count="pageCount = $event"
 				>
+					<template #[`item.number`]="{ item }">
+						{{ page > 1 ? ((page - 1)*limit) + DataCustomer.indexOf(item) + 1 : DataCustomer.indexOf(item) + 1 }}
+					</template>
 					<template #[`item.Refcode`]="{ item }">
 						<input type="hidden" id="testing-code-on" :value="item.Refcode">
 					 	<span ref="myinputon" v-html="item.Refcode ? item.Refcode : '-'" /> <v-icon v-if="item.Refcode" @click.stop.prevent="copyText(item.Refcode, 'Kode Referal')" small>copy_all</v-icon><br>
@@ -208,6 +228,9 @@ export default {
 			{ value: 50 },
 			{ value: 100 },
 		],
+		pageOptions: [
+			{ value: 1 },
+		],
 		pageSummary: {
 			page: '',
 			limit: '',
@@ -215,6 +238,7 @@ export default {
 			totalPages: ''
 		},
 		headersDataCustomer: [
+			{ text: "No.", value: "number", sortable: false, width: "7%" },
       { text: "ID User", value: "idUser", sortable: false },
       { text: "Identitas", value: "identitas", sortable: false },
       { text: "Member Kode Referal", value: "Refcode", sortable: false },
@@ -239,26 +263,34 @@ export default {
 		},
 	},
 	watch: {
+		page: {
+			deep: true,
+			handler(value) {
+				this.getData(value, this.limit)
+			}
+		},
 		limit: {
 			deep: true,
 			handler(value) {
 				this.getData(1, value)
 			}
-		}
+		},
 	},
 	mounted() {
 		this.getData(1, this.limit)
 	},
 	methods: {
 		...mapActions(["fetchData"]),
-		getData(last, limit) {
+		getData(last = 1, limit) {
 			var url = ''
 			if(this.tanggal.length){ 
 				let gabung = `${this.tanggal[0]},${this.tanggal[1]}`
 				url += `&dateRange=${gabung}`
 			}
-			if(this.keyword){ url += `&keyword=${this.keyword}&` }
+			if(this.keyword){ url += `&keyword=${this.keyword}` }
 			this.itemsPerPage = limit
+			this.page = last
+			this.pageOptions = [{ value: 1 }]
 			this.pageSummary = {
 				page: '',
 				limit: '',
@@ -280,14 +312,18 @@ export default {
 				let resdata = res.data.result
 				this.DataCustomer = resdata.records
 				this.pageSummary = {
-					page: resdata.pageSummary.page,
-					limit: resdata.pageSummary.limit,
-					totalRecord: resdata.pageSummary.totalRecord,
-					totalPages: resdata.pageSummary.totalPages
+					page: this.DataCustomer.length ? resdata.pageSummary.page : 0,
+					limit: this.DataCustomer.length ? resdata.pageSummary.limit : 0,
+					totalRecord: this.DataCustomer.length ? resdata.pageSummary.totalRecord : 0,
+					totalPages: this.DataCustomer.length ? resdata.pageSummary.totalPages : 0
 				}
+				for (let index = 1; index <= this.pageSummary.totalPages; index++) {
+          this.pageOptions.push({ value: index })
+        }
 				// this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
+				this.pageOptions = [{ value: 1 }]
 				this.DataCustomer = []
 				this.pageSummary = {
 					page: '',

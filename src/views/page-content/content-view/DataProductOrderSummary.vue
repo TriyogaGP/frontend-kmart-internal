@@ -8,7 +8,7 @@
             <v-list-item>
               <v-list-item-content>
                 <div class="overline text-right">Total Quantity</div>
-								<v-list-item-title class="headline mb-1 text-right">{{ DataJumTransaksiDetail ? DataJumTransaksiDetail.quantity : 0 }}</v-list-item-title>
+								<v-list-item-title class="headline mb-1 text-right">{{ DataJumTransaksiDetail.quantity != 0 ? DataJumTransaksiDetail.quantity : 0 }}</v-list-item-title>
                 <div><v-divider /></div>
               </v-list-item-content>
             </v-list-item>
@@ -19,7 +19,7 @@
 						<v-list-item>
 							<v-list-item-content>
 								<div class="overline text-right">Total Harga</div>
-								<v-list-item-title class="headline mb-1 text-right">Rp.{{ DataJumTransaksiDetail ? currencyDotFormatNumber(DataJumTransaksiDetail.total) : 0 }}</v-list-item-title>
+								<v-list-item-title class="headline mb-1 text-right">Rp.{{ DataJumTransaksiDetail.total != 0 ? currencyDotFormatNumber(DataJumTransaksiDetail.total) : 0 }}</v-list-item-title>
                 <div><v-divider /></div>
               </v-list-item-content>
             </v-list-item>

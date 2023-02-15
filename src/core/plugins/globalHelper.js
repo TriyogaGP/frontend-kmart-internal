@@ -215,6 +215,17 @@ const Helper = {
             return valueConvert
           }
         },
+        convertDateToPicker3(data = null) {
+          if (data == null) {
+            return this.$moment().format("YYYY-MM-DD");
+          } else {
+            let date = new Date(data),
+            mnth = ("0" + (date.getMonth() + 1)).slice(-2),
+            day = ("0" + date.getDate()).slice(-2);
+            const valueConvert = [day, mnth, date.getFullYear()].join("-");
+            return valueConvert
+          }
+        },
         convertDate(data) {
           const [year, month, day] = data.split("-");
           return `${year}${month}${day}`;
