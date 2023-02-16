@@ -73,6 +73,97 @@
       </v-container>
     </v-card>
     <v-card class="mt-2 mb-2 pa-1" outlined elevation="0">
+      <h3 class="text-center"><u>TRANSACTION DAILY {{ `${tahun} - ${bulan}` }}</u></h3>
+      <v-row no-gutters class="mt-1 mr-3">
+        <v-col class="text-start" cols="9">
+          <v-row no-gutters>
+            <v-col class="text-start" cols="3">
+              <v-autocomplete
+                v-model="tahun"
+                :items="tahunOptions"
+                item-text="value"
+                item-value="value"
+                placeholder="pilih tahun"
+                label="pilih tahun"
+                outlined
+                dense
+                hide-details
+              />
+            </v-col>
+            <v-col class="pl-2 text-start" cols="3">
+              <v-autocomplete
+                v-model="bulan"
+                :items="bulanOptions"
+                item-text="value"
+                item-value="value"
+                placeholder="pilih bulan"
+                label="pilih bulan"
+                outlined
+                dense
+                hide-details
+              />
+            </v-col>
+            <v-col class="pl-2 text-start" cols="3">
+              <v-autocomplete
+                v-model="dataView"
+                :items="[{value: 'Record'},{value: 'DP'},{value: 'BV'}]"
+                item-text="value"
+                item-value="value"
+                placeholder="pilih Data"
+                label="pilih Data"
+                outlined
+                dense
+                hide-details
+              />
+            </v-col>
+            <v-col class="pl-2 text-start" cols="3">
+              <v-btn
+                color="light-blue darken-3"
+                x-small
+                dense
+                depressed
+                class="ma-2 white--text text--darken-2"
+                :loading="isLoadingRefresh"
+                @click="getDataTransaksiDaily(tahun, bulan, dataView)"
+              >
+                View
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-col>
+        <v-col class="text-end" cols="3">
+          <v-btn
+            color="light-blue darken-3"
+            x-small
+            dense
+            depressed
+            class="ma-2 white--text text--darken-2"
+            :loading="isLoadingRefresh3"
+            @click="getReloadDashboardTransaksiDaily(tahun, bulan)"
+          >
+            <v-icon small>refresh</v-icon> refresh
+          </v-btn>
+        </v-col>
+      </v-row>
+      <v-container>
+        <v-layout row wrap>
+          <v-flex sm12 xs12 md12 lg12>
+            <v-card class="ma-3">
+              <v-list-item>
+                <v-list-item-content>
+                  <div class="overline text-right">Grafik (TRANSACTION DAILY)</div>
+                  <ChartBar
+                    :record.sync="record5"
+                    :options.sync="options"
+                  />
+                  </v-list-item-content>
+              </v-list-item>
+            </v-card>
+          </v-flex>
+        </v-layout>
+      </v-container>
+    </v-card>
+    <v-card class="mt-2 mb-2 pa-1" outlined elevation="0">
       <h3 class="text-center"><u>USER ACTIVE {{ new Date().getFullYear() }}</u></h3>
       <v-container>
         <v-layout row wrap>
@@ -361,6 +452,22 @@
               <v-divider />
             </div>
             <v-card-text>
+              <v-row no-gutters>
+								<v-col cols="12" md="10" />
+								<v-col cols="12" md="2" class="pl-2 d-flex justify-center align-center">
+									<v-autocomplete
+											v-model="page1"
+											:items="pageOptions"
+											item-text="value"
+											item-value="value"
+											label="Page"
+											outlined
+											dense
+											hide-details
+											:disabled="DataDetailUser.length ? false : true"
+										/>
+								</v-col>
+							</v-row>
               <v-data-table
                 loading-text="Sedang memuat... Harap tunggu"
                 no-data-text="Tidak ada data yang tersedia"
@@ -371,10 +478,12 @@
                 item-key="idUser"
                 hide-default-footer
                 class="elevation-1"
-                :page.sync="page1"
                 :items-per-page="itemsPerPage1"
                 @page-count="pageCount1 = $event"
               >
+                <template #[`item.number`]="{ item }">
+                  {{ page1 > 1 ? ((page1 - 1)*limit) + DataDetailUser.indexOf(item) + 1 : DataDetailUser.indexOf(item) + 1 }}
+                </template>
                 <template #[`item.order`]="{ item }">
                   <v-btn
                     color="light-blue darken-3"
@@ -394,18 +503,19 @@
           <v-card-actions>
             <v-row 
               no-gutters
-              class="mt-1 mr-3"
+              class="mr-3"
             >
-              <v-col cols="10" class="mt-2 d-flex justify-start align-center">
+              <v-col cols="10" class="d-flex justify-start align-center">
                 <span>Halaman <strong>{{ pageSummary.page ? pageSummary.page : 0 }}</strong> dari Total Halaman <strong>{{ pageSummary.totalPages ? pageSummary.totalPages : 0 }}</strong> (Records {{ pageSummary.total ? pageSummary.total : 0 }})</span>
               </v-col>
-              <v-col cols="2" class="mt-2 text-right">
+              <v-col cols="2" class="text-right">
                 <div class="d-flex justify-end">
                   <v-autocomplete
                     v-model="limit"
                     :items="limitPage"
                     item-text="value"
                     item-value="value"
+                    label="Limit"
                     outlined
                     dense
                     hide-details
@@ -557,6 +667,10 @@ export default {
       labels: [],
       datasets: []
     },
+    record5: {
+      labels: [],
+      datasets: []
+    },
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -613,7 +727,9 @@ export default {
     judul: '',
     kategori: '',
     podium: '',
-    tahun: '2023',
+    tahun: '',
+    bulan: '',
+    dataView: 'DP',
     member: '',
     customer: '',
     bulanNow: '',
@@ -622,6 +738,7 @@ export default {
     isLoadingRefresh: false,
     isLoadingRefresh1: false,
     isLoadingRefresh2: false,
+    isLoadingRefresh3: false,
     detailProduct: false,
     detailUser: false,
     detailOrderUser: false,
@@ -644,6 +761,9 @@ export default {
 			{ value: 50 },
 			{ value: 100 },
 		],
+    pageOptions: [
+			{ value: 1 },
+		],
 		pageSummary: {
 			page: '',
 			limit: '',
@@ -663,6 +783,7 @@ export default {
       { text: "Status", value: "status", sortable: false },
     ],
 		headersDetail: [
+			{ text: "No.", value: "number", sortable: false, width: "7%" },
       { text: "ID User", value: "idUser", sortable: false },
       { text: "ID Member", value: "idMember", sortable: false },
       { text: "Nama", value: "fullname", sortable: false },
@@ -692,10 +813,16 @@ export default {
 		},
 	},
   watch: {
+    page1: {
+			deep: true,
+			handler(value) {
+        this.getDetailUserActive(value, this.limit, this.consumerType === 1 ? this.member : this.customer, this.consumerType)
+			}
+		},
     limit: {
 			deep: true,
 			handler(value) {
-				this.getDetailUserActive(1, value, this.consumerType === 1 ? this.member : this.customer, this.consumerType)
+        this.getDetailUserActive(1, value, this.consumerType === 1 ? this.member : this.customer, this.consumerType)
 			}
 		},
   },
@@ -705,9 +832,12 @@ export default {
     this.bulanNow = month[d.getMonth()];
     this.member = this.bulanNow,
     this.customer = this.bulanNow,
+    this.tahun = d.getFullYear().toString()
+    this.bulan = this.bulanNow,
     this.getDataUserMember(this.bulanNow)
     this.getDataUserCustomer(this.bulanNow)
     this.getDataTransaksi(d.getFullYear())
+    this.getDataTransaksiDaily(this.tahun, this.bulan, this.dataView)
     this.judul = '10 Best Seller Product Basic'
     this.podium = '10 Best Seller Product Basic'
     this.url = 'kategori=ALL&is_package=0'
@@ -759,6 +889,57 @@ export default {
             data: bv
           },
         )
+			})
+			.catch((err) => {
+				this.notifikasi("error", err.response.data.message, "1")
+			});
+		},
+    getDataTransaksiDaily(tahun, bulan, data) {
+      this.record5 = {
+        labels: [],
+        datasets: []
+      }
+      let payload = {
+        method: "get",
+				url: `kmart/getDashboardTransaksiDaily?tahun=${tahun}&bulan=${bulan}`,
+				authToken: localStorage.getItem('user_token')
+			};
+			this.fetchData(payload)
+			.then((res) => {
+        let resdata = res.data.result
+        console.log(resdata);
+				let record = [], dp = [], bv = []
+        resdata.dataJson.map(val => {
+          this.record5.labels.push(val.tanggal)
+          record.push(val.record)
+          dp.push(val.dp)
+          bv.push(val.bv)
+        })
+        if(data === 'Record'){
+          this.record5.datasets.push(
+            {
+              label: "Record",
+              backgroundColor: 'green',
+              data: record
+            },
+          )
+        }else if(data === 'DP'){
+          this.record5.datasets.push(
+            {
+              label: "DP",
+              backgroundColor: 'red',
+              data: dp
+            },
+          )
+        }else if(data === 'BV'){
+          this.record5.datasets.push(
+            {
+              label: "BV",
+              backgroundColor: 'blue',
+              data: bv
+            },
+          )
+        }
 			})
 			.catch((err) => {
 				this.notifikasi("error", err.response.data.message, "1")
@@ -856,6 +1037,8 @@ export default {
 		},
     getDetailUserActive(page, limit, bulan, isMember) {
       this.itemsPerPage1 = limit
+      this.page1 = page
+      this.pageOptions = [{ value: 1 }]
       this.DataDetailUser = []
       this.isLoading = true
       this.pageSummary = {
@@ -875,14 +1058,21 @@ export default {
         this.DataDetailUser = res.data.result.records
         let pageSummary = res.data.result.pageSummary
         this.pageSummary = {
-          page: pageSummary.page,
-          limit: pageSummary.limit,
-          total: pageSummary.total,
-          totalPages: pageSummary.totalPages
+          page: this.DataDetailUser.length ? pageSummary.page : 0,
+          limit: this.DataDetailUser.length ? pageSummary.limit : 0,
+          total: this.DataDetailUser.length ? pageSummary.total : 0,
+          totalPages: this.DataDetailUser.length ? pageSummary.totalPages : 0
+        }
+        for (let index = 1; index <= this.pageSummary.totalPages; index++) {
+          this.pageOptions.push({ value: index })
         }
 			})
 			.catch((err) => {
         this.isLoading = false
+        this.itemsPerPage1 = limit
+        this.page1 = page
+        this.pageOptions = [{ value: 1 }]
+        this.DataDetailUser = []
         this.pageSummary = {
           page: '',
           limit: '',
@@ -890,6 +1080,24 @@ export default {
           totalPages: ''
         }
         this.notifikasi("error", err.response.data.message, "1")
+			});
+		},
+    getReloadDashboardTransaksiDaily(tahun, bulan) {
+      this.isLoadingRefresh3 = true
+      let payload = {
+				method: "get",
+				url: `kmart/reloadDashboardTransaksiDaily?tahun=${tahun}&bulan=${bulan}`,
+				authToken: localStorage.getItem('user_token')
+			};
+			this.fetchData(payload)
+			.then((res) => {
+        this.isLoadingRefresh3 = false
+        this.getDataTransaksiDaily(tahun, bulan, 'DP')
+        this.notifikasi("success", res.data.message, "1")
+			})
+			.catch((err) => {
+        this.isLoadingRefresh3 = false
+				this.notifikasi("error", err.response.data.message, "1")
 			});
 		},
     getReloadDashboardTransaksi(tahun) {
@@ -957,6 +1165,7 @@ export default {
       this.detailUser = true
       this.consumerType = kondisi
       this.headersDetail = [
+			  { text: "No.", value: "number", sortable: false, width: "7%" },
         { text: "ID User", value: "idUser", sortable: false },
         { text: "ID Member", value: "idMember", sortable: false },
         { text: "Nama", value: "fullname", sortable: false },
@@ -1040,5 +1249,11 @@ export default {
 	border-style: solid !important;
 	border-radius: 10px !important;
 	padding: 2px !important;
+}
+.v-input .v-label {
+  font-size: 11pt !important;
+}
+.v-text-field.v-input--dense {
+  font-size: 13px !important;
 }
 </style>
