@@ -259,7 +259,7 @@ export default {
     pageCount: 0,
     itemsPerPage: 25,
 		headersDataNonCod: [
-      { text: "", value: "check", sortable: false, width: "7%" },
+      { text: "#", value: "check", sortable: false, width: "5%" },
       { text: "No.", value: "number", sortable: false, width: "7%" },
       { text: "Invoice", value: "orderNumber", sortable: false },
       { text: "No.Resi", value: "awb", sortable: false },

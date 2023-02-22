@@ -89,7 +89,7 @@
 						small
 						dense
 						depressed
-						@click="() => { tanggal = []; DataTransaksiDetail = []; DataJumTransaksiDetail = ''; }"
+						@click="() => { tanggal = []; DataTransaksiDetail = []; DataJumTransaksiDetail = ''; sortBy = []; sortDesc = []; }"
 					>
 						Reset
 					</v-btn>
@@ -104,11 +104,18 @@
 					:loading="isLoadingDataTransaksiDetail"
 					:items="DataTransaksiDetail"
 					item-key="orderNumber"
+					:sort-by="sortBy"
+					:sort-desc="sortDesc"
 					hide-default-footer
 					class="elevation-1"
+					:header-props="{
+						'sort-icon': 'mdi-navigation'
+					}"
 					:page.sync="page"
 					:items-per-page="itemsPerPage"
 					@page-count="pageCount = $event"
+					@update:sort-by="updateSort('By', $event)"
+					@update:sort-desc="updateSort('Desc', $event)"
 				>
 					<template #[`item.number`]="{ item }">
 						{{ DataTransaksiDetail.indexOf(item) + 1 }}
@@ -116,7 +123,7 @@
 					<template #[`item.date`]="{ item }">
 						<span v-html="item.transaksi.date" /> 
 					</template>
-					<template #[`item.record`]="{ item }">
+					<template #[`item.records`]="{ item }">
 						<span v-html="item.transaksi.records" /> 
 					</template>
 					<template #[`item.dp`]="{ item }">
@@ -173,13 +180,15 @@ export default {
     itemsPerPage: 25,
 		headersDataTransaksiDetail: [
       { text: "No.", value: "number", sortable: false, width: "7%" },
-      { text: "Tanggal Order", value: "date", sortable: false },
-      { text: "Record", value: "record", sortable: false },
-      { text: "DP", value: "dp", sortable: false },
-      { text: "BV", value: "bv", sortable: false },
+      { text: "Tanggal Order", value: "date"},
+      { text: "Record", value: "records"},
+      { text: "DP", value: "dp"},
+      { text: "BV", value: "bv"},
     ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
+		sortBy: [],
+		sortDesc: [],
 
 		//notifikasi
     dialogNotifikasi: false,
@@ -194,6 +203,16 @@ export default {
 			amp: true,
 		},
 	},
+	watch: {
+		sortDesc: {
+			deep: true,
+			handler(value) {
+				if(this.tanggal.length){
+					this.getData();
+				}
+			}
+		},
+	},
 	mounted() {
 	},
 	methods: {
@@ -204,7 +223,7 @@ export default {
 			this.isLoadingDataTransaksiDetail = true
       let payload = {
 				method: "get",
-				url: `kmart/getdataKmart?kode=Transaksi Summary Detail&startdate=${this.tanggal.length ? this.convertDateToPicker2(this.tanggal[0]) : ''}&enddate=${this.tanggal.length ? this.convertDateToPicker2(this.tanggal[1]) : ''}`,
+				url: `kmart/getdataKmart?kode=Transaksi Summary Detail&startdate=${this.tanggal.length ? this.convertDateToPicker2(this.tanggal[0]) : ''}&enddate=${this.tanggal.length ? this.convertDateToPicker2(this.tanggal[1]) : ''}&sort=${JSON.stringify({sortBy: this.sortBy, sortDesc: this.sortDesc})}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -228,6 +247,13 @@ export default {
       this.notifikasiText = text
       this.notifikasiButton = proses
     },
+		updateSort(kondisi, data) {
+			if(kondisi == 'By'){
+				this.sortBy = data
+			}else if(kondisi == 'Desc'){
+				this.sortDesc = data
+			}
+		},
 	}
 }
 </script>
@@ -235,6 +261,9 @@ export default {
 <style>
 .v-pagination {
   justify-content: flex-end !important;
+}
+.v-data-table-header__icon {
+  opacity: 10;
 }
 .v-input .v-label {
   font-size: 11pt !important;

@@ -259,7 +259,7 @@ export default {
 		},
 		headers: [
       { text: "No", value: "number", sortable: false, width: "7%" },
-      { text: "", value: "data-table-expand", sortable: false, width: "5%" },
+      { text: "#", value: "data-table-expand", sortable: false, width: "5%" },
       { text: "Nama Role", value: "namaRole", sortable: false },
       { text: "Menu", value: "menu", sortable: false },
     ],

@@ -388,7 +388,7 @@ export default {
 		},
 		headersDataOrder: [
       // { text: "No.", value: "number", sortable: false, width: "7%" },
-      { text: "", value: "data-table-expand", sortable: false, width: "5%" },
+      { text: "#", value: "data-table-expand", sortable: false, width: "5%" },
       { text: "Invoice", value: "orderNumber", sortable: false },
       { text: "Tanggal Order", value: "createdAt", sortable: false },
       { text: "Receiptment", value: "receipt", sortable: false },

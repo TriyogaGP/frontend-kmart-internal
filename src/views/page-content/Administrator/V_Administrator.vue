@@ -172,7 +172,7 @@
 						style="cursor: pointer;"
 						large
 						:disabled="DataAdmin.length ? pageSummary.page != 1 ? false : true : true"
-						@click="getAdministrator(pageSummary.page - 1, limit, searchData)"
+						@click="() => { page = pageSummary.page - 1 }"
 					>
 						keyboard_arrow_left
 					</v-icon>
@@ -180,7 +180,7 @@
 						style="cursor: pointer;"
 						large
 						:disabled="DataAdmin.length ? pageSummary.page != pageSummary.totalPages ? false : true : true"
-						@click="getAdministrator(pageSummary.page + 1, limit, searchData)"
+						@click="() => { page = pageSummary.page + 1 }"
 					>
 						keyboard_arrow_right
 					</v-icon>
@@ -545,7 +545,7 @@ export default {
 		},
 		headers: [
       { text: "No", value: "number", sortable: false, width: "7%" },
-      { text: "", value: "data-table-expand", sortable: false, width: "5%" },
+      { text: "#", value: "data-table-expand", sortable: false, width: "5%" },
       { text: "Nama", value: "nama", sortable: false },
       { text: "Email", value: "email", sortable: false },
       { text: "Role", value: "namaRole", sortable: false },

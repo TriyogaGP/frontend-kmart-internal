@@ -171,7 +171,7 @@
 							style="cursor: pointer;"
 							large
 							:disabled="DataCustomer.length ? pageSummary.page != 1 ? false : true : true"
-							@click="getData(pageSummary.page - 1, limit)"
+							@click="() => { page = pageSummary.page - 1 }"
 						>
 							keyboard_arrow_left
 						</v-icon>
@@ -179,7 +179,7 @@
 							style="cursor: pointer;"
 							large
 							:disabled="DataCustomer.length ? pageSummary.page != pageSummary.totalPages ? false : true : true"
-							@click="getData(pageSummary.page + 1, limit)"
+							@click="() => { page = pageSummary.page + 1 }"
 						>
 							keyboard_arrow_right
 						</v-icon>

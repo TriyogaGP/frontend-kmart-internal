@@ -402,8 +402,8 @@
                                 <v-icon small>{{ v.menuIcon }}</v-icon>
                               </v-list-item-avatar>
                               <v-list-item-content>
-                                <v-list-item-title v-html="v.menuText"></v-list-item-title>
-                                <v-list-item-subtitle style="color: white !important;" v-html="v.menuRoute"></v-list-item-subtitle>
+                                <v-list-item-title>{{ v.menuText }}</v-list-item-title>
+                                <v-list-item-subtitle style="color: white !important;">{{ v.menuRoute }}</v-list-item-subtitle>
                               </v-list-item-content>
                             </v-list-item>
                           </draggable>
@@ -436,8 +436,8 @@
                                 <v-icon small>{{ v.menuIcon }}</v-icon>
                               </v-list-item-avatar>
                               <v-list-item-content>
-                                <v-list-item-title v-html="v.menuText"></v-list-item-title>
-                                <v-list-item-subtitle style="color: white !important;" v-html="v.menuRoute"></v-list-item-subtitle>
+                                <v-list-item-title>{{ v.menuText }}</v-list-item-title>
+                                <v-list-item-subtitle style="color: white !important;">{{ v.menuRoute }}</v-list-item-subtitle>
                               </v-list-item-content>
                             </v-list-item>
                           </draggable>
@@ -503,7 +503,7 @@ export default {
 		},
 		headers: [
       { text: "No", value: "number", sortable: false, width: "7%" },
-      { text: "", value: "data-table-expand", sortable: false, width: "5%" },
+      { text: "#", value: "data-table-expand", sortable: false, width: "5%" },
       { text: "Nama Menu", value: "menuText", sortable: false },
       { text: "Nama Route", value: "menuRoute", sortable: false },
       { text: "Nama Icon", value: "menuIcon", sortable: false },

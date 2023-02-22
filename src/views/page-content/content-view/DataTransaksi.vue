@@ -3,7 +3,7 @@
 		<h1 class="subheading grey--text">Panel Data Transaksi Detail</h1>
 		<v-container>
       <v-layout row wrap>
-        <v-flex sm6 xs12 md6 lg6>
+        <v-flex sm6 xs12 md4 lg4>
           <v-card class="ma-3">
             <v-list-item>
               <v-list-item-content>
@@ -14,12 +14,23 @@
             </v-list-item>
           </v-card>
         </v-flex>
-        <v-flex sm6 xs12 md6 lg6>
+        <v-flex sm6 xs12 md4 lg4>
           <v-card class="ma-3">
             <v-list-item>
               <v-list-item-content>
                 <div class="overline text-right">Total BV</div>
                 <v-list-item-title class="headline mb-1 text-right">{{ DataJumTransaksiDetail ? DataJumTransaksiDetail.bv : 0 }}</v-list-item-title>
+                <div><v-divider /></div>
+              </v-list-item-content>
+            </v-list-item>
+          </v-card>
+        </v-flex>
+        <v-flex sm6 xs12 md4 lg4>
+          <v-card class="ma-3">
+            <v-list-item>
+              <v-list-item-content>
+                <div class="overline text-right">Total Records</div>
+                <v-list-item-title class="headline mb-1 text-right">{{ DataTransaksiDetail ? DataTransaksiDetail.length : 0 }}</v-list-item-title>
                 <div><v-divider /></div>
               </v-list-item-content>
             </v-list-item>
@@ -124,7 +135,7 @@
 						dense
 						depressed
 						:loading="loadingButtonDataTransaksiDetail"
-						@click="() => { getData(); getData2(); }"
+						@click="() => { getData(); }"
 					>
 						Cari
 					</v-btn>
@@ -134,7 +145,7 @@
 						small
 						dense
 						depressed
-						@click="() => { tanggal = []; Member = { Transaksi: [], dp: 0, bv: 0 }; NonMember = { Transaksi: [], dp: 0, bv: 0 }; DataTransaksiDetail = []; DataJumTransaksiDetail = ''; }"
+						@click="() => { tanggal = []; Member = { Transaksi: [], dp: 0, bv: 0 }; NonMember = { Transaksi: [], dp: 0, bv: 0 }; DataTransaksiDetail = []; DataJumTransaksiDetail = ''; sortBy = []; sortDesc = [] }"
 					>
 						Reset
 					</v-btn>
@@ -149,28 +160,39 @@
 					:loading="isLoadingDataTransaksiDetail"
 					:items="DataTransaksiDetail"
 					item-key="orderNumber"
+					:sort-by="sortBy"
+					:sort-desc="sortDesc"
+					multi-sort
 					hide-default-footer
 					class="elevation-1"
+					:header-props="{
+						'sort-icon': 'mdi-navigation'
+					}"
 					:page.sync="page"
 					:items-per-page="itemsPerPage"
 					@page-count="pageCount = $event"
+					@update:sort-by="updateSort('By', $event)"
+					@update:sort-desc="updateSort('Desc', $event)"
 				>
-					<template #[`item.number`]="{ item }">
+					<!-- <template #[`item.number`]="{ item }">
 						{{ DataTransaksiDetail.indexOf(item) + 1 }}
-					</template>
+					</template> -->
 					<template #[`item.date`]="{ item }">
 						<span v-html="item.transaksi.date" /> 
 					</template>
 					<template #[`item.period`]="{ item }">
 						<span v-html="item.transaksi.period" /> 
 					</template>
-					<template #[`item.idec`]="{ item }">
+					<template #[`item.order_no`]="{ item }">
 						<span v-html="item.transaksi.order_no" /> 
 					</template>
-					<template #[`item.idmember`]="{ item }">
+					<template #[`item.reff_no`]="{ item }">
+						<span v-html="item.transaksi.reff_no" /> 
+					</template>
+					<template #[`item.code`]="{ item }">
 						<span v-html="item.distributor.code" /> 
 					</template>
-					<template #[`item.nama`]="{ item }">
+					<template #[`item.name`]="{ item }">
 						<span v-html="item.distributor.name" /> 
 					</template>
 					<template #[`item.dp`]="{ item }">
@@ -256,14 +278,22 @@
 								:loading="isLoadingTransaksiDetail"
 								:items="DataTransaksiDetailOrder"
 								item-key="orderNumber"
+								:sort-by="sortBy2"
+								:sort-desc="sortDesc2"
+								multi-sort
 								hide-default-footer
 								class="elevation-1"
+								:header-props="{
+									'sort-icon': 'mdi-navigation'
+								}"
 								:items-per-page="itemsPerPage1"
 								@page-count="pageCount1 = $event"
+								@update:sort-by="updateSort2('By', $event)"
+								@update:sort-desc="updateSort2('Desc', $event)"
 							>
-								<template #[`item.number`]="{ item }">
+								<!-- <template #[`item.number`]="{ item }">
 									{{ page1 > 1 ? ((page1 - 1)*limit) + DataTransaksiDetailOrder.indexOf(item) + 1 : DataTransaksiDetailOrder.indexOf(item) + 1 }}
-								</template>
+								</template> -->
 								<template #[`item.date`]="{ item }">
 									<span v-html="item.date" /> 
 								</template>
@@ -301,7 +331,7 @@
                     style="cursor: pointer;"
                     large
                     :disabled="DataTransaksiDetailOrder.length ? pageSummary.page != 1 ? false : true : true"
-                    @click="postData(pageSummary.page - 1, limit, dataDetail)"
+                    @click="() => { page1 = pageSummary.page - 1 }"
                   >
                     keyboard_arrow_left
                   </v-icon>
@@ -309,7 +339,7 @@
                     style="cursor: pointer;"
                     large
                     :disabled="DataTransaksiDetailOrder.length ? pageSummary.page != pageSummary.totalPages ? false : true : true"
-                    @click="postData(pageSummary.page + 1, limit, dataDetail)"
+                    @click="() => { page1 = pageSummary.page + 1 }"
                   >
                     keyboard_arrow_right
                   </v-icon>
@@ -389,34 +419,35 @@ export default {
 			total: '',
 			totalPages: ''
 		},
-		dataDetail: {
-			id_userNorder_number: [],
-			data_transaksi: [],
-		},
+		data_transaksi: [],
 		page: 1,
     pageCount: 0,
     itemsPerPage: 25,
 		headersDataTransaksiDetail: [
-      { text: "No.", value: "number", sortable: false, width: "7%" },
-      { text: "Tanggal Order", value: "date", sortable: false },
+      // { text: "No.", value: "number", sortable: false, width: "7%" },
+      { text: "Tanggal Order", value: "date" },
       { text: "Period", value: "period", sortable: false },
-      { text: "Order IDEC", value: "idec", sortable: false },
-      { text: "Invoice", value: "orderNumber", sortable: false },
-      { text: "IDMember", value: "idmember", sortable: false },
-      { text: "Nama Member", value: "nama", sortable: false },
-      { text: "DP", value: "dp", sortable: false },
-      { text: "BV", value: "bv", sortable: false },
+      { text: "Order IDEC", value: "order_no", sortable: false },
+      { text: "Invoice", value: "reff_no" },
+      { text: "IDMember", value: "code" },
+      { text: "Nama Member", value: "name" },
+      { text: "DP", value: "dp" },
+      { text: "BV", value: "bv" },
     ],
 		headersTransaksiDetail: [
-			{ text: "No.", value: "number", sortable: false, width: "7%" },
-      { text: "Invoice", value: "orderNumber", sortable: false },
-      { text: "Tanggal Order", value: "date", sortable: false },
-      { text: "Nama", value: "fullname", sortable: false },
-      { text: "No. telp", value: "devicenumber", sortable: false },
-      { text: "Email", value: "email", sortable: false },
-			{ text: "DP", value: "dp", sortable: false },
-			{ text: "BV", value: "bv", sortable: false },
+			// { text: "No.", value: "number", sortable: false, width: "7%" },
+      { text: "Invoice", value: "orderNumber", width: "10%" },
+      { text: "Tanggal Order", value: "date", width: "10%" },
+      { text: "Nama", value: "fullname", width: "15%" },
+      { text: "No. telp", value: "devicenumber", sortable: false, width: "10%" },
+      { text: "Email", value: "email", sortable: false, width: "10%" },
+			{ text: "DP", value: "dp", width: "8%" },
+			{ text: "BV", value: "bv", width: "8%" },
     ],
+		sortBy: [],
+		sortDesc: [],
+		sortBy2: [],
+		sortDesc2: [],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
 		Member: {
@@ -444,16 +475,32 @@ export default {
 		},
 	},
 	watch: {
+		sortDesc: {
+			deep: true,
+			handler(value) {
+				if(this.tanggal.length){
+					this.getData();
+				}
+			}
+		},
+		sortDesc2: {
+			deep: true,
+			handler(value) {
+				if(value.length > 1){
+					this.postData(1, this.limit, this.data_transaksi)
+				}
+			}
+		},
 		page1: {
 			deep: true,
 			handler(value) {
-				this.postData(value, this.limit, this.dataDetail)
+				this.postData(value, this.limit, this.data_transaksi)
 			}
 		},
     limit: {
 			deep: true,
 			handler(value) {
-				this.postData(1, value, this.dataDetail)
+				this.postData(1, value, this.data_transaksi)
 			}
 		},
   },
@@ -467,7 +514,7 @@ export default {
 			this.isLoadingDataTransaksiDetail = true
       let payload = {
 				method: "get",
-				url: `kmart/getdataKmart?kode=Transaksi Detail&startdate=${this.tanggal.length ? this.convertDateToPicker2(this.tanggal[0]) : ''}&enddate=${this.tanggal.length ? this.convertDateToPicker2(this.tanggal[1]) : ''}`,
+				url: `kmart/getdataKmart?kode=Transaksi Detail&startdate=${this.tanggal.length ? this.convertDateToPicker2(this.tanggal[0]) : ''}&enddate=${this.tanggal.length ? this.convertDateToPicker2(this.tanggal[1]) : ''}&sort=${JSON.stringify({sortBy: this.sortBy, sortDesc: this.sortDesc})}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -476,6 +523,7 @@ export default {
 				this.isLoadingDataTransaksiDetail = false
 				this.DataTransaksiDetail = res.data.result.dataTransaksi
 				this.DataJumTransaksiDetail = res.data.result.dataJumlah
+				this.getData2()
 				// this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
@@ -537,17 +585,10 @@ export default {
 		openDialog(kondisi) {
 			if(!this.Member.Transaksi.length && !this.NonMember.Transaksi.length) return this.notifikasi("warning", 'Proses masih berjalan !', "1")
 			this.kondisi = kondisi
-			this.dataDetail = {
-				id_userNorder_number: [],
-				data_transaksi: [],
-			}
+			this.data_transaksi = []
 			if(kondisi === 'Member') {
 				this.Member.Transaksi.map(val => {
-					this.dataDetail.id_userNorder_number.push({
-						idUser: val.idUser,
-						orderNumber: val.orderNumber,
-					})
-					this.dataDetail.data_transaksi.push({
+					this.data_transaksi.push({
 						id_user: val.idUser,
 						orderNumber: val.orderNumber,
             date: val.transaksi.date,
@@ -557,11 +598,7 @@ export default {
 				})
 			}else if(kondisi === 'Customer') {
 				this.NonMember.Transaksi.map(val => {
-					this.dataDetail.id_userNorder_number.push({
-						idUser: val.idUser,
-						orderNumber: val.orderNumber,
-					})
-					this.dataDetail.data_transaksi.push({
+					this.data_transaksi.push({
 						id_user: val.idUser,
 						orderNumber: val.orderNumber,
             date: val.transaksi.date,
@@ -570,10 +607,12 @@ export default {
 					})
 				})
 			}
-			this.postData(1, this.limit, this.dataDetail)
+			this.sortBy2 = []
+			this.sortDesc2 = []
+			this.DialogOrder = true
+			this.postData(1, this.limit, this.data_transaksi)
 		},
 		postData(page = 1, limit, bodyData) {
-			this.DialogOrder = true
 			this.itemsPerPage1 = limit
 			this.page1 = page
 			this.isLoadingTransaksiDetail = true
@@ -587,8 +626,8 @@ export default {
 			}
 			let payload = {
 				method: "put",
-				url: `kmart/detailTransaksiOrder?page=${page}&limit=${limit}`,
-        body: bodyData,
+				url: `kmart/detailTransaksiOrder?page=${page}&limit=${limit}&sort=${JSON.stringify({sortBy: this.sortBy2, sortDesc: this.sortDesc2})}`,
+        body: { data_transaksi: bodyData },
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -627,10 +666,10 @@ export default {
 			const totalPages = Math.ceil(this.pageSummary.total / 50)
 			let link = process.env.VUE_APP_NODE_ENV === "production" ? process.env.VUE_APP_PROD_API_URL : process.env.VUE_APP_DEV_API_URL
 			this.isLoadingExport = true
-			fetch(`${link}kmart/exportExcelTransaksiFix?totalPages=${totalPages}&limit=50`, {
+			fetch(`${link}kmart/exportExcelTransaksiFix?totalPages=${totalPages}&limit=50&sort=${JSON.stringify({sortBy: this.sortBy2, sortDesc: this.sortDesc2})}`, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(this.dataDetail),
+				body: JSON.stringify({ data_transaksi: this.data_transaksi }),
 			})
 			.then(response => response.arrayBuffer())
 			.then(async response => {
@@ -662,6 +701,20 @@ export default {
       this.notifikasiText = text
       this.notifikasiButton = proses
     },
+		updateSort(kondisi, data) {
+			if(kondisi == 'By'){
+				this.sortBy = data
+			}else if(kondisi == 'Desc'){
+				this.sortDesc = data
+			}
+		},
+		updateSort2(kondisi, data) {
+			if(kondisi == 'By'){
+				this.sortBy2 = data
+			}else if(kondisi == 'Desc'){
+				this.sortDesc2 = data
+			}
+		},
 	}
 }
 </script>
@@ -673,6 +726,9 @@ export default {
 }
 .v-pagination {
   justify-content: flex-end !important;
+}
+.v-data-table-header__icon {
+  opacity: 10;
 }
 .v-input .v-label {
   font-size: 11pt !important;

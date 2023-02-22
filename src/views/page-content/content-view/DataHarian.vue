@@ -76,6 +76,7 @@
 							dense
 							depressed
 							@click="() => {
+								page = 1
 								limit = 20;
 								tanggal = [];
 								DataHarian = [];
@@ -159,7 +160,7 @@
 							style="cursor: pointer;"
 							large
 							:disabled="DataHarian.length ? pageSummary.page != 1 ? false : true : true"
-							@click="getData(pageSummary.page - 1, limit)"
+							@click="() => { page = pageSummary.page - 1 }"
 						>
 							keyboard_arrow_left
 						</v-icon>
@@ -167,7 +168,7 @@
 							style="cursor: pointer;"
 							large
 							:disabled="DataHarian.length ? pageSummary.page != pageSummary.totalPages ? false : true : true"
-							@click="getData(pageSummary.page + 1, limit)"
+							@click="() => { page = pageSummary.page + 1 }"
 						>
 							keyboard_arrow_right
 						</v-icon>
