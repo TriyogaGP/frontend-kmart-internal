@@ -626,6 +626,14 @@ export default {
 				this.getAdministrator(1, value, this.searchData)
 			}
 		},
+    searchData: {
+			deep: true,
+			handler(value) {
+        if (value == null) {
+          this.getAdministrator(1, this.limit, this.searchData)
+        }
+			}
+		},
   },
   mounted() {
     this.roleID = localStorage.getItem('roleID')

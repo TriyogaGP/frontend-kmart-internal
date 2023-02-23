@@ -36,7 +36,7 @@
             </v-list-item>
           </v-card>
         </v-flex>
-        <v-flex sm6 xs12 md3 lg3 @click="(Member.Transaksi.length && NonMember.Transaksi.length) ? openDialog('Member') : ''" style="cursor: pointer;">
+        <v-flex sm6 xs12 md4 lg4 @click="(Member.Transaksi.length && NonMember.Transaksi.length) ? openDialog('Member') : ''" style="cursor: pointer;">
           <v-card class="ma-3">
             <v-list-item>
               <v-list-item-content>
@@ -50,7 +50,7 @@
             </v-list-item>
           </v-card>
         </v-flex>
-        <v-flex sm6 xs12 md3 lg3>
+        <v-flex sm6 xs12 md4 lg4>
           <v-card class="ma-3">
             <v-list-item>
               <v-list-item-content>
@@ -64,7 +64,21 @@
             </v-list-item>
           </v-card>
         </v-flex>
-        <v-flex sm6 xs12 md3 lg3 @click="(Member.Transaksi.length && NonMember.Transaksi.length) ? openDialog('Customer') : ''" style="cursor: pointer;">
+        <v-flex sm6 xs12 md4 lg4 @click="(MemberProduct.length) ? openDialogProduct('Member') : ''" style="cursor: pointer;">
+          <v-card class="ma-3">
+            <v-list-item>
+              <v-list-item-content>
+                <div class="overline text-right">Total Product (Member)</div>
+                <v-list-item-title class="headline mb-1 text-right">
+									<div v-if="isLoadingOrderProduct1"><v-progress-circular indeterminate size="20" /></div>
+									<div v-else>{{ JmlMemberProduct != 0 ? JmlMemberProduct : 0 }}</div>
+								</v-list-item-title>
+                <div><v-divider /></div>
+              </v-list-item-content>
+            </v-list-item>
+          </v-card>
+        </v-flex>
+        <v-flex sm6 xs12 md4 lg4 @click="(Member.Transaksi.length && NonMember.Transaksi.length) ? openDialog('Customer') : ''" style="cursor: pointer;">
           <v-card class="ma-3">
             <v-list-item>
               <v-list-item-content>
@@ -78,7 +92,7 @@
             </v-list-item>
           </v-card>
         </v-flex>
-        <v-flex sm6 xs12 md3 lg3>
+        <v-flex sm6 xs12 md4 lg4>
           <v-card class="ma-3">
             <v-list-item>
               <v-list-item-content>
@@ -86,6 +100,20 @@
                 <v-list-item-title class="headline mb-1 text-right">
 									<div v-if="isLoadingDataDPBV"><v-progress-circular indeterminate size="20" /></div>
 									<div v-else>{{ NonMember.bv ? NonMember.bv : 0 }}</div>
+								</v-list-item-title>
+                <div><v-divider /></div>
+              </v-list-item-content>
+            </v-list-item>
+          </v-card>
+        </v-flex>
+        <v-flex sm6 xs12 md4 lg4 @click="(NonMemberProduct.length) ? openDialogProduct('Customer') : ''" style="cursor: pointer;">
+          <v-card class="ma-3">
+            <v-list-item>
+              <v-list-item-content>
+                <div class="overline text-right">Total Product (Non Member)</div>
+                <v-list-item-title class="headline mb-1 text-right">
+									<div v-if="isLoadingOrderProduct2"><v-progress-circular indeterminate size="20" /></div>
+									<div v-else>{{ JmlNonMemberProduct != 0 ? JmlNonMemberProduct : 0 }}</div>
 								</v-list-item-title>
                 <div><v-divider /></div>
               </v-list-item-content>
@@ -145,7 +173,19 @@
 						small
 						dense
 						depressed
-						@click="() => { tanggal = []; Member = { Transaksi: [], dp: 0, bv: 0 }; NonMember = { Transaksi: [], dp: 0, bv: 0 }; DataTransaksiDetail = []; DataJumTransaksiDetail = ''; sortBy = []; sortDesc = [] }"
+						@click="() => {
+							tanggal = [];
+							Member = { Transaksi: [], dp: 0, bv: 0 };
+							NonMember = { Transaksi: [], dp: 0, bv: 0 };
+							MemberProduct = [];
+							JmlMemberProduct = 0;
+							NonMemberProduct = [];
+							JmlNonMemberProduct = 0;
+							DataTransaksiDetail = [];
+							DataJumTransaksiDetail = '';
+							sortBy = [];
+							sortDesc = []
+						}"
 					>
 						Reset
 					</v-btn>
@@ -351,6 +391,119 @@
       </v-card>
     </v-dialog>
 		<v-dialog
+      v-model="DialogOrderProduct"
+      max-width="1000px"
+      persistent
+      transition="dialog-bottom-transition"
+    >
+      <v-card>
+        <v-toolbar
+          dark
+          color="light-blue darken-3"
+        >
+          <v-toolbar-title>Data Order Product Detail {{ kondisi === 'Member' ? 'Member' : 'Customer' }}</v-toolbar-title>
+          <v-spacer />
+          <v-toolbar-items>
+            <v-btn
+              icon
+              dark
+              @click="() => { DialogOrderProduct = false; }"
+            >
+              <v-icon>close</v-icon>
+            </v-btn>
+          </v-toolbar-items>
+        </v-toolbar>
+        <v-card>
+          <div class="scrollText">
+            <div class="px-5">
+              <v-divider />
+            </div>
+            <v-card-text>
+							<v-row no-gutters>
+								<v-col cols="12" md="10" />
+								<v-col cols="12" md="2" class="pl-2 d-flex justify-center align-center">
+									<v-autocomplete
+											v-model="page2"
+											:items="pageOptions2"
+											item-text="value"
+											item-value="value"
+											label="Page"
+											outlined
+											dense
+											hide-details
+											:disabled="kondisi === 'Member' ? MemberProduct.length ? false : true : NonMemberProduct.length ? false : true"
+										/>
+								</v-col>
+							</v-row>
+							<v-data-table
+								loading-text="Sedang memuat... Harap tunggu"
+								no-data-text="Tidak ada data yang tersedia"
+								no-results-text="Tidak ada catatan yang cocok ditemukan"
+								:headers="headersOrderProduct"
+								:loading="isLoadingOrderProduct"
+								:items="kondisi === 'Member' ? MemberProduct : NonMemberProduct"
+								item-key="idProductSync"
+								:sort-by="sortBy3"
+								:sort-desc="sortDesc3"
+								multi-sort
+								hide-default-footer
+								class="elevation-1"
+								:header-props="{
+									'sort-icon': 'mdi-navigation'
+								}"
+								:items-per-page="itemsPerPage2"
+								@page-count="pageCount2 = $event"
+								@update:sort-by="updateSort3('By', $event)"
+								@update:sort-desc="updateSort3('Desc', $event)"
+							>
+							</v-data-table>
+            </v-card-text>
+          </div>
+					<v-divider />
+					<v-card-actions>
+						<v-row 
+              no-gutters
+              class="mr-3"
+            >
+              <v-col cols="10" class="d-flex justify-start align-center">
+                <span>Halaman <strong>{{ pageSummary2.page ? pageSummary2.page : 0 }}</strong> dari Total Halaman <strong>{{ pageSummary2.totalPages ? pageSummary2.totalPages : 0 }}</strong> (Records {{ pageSummary2.total ? pageSummary2.total : 0 }})</span>
+              </v-col>
+              <v-col cols="2" class="text-right">
+                <div class="d-flex justify-end">
+                  <v-autocomplete
+                    v-model="limit2"
+                    :items="limitPage2"
+                    item-text="value"
+                    item-value="value"
+                    outlined
+                    dense
+                    hide-details
+                    :disabled="kondisi === 'Member' ? MemberProduct.length ? false : true : NonMemberProduct.length ? false : true"
+                  />
+                  <v-icon
+                    style="cursor: pointer;"
+                    large
+                    :disabled="kondisi === 'Member' ? MemberProduct.length ? pageSummary2.page != 1 ? false : true : true : NonMemberProduct.length ? pageSummary2.page != 1 ? false : true : true"
+                    @click="() => { page2 = pageSummary2.page - 1 }"
+                  >
+                    keyboard_arrow_left
+                  </v-icon>
+                  <v-icon
+                    style="cursor: pointer;"
+                    large
+                    :disabled="kondisi === 'Member' ? MemberProduct.length ? pageSummary2.page != pageSummary2.totalPages ? false : true : true : NonMemberProduct.length ? pageSummary2.page != pageSummary2.totalPages ? false : true : true"
+                    @click="() => { page2 = pageSummary2.page + 1 }"
+                  >
+                    keyboard_arrow_right
+                  </v-icon>
+                </div>
+              </v-col>
+            </v-row>
+					</v-card-actions>
+        </v-card>
+      </v-card>
+    </v-dialog>
+		<v-dialog
 			v-model="isLoadingExport"
 			transition="dialog-bottom-transition"
 			persistent
@@ -394,9 +547,13 @@ export default {
 		kondisi: '',
 		DataJumTransaksiDetail: '',
     DialogOrder: false,
+    DialogOrderProduct: false,
     loadingButtonDataTransaksiDetail: false,
     isLoadingDataTransaksiDetail: false,
     isLoadingTransaksiDetail: false,
+    isLoadingOrderProduct: false,
+    isLoadingOrderProduct1: false,
+    isLoadingOrderProduct2: false,
     isLoadingDataDPBV: false,
     isLoadingExport: false,
 		page1: 1,
@@ -420,6 +577,26 @@ export default {
 			totalPages: ''
 		},
 		data_transaksi: [],
+		page2: 1,
+    pageCount2: 0,
+    itemsPerPage2: 100,
+    limit2: 20,
+		limitPage2: [
+      { value: 5 },
+			{ value: 10 },
+			{ value: 20 },
+			{ value: 50 },
+			{ value: 100 },
+		],
+		pageOptions2: [
+			{ value: 1 },
+		],
+		pageSummary2: {
+			page: '',
+			limit: '',
+			total: '',
+			totalPages: ''
+		},
 		page: 1,
     pageCount: 0,
     itemsPerPage: 25,
@@ -444,10 +621,17 @@ export default {
 			{ text: "DP", value: "dp", width: "8%" },
 			{ text: "BV", value: "bv", width: "8%" },
     ],
+		headersOrderProduct: [
+      { text: "ID Product Sync", value: "idProductSync", width: "10%" },
+      { text: "Nama Product", value: "productName", sortable: true },
+      { text: "Quantity", value: "quantity", sortable: true },
+    ],
 		sortBy: [],
 		sortDesc: [],
 		sortBy2: [],
 		sortDesc2: [],
+		sortBy3: [],
+		sortDesc3: [],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
 		Member: {
@@ -460,6 +644,10 @@ export default {
 			dp: 0,
 			bv: 0,
 		},
+		MemberProduct: [],
+		NonMemberProduct: [],
+		JmlMemberProduct: 0,
+		JmlNonMemberProduct: 0,
 
 		//notifikasi
     dialogNotifikasi: false,
@@ -503,6 +691,36 @@ export default {
 				this.postData(1, value, this.data_transaksi)
 			}
 		},
+		page2: {
+			deep: true,
+			handler(value) {
+				if (this.kondisi === 'Member') {
+					this.postDataMember(value, this.limit2, this.Member.Transaksi)
+				}else if (this.kondisi === 'Customer') {
+					this.postDataNonMember(value, this.limit2, this.NonMember.Transaksi)
+				}
+			}
+		},
+    limit2: {
+			deep: true,
+			handler(value) {
+				if (this.kondisi === 'Member') {
+					this.postDataMember(1, value, this.Member.Transaksi)
+				}else if (this.kondisi === 'Customer') {
+					this.postDataNonMember(1, value, this.NonMember.Transaksi)
+				}
+			}
+		},
+		sortDesc3: {
+			deep: true,
+			handler(value) {
+				if (this.kondisi === 'Member') {
+					this.postDataMember(1, this.limit2, this.Member.Transaksi)
+				}else if (this.kondisi === 'Customer') {
+					this.postDataNonMember(1, this.limit2, this.NonMember.Transaksi)
+				}
+			}
+		},
   },
 	mounted() {
 	},
@@ -539,11 +757,13 @@ export default {
 				Transaksi: [],
 				dp: 0,
 				bv: 0,
+				Product: [],
 			}
 			this.NonMember = {
 				Transaksi: [],
 				dp: 0,
 				bv: 0,
+				Product: [],
 			}
       let payload = {
 				method: "get",
@@ -565,6 +785,8 @@ export default {
 					dp: nonmember_resdata.dataJumlah.dp,
 					bv: nonmember_resdata.dataJumlah.bv,
 				}
+				this.postDataMember(1, this.limit2, member_resdata.dataTransaksi)
+				this.postDataNonMember(1, this.limit2, nonmember_resdata.dataTransaksi)
 				// this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
@@ -573,11 +795,13 @@ export default {
 					Transaksi: [],
 					dp: 0,
 					bv: 0,
+					Product: [],
 				}
 				this.NonMember = {
 					Transaksi: [],
 					dp: 0,
 					bv: 0,
+					Product: [],
 				}
 				this.notifikasi("error", err.response.data.message, "1")
 			});
@@ -611,6 +835,15 @@ export default {
 			this.sortDesc2 = []
 			this.DialogOrder = true
 			this.postData(1, this.limit, this.data_transaksi)
+		},
+		openDialogProduct(kondisi) {
+			this.kondisi = kondisi
+			this.DialogOrderProduct = true
+			if(kondisi === 'Member') {
+				this.postDataMember(1, this.limit2, this.Member.Transaksi)
+			}else if(kondisi === 'Customer') {
+				this.postDataNonMember(1, this.limit2, this.NonMember.Transaksi)
+			}
 		},
 		postData(page = 1, limit, bodyData) {
 			this.itemsPerPage1 = limit
@@ -661,6 +894,112 @@ export default {
 				this.notifikasi("error", err.response.data.message, "1")
 			});
 		},
+		postDataMember(page = 1, limit, bodyData) {
+			this.itemsPerPage2 = limit
+			this.page2 = page
+			this.MemberProduct = []
+			this.pageOptions2 = [{ value: 1 }]
+			this.pageSummary2 = {
+				page: '',
+				limit: '',
+				total: '',
+				totalPages: ''
+			}
+			this.isLoadingOrderProduct = true
+			this.isLoadingOrderProduct1 = true
+			let payload = {
+				method: "put",
+				url: `kmart/detailOrderProduct?page=${page}&limit=${limit}&sort=${JSON.stringify({sortBy: this.sortBy3, sortDesc: this.sortDesc3})}`,
+        body: { data_transaksi: bodyData },
+				authToken: localStorage.getItem('user_token')
+			};
+			this.fetchData(payload)
+			.then((res) => {
+				// console.log(userType, res.data.result.length);
+				this.isLoadingOrderProduct = false
+				this.isLoadingOrderProduct1 = false
+				this.MemberProduct = res.data.result.records
+        let pageSummary = res.data.result.pageSummary
+				this.JmlMemberProduct = this.MemberProduct.length ? pageSummary.total : 0
+        this.pageSummary2 = {
+          page: this.MemberProduct.length ? pageSummary.page : 0,
+          limit: this.MemberProduct.length ? pageSummary.limit : 0,
+          total: this.MemberProduct.length ? pageSummary.total : 0,
+          totalPages: this.MemberProduct.length ? pageSummary.totalPages : 0
+        }
+				for (let index = 1; index <= this.pageSummary2.totalPages; index++) {
+          this.pageOptions2.push({ value: index })
+        }
+			})
+			.catch((err) => {
+				this.itemsPerPage2 = limit
+				this.page2 = page
+				this.MemberProduct = []
+				this.pageOptions2 = [{ value: 1 }]
+				this.pageSummary2 = {
+					page: '',
+					limit: '',
+					total: '',
+					totalPages: ''
+				}
+				this.isLoadingOrderProduct = false
+				this.isLoadingOrderProduct1 = false
+				this.notifikasi("error", err.response.data.message, "1")
+			});
+		},
+		postDataNonMember(page = 1, limit, bodyData) {
+			this.itemsPerPage2 = limit
+			this.page2 = page
+			this.NonMemberProduct = []
+			this.pageOptions2 = [{ value: 1 }]
+			this.pageSummary2 = {
+				page: '',
+				limit: '',
+				total: '',
+				totalPages: ''
+			}
+			this.isLoadingOrderProduct = true
+			this.isLoadingOrderProduct2 = true
+			let payload = {
+				method: "put",
+				url: `kmart/detailOrderProduct?page=${page}&limit=${limit}&sort=${JSON.stringify({sortBy: this.sortBy3, sortDesc: this.sortDesc3})}`,
+        body: { data_transaksi: bodyData },
+				authToken: localStorage.getItem('user_token')
+			};
+			this.fetchData(payload)
+			.then((res) => {
+				// console.log(userType, res.data.result.length);
+				this.isLoadingOrderProduct = false
+				this.isLoadingOrderProduct2 = false
+				this.NonMemberProduct = res.data.result.records
+        let pageSummary = res.data.result.pageSummary
+				this.JmlNonMemberProduct = this.NonMemberProduct.length ? pageSummary.total : 0
+        this.pageSummary2 = {
+          page: this.NonMemberProduct.length ? pageSummary.page : 0,
+          limit: this.NonMemberProduct.length ? pageSummary.limit : 0,
+          total: this.NonMemberProduct.length ? pageSummary.total : 0,
+          totalPages: this.NonMemberProduct.length ? pageSummary.totalPages : 0
+        }
+				for (let index = 1; index <= this.pageSummary2.totalPages; index++) {
+          this.pageOptions2.push({ value: index })
+        }
+			})
+			.catch((err) => {
+				this.itemsPerPage2 = limit
+				this.page2 = page
+				this.NonMemberProduct = []
+				this.pageOptions2 = [{ value: 1 }]
+				this.pageSummary2 = {
+					page: '',
+					limit: '',
+					total: '',
+					totalPages: ''
+				}
+				this.isLoadingOrderProduct = false
+				this.isLoadingOrderProduct2 = false
+				this.notifikasi("error", err.response.data.message, "1")
+			});
+		},
 		exportExcelTransaksiFix(kondisi) {
 			if(!this.DataTransaksiDetailOrder.length) return this.notifikasi("warning", 'Gagal Export Excel, Data belum tersedia !', "1")
 			const totalPages = Math.ceil(this.pageSummary.total / 50)
@@ -695,12 +1034,6 @@ export default {
 			);
 			document.body.removeChild(link);
 		},
-		notifikasi(kode, text, proses){
-      this.dialogNotifikasi = true
-      this.notifikasiKode = kode
-      this.notifikasiText = text
-      this.notifikasiButton = proses
-    },
 		updateSort(kondisi, data) {
 			if(kondisi == 'By'){
 				this.sortBy = data
@@ -715,6 +1048,19 @@ export default {
 				this.sortDesc2 = data
 			}
 		},
+		updateSort3(kondisi, data) {
+			if(kondisi == 'By'){
+				this.sortBy3 = data
+			}else if(kondisi == 'Desc'){
+				this.sortDesc3 = data
+			}
+		},
+		notifikasi(kode, text, proses){
+      this.dialogNotifikasi = true
+      this.notifikasiKode = kode
+      this.notifikasiText = text
+      this.notifikasiButton = proses
+    },
 	}
 }
 </script>
