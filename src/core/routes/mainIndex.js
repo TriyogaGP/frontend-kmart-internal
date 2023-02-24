@@ -119,6 +119,11 @@ export default [
         name: 'DataCustomer',
         component: () => import('@/views/page-content/content-view/DataCustomer.vue')
       },
+      {
+        path: '/surveyDNM',
+        name: 'DataSurveyDNM',
+        component: () => import('@/views/page-content/content-view/DataSurveyDNM.vue')
+      },
     ]
   },
   {

@@ -420,7 +420,18 @@
             </div>
             <v-card-text>
 							<v-row no-gutters>
-								<v-col cols="12" md="10" />
+								<v-col cols="12" md="10" class="d-flex justify-start align-center">
+									<v-btn
+										color="light-blue darken-3"
+										class="white--text text--darken-2"
+										small
+										dense
+										depressed
+										@click="exportExcelOrderProduct(kondisi)"
+									>
+										<v-icon style="cursor: pointer;" small>fas fa-file-excel</v-icon>&nbsp;Export Excel
+									</v-btn>
+								</v-col>
 								<v-col cols="12" md="2" class="pl-2 d-flex justify-center align-center">
 									<v-autocomplete
 											v-model="page2"
@@ -622,7 +633,7 @@ export default {
 			{ text: "BV", value: "bv", width: "8%" },
     ],
 		headersOrderProduct: [
-      { text: "ID Product Sync", value: "idProductSync", width: "10%" },
+      { text: "ID Product Sync", value: "idProductSync", sortable: false, width: "10%" },
       { text: "Nama Product", value: "productName", sortable: true },
       { text: "Quantity", value: "quantity", sortable: true },
     ],
@@ -1016,6 +1027,25 @@ export default {
 				this.isLoadingExport = false
 				let blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
 				this.downloadBlob(blob,`Data Transaksi ${kondisi} (${this.convertDateToPicker3(this.tanggal[0])} sampai ${this.convertDateToPicker3(this.tanggal[1])}).xlsx`)
+				this.notifikasi("success", 'Sukses Export Excel', "1")
+			})
+		},
+		exportExcelOrderProduct(kondisi) {
+			if((!this.MemberProduct.length && kondisi === 'Member') || (!this.NonMemberProduct.length && kondisi === 'Customer')) return this.notifikasi("warning", 'Gagal Export Excel, Data belum tersedia !', "1")
+			const totalPages = Math.ceil(this.pageSummary2.total / 100)
+			let link = process.env.VUE_APP_NODE_ENV === "production" ? process.env.VUE_APP_PROD_API_URL : process.env.VUE_APP_DEV_API_URL
+			this.isLoadingExport = true
+			fetch(`${link}kmart/exportExcelOrderProduct?totalPages=${totalPages}&limit=100`, {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ data_transaksi: kondisi === 'Member' ? this.Member.Transaksi : this.NonMember.Transaksi }),
+			})
+			.then(response => response.arrayBuffer())
+			.then(async response => {
+				// console.log(response)
+				this.isLoadingExport = false
+				let blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+				this.downloadBlob(blob,`Data Order Product ${kondisi} (${this.convertDateToPicker3(this.tanggal[0])} sampai ${this.convertDateToPicker3(this.tanggal[1])}).xlsx`)
 				this.notifikasi("success", 'Sukses Export Excel', "1")
 			})
 		},
