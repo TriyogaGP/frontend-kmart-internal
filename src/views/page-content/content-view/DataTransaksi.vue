@@ -64,14 +64,14 @@
             </v-list-item>
           </v-card>
         </v-flex>
-        <v-flex sm6 xs12 md4 lg4 @click="(MemberProduct.length) ? openDialogProduct('Member') : ''" style="cursor: pointer;">
+        <v-flex sm6 xs12 md4 lg4 @click="(Member.Product.length) ? openDialogProduct('Member', Member.Product) : ''" style="cursor: pointer;">
           <v-card class="ma-3">
             <v-list-item>
               <v-list-item-content>
                 <div class="overline text-right">Total Product (Member)</div>
                 <v-list-item-title class="headline mb-1 text-right">
-									<div v-if="isLoadingOrderProduct1"><v-progress-circular indeterminate size="20" /></div>
-									<div v-else>{{ JmlMemberProduct != 0 ? JmlMemberProduct : 0 }}</div>
+									<div v-if="isLoadingDataDPBV"><v-progress-circular indeterminate size="20" /></div>
+									<div v-else>{{ Member.totalProduct ? Member.totalProduct : 0 }}</div>
 								</v-list-item-title>
                 <div><v-divider /></div>
               </v-list-item-content>
@@ -106,14 +106,14 @@
             </v-list-item>
           </v-card>
         </v-flex>
-        <v-flex sm6 xs12 md4 lg4 @click="(NonMemberProduct.length) ? openDialogProduct('Customer') : ''" style="cursor: pointer;">
+        <v-flex sm6 xs12 md4 lg4 @click="(NonMember.Product.length) ? openDialogProduct('Customer', NonMember.Product) : ''" style="cursor: pointer;">
           <v-card class="ma-3">
             <v-list-item>
               <v-list-item-content>
                 <div class="overline text-right">Total Product (Non Member)</div>
                 <v-list-item-title class="headline mb-1 text-right">
-									<div v-if="isLoadingOrderProduct2"><v-progress-circular indeterminate size="20" /></div>
-									<div v-else>{{ JmlNonMemberProduct != 0 ? JmlNonMemberProduct : 0 }}</div>
+									<div v-if="isLoadingDataDPBV"><v-progress-circular indeterminate size="20" /></div>
+									<div v-else>{{ NonMember.totalProduct ? NonMember.totalProduct : 0 }}</div>
 								</v-list-item-title>
                 <div><v-divider /></div>
               </v-list-item-content>
@@ -407,7 +407,15 @@
             <v-btn
               icon
               dark
-              @click="() => { DialogOrderProduct = false; }"
+              @click="() => {
+								DialogOrderProduct = false;
+								pageSummary2 = { page: '', limit: '', total: '', totalPages: '' };
+								pageOptions2 = [{ value: 1 }];
+								page2 = 1;
+								limit2 = 20;
+								itemsPerPage2 = 100;
+								DataTransaksiDetailProduct = [];
+							}"
             >
               <v-icon>close</v-icon>
             </v-btn>
@@ -442,7 +450,7 @@
 											outlined
 											dense
 											hide-details
-											:disabled="kondisi === 'Member' ? MemberProduct.length ? false : true : NonMemberProduct.length ? false : true"
+											:disabled="DataTransaksiDetailProduct.length ? false : true"
 										/>
 								</v-col>
 							</v-row>
@@ -452,7 +460,7 @@
 								no-results-text="Tidak ada catatan yang cocok ditemukan"
 								:headers="headersOrderProduct"
 								:loading="isLoadingOrderProduct"
-								:items="kondisi === 'Member' ? MemberProduct : NonMemberProduct"
+								:items="DataTransaksiDetailProduct"
 								item-key="idProductSync"
 								:sort-by="sortBy3"
 								:sort-desc="sortDesc3"
@@ -489,12 +497,12 @@
                     outlined
                     dense
                     hide-details
-                    :disabled="kondisi === 'Member' ? MemberProduct.length ? false : true : NonMemberProduct.length ? false : true"
+                    :disabled="DataTransaksiDetailProduct.length ? false : true"
                   />
                   <v-icon
                     style="cursor: pointer;"
                     large
-                    :disabled="kondisi === 'Member' ? MemberProduct.length ? pageSummary2.page != 1 ? false : true : true : NonMemberProduct.length ? pageSummary2.page != 1 ? false : true : true"
+                    :disabled="DataTransaksiDetailProduct.length ? pageSummary2.page != 1 ? false : true : true"
                     @click="() => { page2 = pageSummary2.page - 1 }"
                   >
                     keyboard_arrow_left
@@ -502,7 +510,7 @@
                   <v-icon
                     style="cursor: pointer;"
                     large
-                    :disabled="kondisi === 'Member' ? MemberProduct.length ? pageSummary2.page != pageSummary2.totalPages ? false : true : true : NonMemberProduct.length ? pageSummary2.page != pageSummary2.totalPages ? false : true : true"
+                    :disabled="DataTransaksiDetailProduct.length ? pageSummary2.page != pageSummary2.totalPages ? false : true : true"
                     @click="() => { page2 = pageSummary2.page + 1 }"
                   >
                     keyboard_arrow_right
@@ -555,6 +563,7 @@ export default {
 		tanggal: [],
 		DataTransaksiDetail: [],
 		DataTransaksiDetailOrder: [],
+		DataTransaksiDetailProduct: [],
 		kondisi: '',
 		DataJumTransaksiDetail: '',
     DialogOrder: false,
@@ -647,13 +656,17 @@ export default {
     totalItems: 0,
 		Member: {
 			Transaksi: [],
+			Product: [],
 			dp: 0,
 			bv: 0,
+			totalProduct: 0,
 		},
 		NonMember: {
 			Transaksi: [],
+			Product: [],
 			dp: 0,
 			bv: 0,
+			totalProduct: 0,
 		},
 		MemberProduct: [],
 		NonMemberProduct: [],
@@ -705,31 +718,19 @@ export default {
 		page2: {
 			deep: true,
 			handler(value) {
-				if (this.kondisi === 'Member') {
-					this.postDataMember(value, this.limit2, this.Member.Transaksi)
-				}else if (this.kondisi === 'Customer') {
-					this.postDataNonMember(value, this.limit2, this.NonMember.Transaksi)
-				}
+				this.postDataProduct(value, this.limit2, this.kondisi === 'Member' ? this.Member.Product : this.NonMember.Product)
 			}
 		},
     limit2: {
 			deep: true,
 			handler(value) {
-				if (this.kondisi === 'Member') {
-					this.postDataMember(1, value, this.Member.Transaksi)
-				}else if (this.kondisi === 'Customer') {
-					this.postDataNonMember(1, value, this.NonMember.Transaksi)
-				}
+				this.postDataProduct(1, value, this.kondisi === 'Member' ? this.Member.Product : this.NonMember.Product)
 			}
 		},
 		sortDesc3: {
 			deep: true,
 			handler(value) {
-				if (this.kondisi === 'Member') {
-					this.postDataMember(1, this.limit2, this.Member.Transaksi)
-				}else if (this.kondisi === 'Customer') {
-					this.postDataNonMember(1, this.limit2, this.NonMember.Transaksi)
-				}
+				this.postDataProduct(1, this.limit2, this.kondisi === 'Member' ? this.Member.Product : this.NonMember.Product)
 			}
 		},
   },
@@ -788,16 +789,18 @@ export default {
 				let nonmember_resdata = res.data.result.NonMember
 				this.Member = {
 					Transaksi: member_resdata.dataTransaksi,
+					Product: member_resdata.dataProduct,
 					dp: member_resdata.dataJumlah.dp,
 					bv: member_resdata.dataJumlah.bv,
+					totalProduct: member_resdata.dataJumlah.totalProduct,
 				}
 				this.NonMember = {
 					Transaksi: nonmember_resdata.dataTransaksi,
+					Product: nonmember_resdata.dataProduct,
 					dp: nonmember_resdata.dataJumlah.dp,
 					bv: nonmember_resdata.dataJumlah.bv,
+					totalProduct: nonmember_resdata.dataJumlah.totalProduct,
 				}
-				this.postDataMember(1, this.limit2, member_resdata.dataTransaksi)
-				this.postDataNonMember(1, this.limit2, nonmember_resdata.dataTransaksi)
 				// this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
@@ -847,14 +850,16 @@ export default {
 			this.DialogOrder = true
 			this.postData(1, this.limit, this.data_transaksi)
 		},
-		openDialogProduct(kondisi) {
+		openDialogProduct(kondisi, data) {
+			if(!this.Member.Product.length && !this.NonMember.Product.length) return this.notifikasi("warning", 'Proses masih berjalan !', "1")
 			this.kondisi = kondisi
 			this.DialogOrderProduct = true
 			if(kondisi === 'Member') {
-				this.postDataMember(1, this.limit2, this.Member.Transaksi)
+				this.postDataProduct(1, this.limit2, data)
 			}else if(kondisi === 'Customer') {
-				this.postDataNonMember(1, this.limit2, this.NonMember.Transaksi)
+				this.postDataProduct(1, this.limit2, data)
 			}
+			// console.log(this.DataTransaksiDetailProduct);
 		},
 		postData(page = 1, limit, bodyData) {
 			this.itemsPerPage1 = limit
@@ -905,10 +910,10 @@ export default {
 				this.notifikasi("error", err.response.data.message, "1")
 			});
 		},
-		postDataMember(page = 1, limit, bodyData) {
+		postDataProduct(page = 1, limit, bodyData) {
 			this.itemsPerPage2 = limit
 			this.page2 = page
-			this.MemberProduct = []
+			this.DataTransaksiDetailProduct = []
 			this.pageOptions2 = [{ value: 1 }]
 			this.pageSummary2 = {
 				page: '',
@@ -916,107 +921,23 @@ export default {
 				total: '',
 				totalPages: ''
 			}
-			this.isLoadingOrderProduct = true
-			this.isLoadingOrderProduct1 = true
-			let payload = {
-				method: "put",
-				url: `kmart/detailOrderProduct?page=${page}&limit=${limit}&sort=${JSON.stringify({sortBy: this.sortBy3, sortDesc: this.sortDesc3})}`,
-        body: { data_transaksi: bodyData },
-				authToken: localStorage.getItem('user_token')
-			};
-			this.fetchData(payload)
-			.then((res) => {
-				// console.log(userType, res.data.result.length);
-				this.isLoadingOrderProduct = false
-				this.isLoadingOrderProduct1 = false
-				this.MemberProduct = res.data.result.records
-        let pageSummary = res.data.result.pageSummary
-				this.JmlMemberProduct = this.MemberProduct.length ? pageSummary.total : 0
-        this.pageSummary2 = {
-          page: this.MemberProduct.length ? pageSummary.page : 0,
-          limit: this.MemberProduct.length ? pageSummary.limit : 0,
-          total: this.MemberProduct.length ? pageSummary.total : 0,
-          totalPages: this.MemberProduct.length ? pageSummary.totalPages : 0
-        }
-				for (let index = 1; index <= this.pageSummary2.totalPages; index++) {
-          this.pageOptions2.push({ value: index })
-        }
-			})
-			.catch((err) => {
-				this.itemsPerPage2 = limit
-				this.page2 = page
-				this.MemberProduct = []
-				this.pageOptions2 = [{ value: 1 }]
-				this.pageSummary2 = {
-					page: '',
-					limit: '',
-					total: '',
-					totalPages: ''
-				}
-				this.isLoadingOrderProduct = false
-				this.isLoadingOrderProduct1 = false
-				this.notifikasi("error", err.response.data.message, "1")
-			});
-		},
-		postDataNonMember(page = 1, limit, bodyData) {
-			this.itemsPerPage2 = limit
-			this.page2 = page
-			this.NonMemberProduct = []
-			this.pageOptions2 = [{ value: 1 }]
+			this.DataTransaksiDetailProduct = bodyData.slice((page - 1) * Number(limit), page * Number(limit))
 			this.pageSummary2 = {
-				page: '',
-				limit: '',
-				total: '',
-				totalPages: ''
+				page: bodyData.length ? page : 0,
+				limit: bodyData.length ? Number(limit) : 0,
+				total: bodyData.length ? bodyData.length : 0,
+				totalPages: bodyData.length ? Math.ceil(bodyData.length /Number(limit)) : 0
 			}
-			this.isLoadingOrderProduct = true
-			this.isLoadingOrderProduct2 = true
-			let payload = {
-				method: "put",
-				url: `kmart/detailOrderProduct?page=${page}&limit=${limit}&sort=${JSON.stringify({sortBy: this.sortBy3, sortDesc: this.sortDesc3})}`,
-        body: { data_transaksi: bodyData },
-				authToken: localStorage.getItem('user_token')
-			};
-			this.fetchData(payload)
-			.then((res) => {
-				// console.log(userType, res.data.result.length);
-				this.isLoadingOrderProduct = false
-				this.isLoadingOrderProduct2 = false
-				this.NonMemberProduct = res.data.result.records
-        let pageSummary = res.data.result.pageSummary
-				this.JmlNonMemberProduct = this.NonMemberProduct.length ? pageSummary.total : 0
-        this.pageSummary2 = {
-          page: this.NonMemberProduct.length ? pageSummary.page : 0,
-          limit: this.NonMemberProduct.length ? pageSummary.limit : 0,
-          total: this.NonMemberProduct.length ? pageSummary.total : 0,
-          totalPages: this.NonMemberProduct.length ? pageSummary.totalPages : 0
-        }
-				for (let index = 1; index <= this.pageSummary2.totalPages; index++) {
-          this.pageOptions2.push({ value: index })
-        }
-			})
-			.catch((err) => {
-				this.itemsPerPage2 = limit
-				this.page2 = page
-				this.NonMemberProduct = []
-				this.pageOptions2 = [{ value: 1 }]
-				this.pageSummary2 = {
-					page: '',
-					limit: '',
-					total: '',
-					totalPages: ''
-				}
-				this.isLoadingOrderProduct = false
-				this.isLoadingOrderProduct2 = false
-				this.notifikasi("error", err.response.data.message, "1")
-			});
+			for (let index = 1; index <= this.pageSummary2.totalPages; index++) {
+				this.pageOptions2.push({ value: index })
+			}
 		},
 		exportExcelTransaksiFix(kondisi) {
 			if(!this.DataTransaksiDetailOrder.length) return this.notifikasi("warning", 'Gagal Export Excel, Data belum tersedia !', "1")
-			const totalPages = Math.ceil(this.pageSummary.total / 50)
+			const totalPages = Math.ceil(this.pageSummary.total / 100)
 			let link = process.env.VUE_APP_NODE_ENV === "production" ? process.env.VUE_APP_PROD_API_URL : process.env.VUE_APP_DEV_API_URL
 			this.isLoadingExport = true
-			fetch(`${link}kmart/exportExcelTransaksiFix?totalPages=${totalPages}&limit=50&sort=${JSON.stringify({sortBy: this.sortBy2, sortDesc: this.sortDesc2})}`, {
+			fetch(`${link}kmart/exportExcelTransaksiFix?totalPages=${totalPages}&limit=100&sort=${JSON.stringify({sortBy: this.sortBy2, sortDesc: this.sortDesc2})}`, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ data_transaksi: this.data_transaksi }),
@@ -1031,14 +952,14 @@ export default {
 			})
 		},
 		exportExcelOrderProduct(kondisi) {
-			if((!this.MemberProduct.length && kondisi === 'Member') || (!this.NonMemberProduct.length && kondisi === 'Customer')) return this.notifikasi("warning", 'Gagal Export Excel, Data belum tersedia !', "1")
+			if((!this.Member.Product.length && kondisi === 'Member') || (!this.NonMember.Product.length && kondisi === 'Customer')) return this.notifikasi("warning", 'Gagal Export Excel, Data belum tersedia !', "1")
 			const totalPages = Math.ceil(this.pageSummary2.total / 100)
 			let link = process.env.VUE_APP_NODE_ENV === "production" ? process.env.VUE_APP_PROD_API_URL : process.env.VUE_APP_DEV_API_URL
 			this.isLoadingExport = true
 			fetch(`${link}kmart/exportExcelOrderProduct?totalPages=${totalPages}&limit=100`, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ data_transaksi: kondisi === 'Member' ? this.Member.Transaksi : this.NonMember.Transaksi }),
+				body: JSON.stringify({ data_product: kondisi === 'Member' ? this.Member.Product : this.NonMember.Product }),
 			})
 			.then(response => response.arrayBuffer())
 			.then(async response => {
