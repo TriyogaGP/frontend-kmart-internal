@@ -50,90 +50,92 @@
 			</v-menu>
 		</v-app-bar>
 		<v-navigation-drawer v-model="drawer" dark app class="light-blue darken-3">
-			<v-layout column align-center>
-				<v-flex class="mt-5">
-					<v-toolbar-title class="white--text subheading mt-1 text-center text-uppercase">
-						<span>&nbsp;DNM Mobile</span>
-					</v-toolbar-title>
-					<div class="d-flex flex-column justify-space-between align-center">
-						<v-avatar size="100">
-							<v-img src="../../public/logo.png" width="100%" />
-						</v-avatar>
-					</div>
-				</v-flex>
-			</v-layout>
-			<v-list dense>
-				<v-list-item
-					router to="/dashboard"
-					class="SelectedTile"
-					active-class="SelectedTile-active"
-				>
-					<v-list-item-title>
-						<span class="menufont">Dashboard</span>
-					</v-list-item-title>
-					<v-icon right>dashboard</v-icon>
-				</v-list-item>
-				<v-list-group
-          :value="false"
-					class="SelectedTile"
-					active-class="SelectedTile-active"
-				>
-          <template v-slot:activator>
-            <v-list-item-content style="color: white;">
-              <v-list-item-title class="menufont">Proses Data</v-list-item-title>
-            </v-list-item-content>
-          </template>
-
+			<div class="customScroll">
+				<v-layout column align-center>
+					<v-flex class="mt-5">
+						<v-toolbar-title class="white--text subheading mt-1 text-center text-uppercase">
+							<span>&nbsp;DNM Mobile</span>
+						</v-toolbar-title>
+						<div class="d-flex flex-column justify-space-between align-center">
+							<v-avatar size="100">
+								<v-img src="../../public/logo.png" width="100%" />
+							</v-avatar>
+						</div>
+					</v-flex>
+				</v-layout>
+				<v-list dense>
 					<v-list-item
-						v-for="(link) in sortLinksNav"
-						:key="link.menuRoute"
-						router :to="link.menuRoute"
+						router to="/dashboard"
 						class="SelectedTile"
 						active-class="SelectedTile-active"
 					>
 						<v-list-item-title>
-							<span class="menufont" style="margin-left: 20px;">{{link.menuText}}</span>
+							<span class="menufont">Dashboard</span>
 						</v-list-item-title>
-						<v-icon right>{{link.menuIcon}}</v-icon>
+						<v-icon right>dashboard</v-icon>
 					</v-list-item>
-				</v-list-group>
-				<v-list-group
-					v-if="linksNavKmart.length"
-          :value="false"
-					class="SelectedTile"
-					active-class="SelectedTile-active"
-				>
-          <template v-slot:activator>
-            <v-list-item-content style="color: white;">
-              <v-list-item-title class="menufont">Menu DNM</v-list-item-title>
-            </v-list-item-content>
-          </template>
-
+					<v-list-group
+						:value="false"
+						class="SelectedTile"
+						active-class="SelectedTile-active"
+					>
+						<template v-slot:activator>
+							<v-list-item-content style="color: white;">
+								<v-list-item-title class="menufont">Proses Data</v-list-item-title>
+							</v-list-item-content>
+						</template>
+	
+						<v-list-item
+							v-for="(link) in sortLinksNav"
+							:key="link.menuRoute"
+							router :to="link.menuRoute"
+							class="SelectedTile"
+							active-class="SelectedTile-active"
+						>
+							<v-list-item-title>
+								<span class="menufont" style="margin-left: 20px;">{{link.menuText}}</span>
+							</v-list-item-title>
+							<v-icon right>{{link.menuIcon}}</v-icon>
+						</v-list-item>
+					</v-list-group>
+					<v-list-group
+						v-if="linksNavKmart.length"
+						:value="false"
+						class="SelectedTile"
+						active-class="SelectedTile-active"
+					>
+						<template v-slot:activator>
+							<v-list-item-content style="color: white;">
+								<v-list-item-title class="menufont">Menu DNM</v-list-item-title>
+							</v-list-item-content>
+						</template>
+	
+						<v-list-item
+							v-for="(linkKmart) in sortLinksNavKmart"
+							:key="linkKmart.menuRoute"
+							router :to="linkKmart.menuRoute"
+							class="SelectedTile"
+							active-class="SelectedTile-active"
+						>
+							<v-list-item-title>
+								<span class="menufont" style="margin-left: 20px;">{{linkKmart.menuText}}</span>
+							</v-list-item-title>
+							<v-icon right>{{linkKmart.menuIcon}}</v-icon>
+						</v-list-item>
+					</v-list-group>
 					<v-list-item
-						v-for="(linkKmart) in sortLinksNavKmart"
-						:key="linkKmart.menuRoute"
-						router :to="linkKmart.menuRoute"
+						v-if="roleID == 1"
+						router to="/settings"
 						class="SelectedTile"
 						active-class="SelectedTile-active"
 					>
 						<v-list-item-title>
-							<span class="menufont" style="margin-left: 20px;">{{linkKmart.menuText}}</span>
+							<span class="menufont">Settings</span>
 						</v-list-item-title>
-						<v-icon right>{{linkKmart.menuIcon}}</v-icon>
+						<v-icon right>settings</v-icon>
 					</v-list-item>
-				</v-list-group>
-				<v-list-item
-					v-if="roleID == 1"
-					router to="/settings"
-					class="SelectedTile"
-					active-class="SelectedTile-active"
-				>
-					<v-list-item-title>
-						<span class="menufont">Settings</span>
-					</v-list-item-title>
-					<v-icon right>settings</v-icon>
-				</v-list-item>
-			</v-list>
+				</v-list>
+			</div>
 		</v-navigation-drawer>
 		<v-dialog
 			v-model="dialogNotifikasi"
@@ -338,5 +340,26 @@ export default {
 }
 .theme--dark.v-icon {
 	color: #FFFFFF !important;
+}
+.customScroll {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.customScroll::-webkit-scrollbar {
+  width: 16px;
+}
+.customScroll::-webkit-scrollbar-thumb {
+  background-color: rgba(10, 204, 117, 0.694);
+  border: 5px solid #0277bd;
+  border-radius: 10rem;
+}
+.customScroll::-webkit-scrollbar-track {
+  position: absolute;
+  right: -3rem;
+  top: -50rem;
+  background: transparent;
 }
 </style>

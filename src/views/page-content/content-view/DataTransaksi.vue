@@ -36,7 +36,7 @@
             </v-list-item>
           </v-card>
         </v-flex>
-        <v-flex sm6 xs12 md4 lg4 @click="(Member.Transaksi.length && NonMember.Transaksi.length) ? openDialog('Member') : ''" style="cursor: pointer;">
+        <v-flex sm6 xs12 md4 lg4 @click="(Member.Transaksi.length) ? openDialog('Member') : ''" style="cursor: pointer;">
           <v-card class="ma-3">
             <v-list-item>
               <v-list-item-content>
@@ -78,7 +78,7 @@
             </v-list-item>
           </v-card>
         </v-flex>
-        <v-flex sm6 xs12 md4 lg4 @click="(Member.Transaksi.length && NonMember.Transaksi.length) ? openDialog('Customer') : ''" style="cursor: pointer;">
+        <v-flex sm6 xs12 md4 lg4 @click="(NonMember.Transaksi.length) ? openDialog('Customer') : ''" style="cursor: pointer;">
           <v-card class="ma-3">
             <v-list-item>
               <v-list-item-content>

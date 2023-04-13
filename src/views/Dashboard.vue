@@ -123,7 +123,6 @@
                 dense
                 depressed
                 class="ma-2 white--text text--darken-2"
-                :loading="isLoadingRefresh"
                 @click="getDataTransaksiDaily(tahun, bulan, dataView)"
               >
                 View

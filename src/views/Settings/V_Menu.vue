@@ -636,6 +636,24 @@ export default {
 				this.notifikasi("error", err.response.data.message, "1")
 			});
 		},
+    getSequenceMenu() {
+			let payload = {
+				method: "get",
+				url: `settings/getSequenceMenu`,
+				authToken: localStorage.getItem('user_token')
+			};
+			this.fetchData(payload)
+			.then((res) => {
+        this.Utama = []
+        this.DNM = []
+        let resdata = res.data.result
+				this.Utama = resdata.Utama
+				this.DNM = resdata.DNM
+			})
+			.catch((err) => {
+        this.notifikasi("error", err.response.data.message, "1")
+			});
+		},
 		bukaDialog(item, index){
       this.editedIndex = index
       if(index == 0){
@@ -654,6 +672,7 @@ export default {
       this.DialogMenu = true
     },
     bukaDialogSet(){
+      this.getSequenceMenu()
       this.DialogSet = true
     },
 		tutupDialog(){
@@ -743,7 +762,7 @@ export default {
 			};
 			this.fetchData(payload)
 			.then((res) => {
-        this.getMenu(1, this.limit, this.searchData);
+        this.getSequenceMenu()
         this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
