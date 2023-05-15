@@ -54,7 +54,7 @@
 						class="pt-3"
 					>
 					<v-textarea
-						v-model="input.idProductName"
+						v-model="input.idProductSync"
 						placeholder="ID Product Package (PPKG1;PPKG2;PPKG3;...)"
 						outlined
 						dense
@@ -141,7 +141,7 @@
 			<div class="px-1">
 				<v-row no-gutters class="pa-2">
 					<v-col cols="12" md="6" class="d-flex align-center">
-						<!-- <v-btn
+						<v-btn
 							color="light-blue darken-3"
 							class="white--text text--darken-2"
 							small
@@ -150,7 +150,7 @@
 							@click="exportexcel()"
 						>
 							<v-icon style="cursor: pointer;" small>fas fa-file-excel</v-icon>&nbsp;Export Excel
-						</v-btn> -->
+						</v-btn>
 					</v-col>
 					<v-col cols="12" md="4" class="d-flex justify-center">
 						<DatePicker
@@ -185,7 +185,7 @@
 							small
 							dense
 							depressed
-							@click="() => { tanggal = []; input = { idProductName: '', shippingType: '', payment: '' }; DataProductOrderSummary = []; DataJumTransaksiDetail = { quantity: 0, total: 0 } }"
+							@click="() => { tanggal = []; input = { idProductSync: '', shippingType: '', payment: '' }; DataProductOrderSummary = []; DataJumTransaksiDetail = { quantity: 0, total: 0 } }"
 						>
 							Reset
 						</v-btn>
@@ -207,6 +207,12 @@
 				>
 					<template #[`item.number`]="{ item }">
 						{{ DataProductOrderSummary.indexOf(item) + 1 }}
+					</template>
+					<template #[`item.priceMember`]="{ item }">
+						Rp.<span v-html="currencyDotFormatNumber(item.priceMember)" />
+					</template>
+					<template #[`item.priceNonMember`]="{ item }">
+						Rp.<span v-html="currencyDotFormatNumber(item.priceNonMember)" />
 					</template>
 					<template #[`item.totalPrice`]="{ item }">
 						Rp.<span v-html="currencyDotFormatNumber(item.totalPrice)" />
@@ -264,7 +270,7 @@ export default {
 	data: () => ({
 		tanggal: [],
 		input: {
-			idProductName: '',
+			idProductSync: '',
 			shippingType: '',
 			payment: '',
 		},
@@ -299,6 +305,8 @@ export default {
       { text: "No.", value: "number", sortable: false, width: "7%" },
       { text: "ID Product", value: "idProductSync", sortable: false },
       { text: "Product Name", value: "productName", sortable: false },
+      { text: "Price Member", value: "priceMember", sortable: false },
+      { text: "Price NonMember", value: "priceNonMember", sortable: false },
       { text: "Quantity", value: "quantity", sortable: false },
       { text: "Total", value: "totalPrice", sortable: false },
     ],
@@ -323,12 +331,12 @@ export default {
 	methods: {
 		...mapActions(["fetchData"]),
 		getData() {
-			if(!this.input.idProductName || !this.input.shippingType || !this.input.payment) {
+			if(!this.input.idProductSync || !this.input.shippingType || !this.input.payment) {
 				return this.notifikasi("warning", 'Parameter kosong !', "1")
 			}
 			var url = ''
-			if(this.input.idProductName){ url += `idProductName=${this.input.idProductName}` }
-			if(this.input.payment){ url += `&payment=${this.input.payment}` }
+			// if(this.input.idProductSync){ url += `idProductSync=${this.input.idProductSync}` }
+			if(this.input.payment){ url += `payment=${this.input.payment}` }
 			if(this.input.shippingType){
 				let shipping = this.input.shippingType.join(',')
 				url += `&shippingType=${shipping}`
@@ -339,8 +347,11 @@ export default {
 			this.loadingButtonDataProductOrderSummary = true
 			this.isLoadingDataProductOrderSummary = true
       let payload = {
-				method: "get",
+				method: "put",
 				url: `kmart/getdataProductOrderSummary?${url}`,
+				body: {
+					idProductSync: this.input.idProductSync.split(';')
+				},
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -363,11 +374,26 @@ export default {
 			});
 		},
 		exportexcel() {
-			if(!this.DataProductOrderSummary.length) return this.notifikasi("warning", 'Gagal Export Excel, Data belum tersedia !', "1")
+			if(!this.input.idProductSync || !this.input.shippingType || !this.input.payment) {
+				return this.notifikasi("warning", 'Parameter kosong !', "1")
+			}
+			var url = ''
+			if(this.input.payment){ url += `payment=${this.input.payment}` }
+			if(this.input.shippingType){
+				let shipping = this.input.shippingType.join(',')
+				url += `&shippingType=${shipping}`
+			}
+			if(this.tanggal.length === 2){ url += `&startdate=${this.tanggal.length ? this.convertDateToPicker2(this.tanggal[0]) : ''}&enddate=${this.tanggal.length ? this.convertDateToPicker2(this.tanggal[1]) : ''}` }
 			let link = process.env.VUE_APP_NODE_ENV === "production" ? process.env.VUE_APP_PROD_API_URL : process.env.VUE_APP_DEV_API_URL
 			this.isLoadingExport = true
-			fetch(`${link}kmart/exportExcel?startdate=${this.input.StartDate}&enddate=${this.input.EndDate}`, {
-				method: 'GET',
+			fetch(`${link}kmart/exportExcelOrderProductSummary?${url}`, {
+				method: 'PUT',
+				body: JSON.stringify({
+					idProductSync: this.input.idProductSync.split(';')
+				}),
+				headers: {
+					'Content-type': 'application/json; charset=UTF-8'
+				},
 				dataType: "xml",
 			})
 			.then(response => response.arrayBuffer())
@@ -375,7 +401,7 @@ export default {
 				// console.log(response)
 				this.isLoadingExport = false
 				let blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
-				this.downloadBlob(blob,`DataOrder_${this.convertDateToPicker2(new Date())}.xlsx`)
+				this.downloadBlob(blob,`DataOrderProductSummary_${this.convertDateToPicker2(new Date())}.xlsx`)
 				this.notifikasi("success", 'Sukses Export Excel', "1")
 			})
 		},
