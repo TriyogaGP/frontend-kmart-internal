@@ -366,9 +366,35 @@
             </v-flex>
           </v-layout>
           <v-divider style="border: 1px solid #FFF" />
+          <div class="d-flex flex-column justify-space-between align-center mt-3">
+            <v-btn
+              v-if="roleID === '1'"
+              color="green darken-4"
+              class="white--text text--darken-2"
+              small
+              dense
+              depressed
+              @click="emptyCart()"
+            >
+              <v-icon style="cursor: pointer;" small>fa-solid fa-window-restore</v-icon>&nbsp;Kosongkan Keranjang
+            </v-btn>
+          </div>
         </v-col>
       </v-row>
     </v-card>
+    <v-dialog
+			v-model="isLoading"
+			transition="dialog-bottom-transition"
+			persistent
+			width="500px"
+		>
+			<v-progress-linear
+				class="pa-3"
+				indeterminate
+				color="light-blue darken-3"
+			/>
+			<h4 style="color: #000; text-align: center; background-color: #FFF;">Sedang proses kosongkan Keranjang, harap menunggu ...</h4>
+		</v-dialog>
     <v-dialog
       v-model="dialogNotifikasi"
       transition="dialog-bottom-transition"
@@ -395,6 +421,7 @@ export default {
   data: () => ({
     nama: '',
     namaRole: '',
+    roleID: '',
     profileData: {
       idLogin: '',
       nik: '',
@@ -412,6 +439,7 @@ export default {
       passwordBaru: '',
       passwordConfBaru: '',
     },
+    isLoading: false,
     kondisiTombol: true,
     dataAddress: [],
     editedIndex: 2,
@@ -468,6 +496,7 @@ export default {
   mounted() {
     this.nama = localStorage.getItem("nama")
     this.namaRole = localStorage.getItem("nama_role")
+    this.roleID = localStorage.getItem("roleID")
     this.API_URL = process.env.VUE_APP_NODE_ENV === "production" ? process.env.VUE_APP_VIEW_PROD_API_URL : process.env.VUE_APP_VIEW_DEV_API_URL
     this.getKota()
     this.passType = true
@@ -542,6 +571,23 @@ export default {
 				this.notifikasi("error", err.response.data.message, "1")
 			});
     },
+    emptyCart() {
+      this.isLoading = true
+			let payload = {
+				method: "get",
+				url: `kmart/hitCartEmpty`,
+				authToken: localStorage.getItem('user_token')
+			};
+			this.fetchData(payload)
+			.then((res) => {
+        this.isLoading = false
+        this.notifikasi("success", res.data.message, "1")
+			})
+			.catch((err) => {
+        this.isLoading = false
+				this.notifikasi("error", err.response.data.message, "1")
+			});
+		},
     onClickVisible(d) {
       this[d] = !this[d]
     },

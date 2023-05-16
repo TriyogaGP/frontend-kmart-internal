@@ -278,10 +278,56 @@
           </v-toolbar-items>
         </v-toolbar>
         <v-card>
+					<v-container>
+						<v-layout row wrap>
+							<v-flex sm6 xs12 md3 lg3>
+								<v-card class="ma-3">
+									<v-list-item>
+										<v-list-item-content>
+											<div class="overline text-right">DELIVERY NON COD</div>
+											<v-list-item-title class="headline mb-1 text-right">{{ kondisi === 'Member' ? Member ? Member.Shipping.noncod : 0 : NonMember ? NonMember.Shipping.noncod : 0 }}</v-list-item-title>
+											<div><v-divider /></div>
+										</v-list-item-content>
+									</v-list-item>
+								</v-card>
+							</v-flex>
+							<v-flex sm6 xs12 md3 lg3>
+								<v-card class="ma-3">
+									<v-list-item>
+										<v-list-item-content>
+											<div class="overline text-right">DELIVERY COD</div>
+											<v-list-item-title class="headline mb-1 text-right">{{ kondisi === 'Member' ? Member ? Member.Shipping.cod : 0 : NonMember ? NonMember.Shipping.cod : 0 }}</v-list-item-title>
+											<div><v-divider /></div>
+										</v-list-item-content>
+									</v-list-item>
+								</v-card>
+							</v-flex>
+							<v-flex sm6 xs12 md3 lg3>
+								<v-card class="ma-3">
+									<v-list-item>
+										<v-list-item-content>
+											<div class="overline text-right">DELIVERY PICKUP</div>
+											<v-list-item-title class="headline mb-1 text-right">{{ kondisi === 'Member' ? Member ? Member.Shipping.pickup : 0 : NonMember ? NonMember.Shipping.pickup : 0 }}</v-list-item-title>
+											<div><v-divider /></div>
+										</v-list-item-content>
+									</v-list-item>
+								</v-card>
+							</v-flex>
+							<v-flex sm6 xs12 md3 lg3>
+								<v-card class="ma-3">
+									<v-list-item>
+										<v-list-item-content>
+											<div class="overline text-right">DELIVERY SAMEDAY</div>
+											<v-list-item-title class="headline mb-1 text-right">{{ kondisi === 'Member' ? Member ? Member.Shipping.sameday : 0 : NonMember ? NonMember.Shipping.sameday : 0 }}</v-list-item-title>
+											<div><v-divider /></div>
+										</v-list-item-content>
+									</v-list-item>
+								</v-card>
+							</v-flex>
+						</v-layout>
+					</v-container>
+					<v-divider />
           <div class="scrollText">
-            <div class="px-5">
-              <v-divider />
-            </div>
             <v-card-text>
 							<v-row no-gutters>
 								<v-col cols="12" md="10" class="d-flex justify-start align-center">
@@ -659,6 +705,12 @@ export default {
 			Product: [],
 			dp: 0,
 			bv: 0,
+			Shipping: {
+				noncod: 0,
+				cod: 0,
+				pickup: 0,
+				sameday: 0,
+			},
 			totalProduct: 0,
 		},
 		NonMember: {
@@ -666,6 +718,12 @@ export default {
 			Product: [],
 			dp: 0,
 			bv: 0,
+			Shipping: {
+				noncod: 0,
+				cod: 0,
+				pickup: 0,
+				sameday: 0,
+			},
 			totalProduct: 0,
 		},
 		MemberProduct: [],
@@ -769,12 +827,24 @@ export default {
 				Transaksi: [],
 				dp: 0,
 				bv: 0,
+				Shipping: {
+					noncod: 0,
+					cod: 0,
+					pickup: 0,
+					sameday: 0,
+				},
 				Product: [],
 			}
 			this.NonMember = {
 				Transaksi: [],
 				dp: 0,
 				bv: 0,
+				Shipping: {
+					noncod: 0,
+					cod: 0,
+					pickup: 0,
+					sameday: 0,
+				},
 				Product: [],
 			}
       let payload = {
@@ -792,6 +862,12 @@ export default {
 					Product: member_resdata.dataProduct,
 					dp: member_resdata.dataJumlah.dp,
 					bv: member_resdata.dataJumlah.bv,
+					Shipping: {
+						noncod: member_resdata.dataJumlah.shipping.noncod,
+						cod: member_resdata.dataJumlah.shipping.cod,
+						pickup: member_resdata.dataJumlah.shipping.pickup,
+						sameday: member_resdata.dataJumlah.shipping.sameday,
+					},
 					totalProduct: member_resdata.dataJumlah.totalProduct,
 				}
 				this.NonMember = {
@@ -799,6 +875,12 @@ export default {
 					Product: nonmember_resdata.dataProduct,
 					dp: nonmember_resdata.dataJumlah.dp,
 					bv: nonmember_resdata.dataJumlah.bv,
+					Shipping: {
+						noncod: nonmember_resdata.dataJumlah.shipping.noncod,
+						cod: nonmember_resdata.dataJumlah.shipping.cod,
+						pickup: nonmember_resdata.dataJumlah.shipping.pickup,
+						sameday: nonmember_resdata.dataJumlah.shipping.sameday,
+					},
 					totalProduct: nonmember_resdata.dataJumlah.totalProduct,
 				}
 				// this.notifikasi("success", res.data.message, "1")
