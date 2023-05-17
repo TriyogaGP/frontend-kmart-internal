@@ -249,8 +249,9 @@
 		</v-card>
 		<v-dialog
       v-model="DialogSetupConsumer"
-      max-width="1000px"
-      persistent
+			fullscreen
+      scrollable
+      hide-overlay
       transition="dialog-bottom-transition"
     >
       <v-card>
@@ -270,102 +271,95 @@
             </v-btn>
           </v-toolbar-items>
         </v-toolbar>
-        <v-card>
-          <div class="scrollText">
-            <div class="px-5">
-              <v-divider />
-            </div>
-            <v-card-text>
-							<v-alert
-								icon="info"
-								border="left"
-								color="light-blue darken-3"
-								text
-								dense
-							>
-								<span style="font-size: 12px;">Filter range date maksimal 1 bulan</span>
-							</v-alert>
-							<v-row no-gutters>
-								<v-col
-									cols="12"
-									md="4"
-									class="pt-2 d-flex align-center font-weight-bold"
-								>
-									Range Date
-								</v-col>
-								<v-col
-									cols="12"
-									md="8"
-									class="pt-3"
-								>
-								<DatePicker
-									v-model="tanggal" 
-									range
-									circle
-									lang="id"
-									position="center bottom"
-									:date-format="{
-										day: '2-digit',
-										month: '2-digit',
-										year: 'numeric'
-									}"
-									placeholder="Start Date ~ End Date"
-								/>
-								</v-col>
-							</v-row>
-							<v-row no-gutters>
-								<v-col
-									cols="12"
-									md="4"
-									class="pt-2 d-flex align-center font-weight-bold"
-								>
-									Consumer Type
-								</v-col>
-								<v-col
-									cols="12"
-									md="8"
-									class="pt-3"
-								>
-									<v-autocomplete
-										v-model="consumerType"
-										:items="[{ value: '1', text: 'Member' }, { value: '0', text: 'Non-Member' }]"
-										item-text="text"
-										item-value="value"
-										placeholder="Consumer Type"
-										label="Consumer Type"
-										outlined
-										dense
-										hide-details
-										clearable
-									/>
-								</v-col>
-							</v-row>
-            </v-card-text>
-          </div>
-					<v-divider />
-					<v-card-actions>
-						<v-row 
-							no-gutters
-							class="mt-1 mr-3"
+				<v-card-text class="pt-4" style="height: 100%;">
+					<v-alert
+						icon="info"
+						border="left"
+						color="light-blue darken-3"
+						text
+						dense
+					>
+						<span style="font-size: 12px;">Filter range date maksimal 1 bulan</span>
+					</v-alert>
+					<v-row no-gutters>
+						<v-col
+							cols="12"
+							md="4"
+							class="pt-2 d-flex align-center font-weight-bold"
 						>
-							<v-col
-								class="text-end"
-								cols="12"
+							Range Date
+						</v-col>
+						<v-col
+							cols="12"
+							md="8"
+							class="pt-3"
+						>
+						<DatePicker
+							v-model="tanggal" 
+							range
+							circle
+							lang="id"
+							position="center bottom"
+							:date-format="{
+								day: '2-digit',
+								month: '2-digit',
+								year: 'numeric'
+							}"
+							placeholder="Start Date ~ End Date"
+						/>
+						</v-col>
+					</v-row>
+					<v-row no-gutters>
+						<v-col
+							cols="12"
+							md="4"
+							class="pt-2 d-flex align-center font-weight-bold"
+						>
+							Consumer Type
+						</v-col>
+						<v-col
+							cols="12"
+							md="8"
+							class="pt-3"
+						>
+							<v-autocomplete
+								v-model="consumerType"
+								:items="[{ value: '1', text: 'Member' }, { value: '0', text: 'Non-Member' }]"
+								item-text="text"
+								item-value="value"
+								placeholder="Consumer Type"
+								label="Consumer Type"
+								outlined
+								dense
+								hide-details
+								clearable
+							/>
+						</v-col>
+					</v-row>
+				</v-card-text>
+				<v-divider />
+				<v-card-actions>
+					<v-row 
+						no-gutters
+						class="mt-1 mr-3"
+					>
+						<v-col
+							class="text-end"
+							cols="12"
+						>
+							<v-btn
+								color="light-blue darken-3"
+								class="white--text text--darken-2"
+								small
+								dense
+								depressed
+								@click="SetupConsumer()"
 							>
-								<v-btn
-									color="light-blue darken-3"
-									class="white--text text--darken-2"
-									small
-									dense
-									depressed
-									@click="SetupConsumer()"
-								>
-									Setup Consumer
-								</v-btn>
-							</v-col>
-						</v-row>
-					</v-card-actions>
-        </v-card>
+								Setup Consumer
+							</v-btn>
+						</v-col>
+					</v-row>
+				</v-card-actions>
       </v-card>
     </v-dialog>
 		<v-dialog

@@ -203,6 +203,7 @@
 		</v-card>
 		<v-dialog
       v-model="DialogTopic"
+			scrollable
       max-width="1000px"
       persistent
       transition="dialog-bottom-transition"
@@ -224,129 +225,124 @@
             </v-btn>
           </v-toolbar-items>
         </v-toolbar>
-        <v-card>
-          <div class="scrollText">
-            <div class="px-5">
-              <v-divider />
-            </div>
-            <v-card-text>
-							<v-tabs
-							 	v-model="tab"
-								fixed-tabs
-								background-color="light-blue darken-3"
-								dark
-							>
-								<v-tab key="Belanja">
-									Belanja ({{ OrderMemberBelanja ? OrderMemberBelanja.length : 0 }})
-								</v-tab>
-								<v-tab key="TidakBelanja">
-									Tidak Belanja ({{ OrderMemberTidakBelanja ? OrderMemberTidakBelanja.length : 0 }})
-								</v-tab>
-							</v-tabs>
-							<v-tabs-items v-model="tab">
-								<v-tab-item key="Belanja">
-									<v-card class="mt-2 mb-2 pa-1" elevation="0">
+				<v-card-text class="pt-4">
+					<v-tabs
+						v-model="tab"
+						fixed-tabs
+						background-color="light-blue darken-3"
+						dark
+					>
+						<v-tab key="Belanja">
+							Belanja ({{ OrderMemberBelanja ? OrderMemberBelanja.length : 0 }})
+						</v-tab>
+						<v-tab key="TidakBelanja">
+							Tidak Belanja ({{ OrderMemberTidakBelanja ? OrderMemberTidakBelanja.length : 0 }})
+						</v-tab>
+					</v-tabs>
+					<v-tabs-items v-model="tab">
+						<v-tab-item key="Belanja">
+							<v-card class="mt-2 mb-2 pa-1" elevation="0">
+								<v-btn
+									color="light-blue darken-3"
+									class="white--text text--darken-2"
+									small
+									dense
+									depressed
+									@click="exportExcelConsumer(titleDialog, OrderMemberBelanja, 'Belanja')"
+								>
+									<v-icon style="cursor: pointer;" small>fas fa-file-excel</v-icon>&nbsp;Export Excel
+								</v-btn>
+								<v-data-table
+									loading-text="Sedang memuat... Harap tunggu"
+									no-data-text="Tidak ada data yang tersedia"
+									no-results-text="Tidak ada catatan yang cocok ditemukan"
+									:headers="headersOrderMember"
+									:loading="isLoadingDataTopic"
+									:items="OrderMemberBelanja"
+									item-key="idUser"
+									hide-default-footer
+									class="elevation-1"
+									:page.sync="page"
+									:items-per-page="itemsPerPage"
+									@page-count="pageCount = $event"
+								>
+									<template #[`item.number`]="{ item }">
+										{{ OrderMemberBelanja.indexOf(item) + 1 }}
+									</template>
+									<template #[`item.orders`]="{ item }">
 										<v-btn
 											color="light-blue darken-3"
 											class="white--text text--darken-2"
 											small
 											dense
 											depressed
-											@click="exportExcelConsumer(titleDialog, OrderMemberBelanja, 'Belanja')"
+											@click="viewDataOrder(item.dataOrders)"
 										>
-											<v-icon style="cursor: pointer;" small>fas fa-file-excel</v-icon>&nbsp;Export Excel
+											Lihat Order
 										</v-btn>
-										<v-data-table
-											loading-text="Sedang memuat... Harap tunggu"
-											no-data-text="Tidak ada data yang tersedia"
-											no-results-text="Tidak ada catatan yang cocok ditemukan"
-											:headers="headersOrderMember"
-											:loading="isLoadingDataTopic"
-											:items="OrderMemberBelanja"
-											item-key="idUser"
-											hide-default-footer
-											class="elevation-1"
-											:page.sync="page"
-											:items-per-page="itemsPerPage"
-											@page-count="pageCount = $event"
-										>
-											<template #[`item.number`]="{ item }">
-												{{ OrderMemberBelanja.indexOf(item) + 1 }}
-											</template>
-											<template #[`item.orders`]="{ item }">
-												<v-btn
-													color="light-blue darken-3"
-													class="white--text text--darken-2"
-													small
-													dense
-													depressed
-													@click="viewDataOrder(item.dataOrders)"
-												>
-													Lihat Order
-												</v-btn>
-											</template>
-										</v-data-table>
-									</v-card>
-									<v-row>
-										<v-col cols="12">
-											<v-pagination
-												v-if="OrderMemberBelanja.length > 0"
-												v-model="page"
-												:length="pageCount"
-												:total-visible="7"
-											/>
-										</v-col>
-									</v-row>
-								</v-tab-item>
-								<v-tab-item key="TidakBelanja">
-									<v-card class="mt-2 mb-2 pa-1" elevation="0">
-										<v-btn
-											color="light-blue darken-3"
-											class="white--text text--darken-2"
-											small
-											dense
-											depressed
-											@click="exportExcelConsumer(titleDialog, OrderMemberTidakBelanja, 'Tidak Belanja')"
-										>
-											<v-icon style="cursor: pointer;" small>fas fa-file-excel</v-icon>&nbsp;Export Excel
-										</v-btn>
-										<v-data-table
-											loading-text="Sedang memuat... Harap tunggu"
-											no-data-text="Tidak ada data yang tersedia"
-											no-results-text="Tidak ada catatan yang cocok ditemukan"
-											:headers="headersOrderMember"
-											:loading="isLoadingDataTopic"
-											:items="OrderMemberTidakBelanja"
-											item-key="idUser"
-											hide-default-footer
-											class="elevation-1"
-											:page.sync="page1"
-											:items-per-page="itemsPerPage1"
-											@page-count="pageCount1 = $event"
-										>
-											<template #[`item.number`]="{ item }">
-												{{ OrderMemberTidakBelanja.indexOf(item) + 1 }}
-											</template>
-											<template #[`item.orders`]="{}">
-												-
-											</template>
-										</v-data-table>
-									</v-card>
-									<v-row>
-										<v-col cols="12">
-											<v-pagination
-												v-if="OrderMemberTidakBelanja.length > 0"
-												v-model="page1"
-												:length="pageCount1"
-												:total-visible="7"
-											/>
-										</v-col>
-									</v-row>
-								</v-tab-item>
-							</v-tabs-items>
-            </v-card-text>
-          </div>
-        </v-card>
+									</template>
+								</v-data-table>
+							</v-card>
+							<v-row>
+								<v-col cols="12">
+									<v-pagination
+										v-if="OrderMemberBelanja.length > 0"
+										v-model="page"
+										:length="pageCount"
+										:total-visible="7"
+									/>
+								</v-col>
+							</v-row>
+						</v-tab-item>
+						<v-tab-item key="TidakBelanja">
+							<v-card class="mt-2 mb-2 pa-1" elevation="0">
+								<v-btn
+									color="light-blue darken-3"
+									class="white--text text--darken-2"
+									small
+									dense
+									depressed
+									@click="exportExcelConsumer(titleDialog, OrderMemberTidakBelanja, 'Tidak Belanja')"
+								>
+									<v-icon style="cursor: pointer;" small>fas fa-file-excel</v-icon>&nbsp;Export Excel
+								</v-btn>
+								<v-data-table
+									loading-text="Sedang memuat... Harap tunggu"
+									no-data-text="Tidak ada data yang tersedia"
+									no-results-text="Tidak ada catatan yang cocok ditemukan"
+									:headers="headersOrderMember"
+									:loading="isLoadingDataTopic"
+									:items="OrderMemberTidakBelanja"
+									item-key="idUser"
+									hide-default-footer
+									class="elevation-1"
+									:page.sync="page1"
+									:items-per-page="itemsPerPage1"
+									@page-count="pageCount1 = $event"
+								>
+									<template #[`item.number`]="{ item }">
+										{{ OrderMemberTidakBelanja.indexOf(item) + 1 }}
+									</template>
+									<template #[`item.orders`]="{}">
+										-
+									</template>
+								</v-data-table>
+							</v-card>
+							<v-row>
+								<v-col cols="12">
+									<v-pagination
+										v-if="OrderMemberTidakBelanja.length > 0"
+										v-model="page1"
+										:length="pageCount1"
+										:total-visible="7"
+									/>
+								</v-col>
+							</v-row>
+						</v-tab-item>
+					</v-tabs-items>
+				</v-card-text>
+        <v-divider />
+				<v-card-actions />
       </v-card>
     </v-dialog>
 		<v-dialog
@@ -725,10 +721,6 @@ export default {
 </script>
 
 <style>
-.scrollText{
-  max-height: 450px !important;
-  overflow-y: auto !important;
-}
 .v-pagination {
   justify-content: flex-end !important;
 }

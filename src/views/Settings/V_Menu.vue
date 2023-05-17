@@ -186,157 +186,152 @@
             </v-btn>
           </v-toolbar-items>
         </v-toolbar>
-        <v-card>
-          <div class="scrollText">
-            <div class="px-5">
-              <v-divider />
-            </div>
-            <v-card-text>
-              <v-row no-gutters>
-                <v-col
-                  cols="12"
-                  md="4"
-                  class="pt-2 d-flex align-center font-weight-bold"
-                >
-                  Kategori Menu
-                </v-col>
-                <v-col
-                  cols="12"
-                  md="8"
-                  class="pt-3"
-                >
-									<v-autocomplete
-										v-model="inputMenu.kategori"
-										:items="kategoriOptions"
-										item-text="text"
-										item-value="value"
-										placeholder="Kategori Menu"
-										label="Kategori Menu"
-										outlined
-										dense
-										hide-details
-										clearable
-									/>
-                </v-col>
-              </v-row>
-              <v-row no-gutters>
-                <v-col
-                  cols="12"
-                  md="4"
-                  class="pt-2 d-flex align-center font-weight-bold"
-                >
-                  Menu Text
-                </v-col>
-                <v-col
-                  cols="12"
-                  md="8"
-                  class="pt-3"
-                >
-                  <v-text-field
-                    v-model="inputMenu.menu_text"
-                    placeholder="Menu Text"
-                    outlined
-                    dense
-                    label="Menu Text"
-                    color="light-blue darken-3"
-                    hide-details
-                    clearable
-                  />
-                </v-col>
-              </v-row>
-              <v-row no-gutters>
-                <v-col
-                  cols="12"
-                  md="4"
-                  class="pt-2 d-flex align-center font-weight-bold"
-                >
-                  Menu Route
-                </v-col>
-                <v-col
-                  cols="12"
-                  md="8"
-                  class="pt-3"
-                >
-                  <v-text-field
-                    v-model="inputMenu.menu_route"
-                    placeholder="Menu Route"
-                    outlined
-                    dense
-                    label="Menu Route"
-                    color="light-blue darken-3"
-                    hide-details
-                    clearable
-                  />
-                </v-col>
-              </v-row>
-              <v-row no-gutters>
-                <v-col
-                  cols="12"
-                  md="4"
-                  class="pt-2 d-flex align-center font-weight-bold"
-                >
-                  Menu Icon
-                </v-col>
-                <v-col
-                  cols="12"
-                  md="8"
-                  class="pt-3"
-                >
-                  <v-text-field
-                    v-model="inputMenu.menu_icon"
-                    placeholder="Menu Icon"
-                    outlined
-                    dense
-                    label="Menu Icon"
-                    color="light-blue darken-3"
-                    hide-details
-                    clearable
-                  />
-                </v-col>
-              </v-row>
-            </v-card-text>
-          </div>
-          <v-card-actions>
-            <v-row 
-              no-gutters
-              class="mt-1 mr-3"
+        <v-card-text class="pt-4">
+          <v-row no-gutters>
+            <v-col
+              cols="12"
+              md="4"
+              class="pt-2 d-flex align-center font-weight-bold"
             >
-              <v-col
-                class="text-end"
-                cols="12"
+              Kategori Menu
+            </v-col>
+            <v-col
+              cols="12"
+              md="8"
+              class="pt-3"
+            >
+              <v-autocomplete
+                v-model="inputMenu.kategori"
+                :items="kategoriOptions"
+                item-text="text"
+                item-value="value"
+                placeholder="Kategori Menu"
+                label="Kategori Menu"
+                outlined
+                dense
+                hide-details
+                clearable
+              />
+            </v-col>
+          </v-row>
+          <v-row no-gutters>
+            <v-col
+              cols="12"
+              md="4"
+              class="pt-2 d-flex align-center font-weight-bold"
+            >
+              Menu Text
+            </v-col>
+            <v-col
+              cols="12"
+              md="8"
+              class="pt-3"
+            >
+              <v-text-field
+                v-model="inputMenu.menu_text"
+                placeholder="Menu Text"
+                outlined
+                dense
+                label="Menu Text"
+                color="light-blue darken-3"
+                hide-details
+                clearable
+              />
+            </v-col>
+          </v-row>
+          <v-row no-gutters>
+            <v-col
+              cols="12"
+              md="4"
+              class="pt-2 d-flex align-center font-weight-bold"
+            >
+              Menu Route
+            </v-col>
+            <v-col
+              cols="12"
+              md="8"
+              class="pt-3"
+            >
+              <v-text-field
+                v-model="inputMenu.menu_route"
+                placeholder="Menu Route"
+                outlined
+                dense
+                label="Menu Route"
+                color="light-blue darken-3"
+                hide-details
+                clearable
+              />
+            </v-col>
+          </v-row>
+          <v-row no-gutters>
+            <v-col
+              cols="12"
+              md="4"
+              class="pt-2 d-flex align-center font-weight-bold"
+            >
+              Menu Icon
+            </v-col>
+            <v-col
+              cols="12"
+              md="8"
+              class="pt-3"
+            >
+              <v-text-field
+                v-model="inputMenu.menu_icon"
+                placeholder="Menu Icon"
+                outlined
+                dense
+                label="Menu Icon"
+                color="light-blue darken-3"
+                hide-details
+                clearable
+              />
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <v-divider />
+        <v-card-actions>
+          <v-row 
+            no-gutters
+            class="mt-1 mr-3"
+          >
+            <v-col
+              class="text-end"
+              cols="12"
+            >
+              <v-btn
+                v-if="editedIndex == 0"
+                color="light-blue darken-3"
+                class="white--text text--darken-2"
+                small
+                dense
+                depressed
+                :disabled="kondisiTombol"
+                @click="SimpanForm(0)"
               >
-                <v-btn
-                  v-if="editedIndex == 0"
-                  color="light-blue darken-3"
-                  class="white--text text--darken-2"
-                  small
-                  dense
-                  depressed
-                  :disabled="kondisiTombol"
-                  @click="SimpanForm(0)"
-                >
-                  Simpan Data
-                </v-btn> 
-                <v-btn
-                  v-else-if="editedIndex == 1"
-                  color="light-blue darken-3"
-                  class="white--text text--darken-2"
-                  small
-                  dense
-                  depressed
-                  :disabled="kondisiTombol"
-                  @click="SimpanForm(1)"
-                >
-                  Ubah Data
-                </v-btn>
-              </v-col>
-            </v-row>
-          </v-card-actions>
-        </v-card>
+                Simpan Data
+              </v-btn> 
+              <v-btn
+                v-else-if="editedIndex == 1"
+                color="light-blue darken-3"
+                class="white--text text--darken-2"
+                small
+                dense
+                depressed
+                :disabled="kondisiTombol"
+                @click="SimpanForm(1)"
+              >
+                Ubah Data
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-card-actions>
       </v-card>
     </v-dialog>
 		<v-dialog
       v-model="DialogSet"
+      scrollable
       max-width="800px"
       persistent
       transition="dialog-bottom-transition"
@@ -358,100 +353,93 @@
             </v-btn>
           </v-toolbar-items>
         </v-toolbar>
-        <v-card>
-          <div class="scrollText">
-            <div class="px-5">
-              <v-divider />
-            </div>
-            <v-card-text>
-              <v-tabs
-							 	v-model="tab"
-								fixed-tabs
-								background-color="light-blue darken-3"
-								dark
-							>
-								<v-tab key="utama">
-									MENU UTAMA ({{ Utama.length }})
-								</v-tab>
-								<v-tab key="DNM">
-									MENU DNM ({{ DNM.length }})
-								</v-tab>
-							</v-tabs>
-							<v-tabs-items v-model="tab">
-								<v-tab-item key="utama">
-									<v-card class="pa-1" elevation="0">
-                    <v-container>
-                      <v-flex>
-                        <v-toolbar color="light-blue darken-3" dark>
-                          <v-toolbar-title>Menu Utama</v-toolbar-title>
-                          <v-spacer></v-spacer>
-                          <v-btn icon @click="actionUtama('edit')" v-if="!editingUtama">
-                            <v-icon>sort</v-icon>
-                          </v-btn>
-                          <v-btn icon @click="actionUtama('done')" v-if="editingUtama">
-                            <v-icon>done</v-icon>
-                          </v-btn>
-                          <v-btn icon @click="actionUtama('undo')" v-if="editingUtama">
-                            <v-icon>close</v-icon>
-                          </v-btn>
-                        </v-toolbar>
-                        <v-list two-line>
-                          <draggable v-bind="optionsUtama" v-model="Utama" class="kotakDrag">
-                            <v-list-item v-for="v in Utama" :key="v.idMenu" class="kotak">
-                              <v-list-item-avatar color="white">
-                                <v-icon small>{{ v.menuIcon }}</v-icon>
-                              </v-list-item-avatar>
-                              <v-list-item-content>
-                                <v-list-item-title>{{ v.menuText }}</v-list-item-title>
-                                <v-list-item-subtitle style="color: white !important;">{{ v.menuRoute }}</v-list-item-subtitle>
-                              </v-list-item-content>
-                            </v-list-item>
-                          </draggable>
-                        </v-list>
-                      </v-flex>
-                    </v-container>
-                  </v-card>
-                </v-tab-item>
-								<v-tab-item key="DNM">
-                  <v-card class="mt-2 mb-2 pa-1" elevation="0">
-                    <v-container>
-                      <v-flex>
-                        <v-toolbar color="light-blue darken-3" dark>
-                          <v-toolbar-title>Menu DNM</v-toolbar-title>
-                          <v-spacer></v-spacer>
-                          <v-btn icon @click="actionDNM('edit')" v-if="!editingDNM">
-                            <v-icon>sort</v-icon>
-                          </v-btn>
-                          <v-btn icon @click="actionDNM('done')" v-if="editingDNM">
-                            <v-icon>done</v-icon>
-                          </v-btn>
-                          <v-btn icon @click="actionDNM('undo')" v-if="editingDNM">
-                            <v-icon>close</v-icon>
-                          </v-btn>
-                        </v-toolbar>
-                        <v-list two-line>
-                          <draggable v-bind="optionsDNM" v-model="DNM" class="kotakDrag">
-                            <v-list-item v-for="v in DNM" :key="v.idMenu" class="kotak">
-                              <v-list-item-avatar color="white">
-                                <v-icon small>{{ v.menuIcon }}</v-icon>
-                              </v-list-item-avatar>
-                              <v-list-item-content>
-                                <v-list-item-title>{{ v.menuText }}</v-list-item-title>
-                                <v-list-item-subtitle style="color: white !important;">{{ v.menuRoute }}</v-list-item-subtitle>
-                              </v-list-item-content>
-                            </v-list-item>
-                          </draggable>
-                        </v-list>
-                      </v-flex>
-                    </v-container>
-                  </v-card>
-                </v-tab-item>
-              </v-tabs-items>
-            </v-card-text>
-          </div>
-          <v-divider />
-          <v-card-actions class="pa-5"/>
-        </v-card>
+        <v-card-text class="pt-4">
+          <v-tabs
+            v-model="tab"
+            fixed-tabs
+            background-color="light-blue darken-3"
+            dark
+          >
+            <v-tab key="utama">
+              MENU UTAMA ({{ Utama.length }})
+            </v-tab>
+            <v-tab key="DNM">
+              MENU DNM ({{ DNM.length }})
+            </v-tab>
+          </v-tabs>
+          <v-tabs-items v-model="tab">
+            <v-tab-item key="utama">
+              <v-card class="pa-1" elevation="0">
+                <v-container>
+                  <v-flex>
+                    <v-toolbar color="light-blue darken-3" dark>
+                      <v-toolbar-title>Menu Utama</v-toolbar-title>
+                      <v-spacer></v-spacer>
+                      <v-btn icon @click="actionUtama('edit')" v-if="!editingUtama">
+                        <v-icon>sort</v-icon>
+                      </v-btn>
+                      <v-btn icon @click="actionUtama('done')" v-if="editingUtama">
+                        <v-icon>done</v-icon>
+                      </v-btn>
+                      <v-btn icon @click="actionUtama('undo')" v-if="editingUtama">
+                        <v-icon>close</v-icon>
+                      </v-btn>
+                    </v-toolbar>
+                    <v-list two-line>
+                      <draggable v-bind="optionsUtama" v-model="Utama" class="kotakDrag">
+                        <v-list-item v-for="v in Utama" :key="v.idMenu" class="kotak">
+                          <v-list-item-avatar color="white">
+                            <v-icon small>{{ v.menuIcon }}</v-icon>
+                          </v-list-item-avatar>
+                          <v-list-item-content>
+                            <v-list-item-title>{{ v.menuText }}</v-list-item-title>
+                            <v-list-item-subtitle style="color: white !important;">{{ v.menuRoute }}</v-list-item-subtitle>
+                          </v-list-item-content>
+                        </v-list-item>
+                      </draggable>
+                    </v-list>
+                  </v-flex>
+                </v-container>
+              </v-card>
+            </v-tab-item>
+            <v-tab-item key="DNM">
+              <v-card class="mt-2 mb-2 pa-1" elevation="0">
+                <v-container>
+                  <v-flex>
+                    <v-toolbar color="light-blue darken-3" dark>
+                      <v-toolbar-title>Menu DNM</v-toolbar-title>
+                      <v-spacer></v-spacer>
+                      <v-btn icon @click="actionDNM('edit')" v-if="!editingDNM">
+                        <v-icon>sort</v-icon>
+                      </v-btn>
+                      <v-btn icon @click="actionDNM('done')" v-if="editingDNM">
+                        <v-icon>done</v-icon>
+                      </v-btn>
+                      <v-btn icon @click="actionDNM('undo')" v-if="editingDNM">
+                        <v-icon>close</v-icon>
+                      </v-btn>
+                    </v-toolbar>
+                    <v-list two-line>
+                      <draggable v-bind="optionsDNM" v-model="DNM" class="kotakDrag">
+                        <v-list-item v-for="v in DNM" :key="v.idMenu" class="kotak">
+                          <v-list-item-avatar color="white">
+                            <v-icon small>{{ v.menuIcon }}</v-icon>
+                          </v-list-item-avatar>
+                          <v-list-item-content>
+                            <v-list-item-title>{{ v.menuText }}</v-list-item-title>
+                            <v-list-item-subtitle style="color: white !important;">{{ v.menuRoute }}</v-list-item-subtitle>
+                          </v-list-item-content>
+                        </v-list-item>
+                      </draggable>
+                    </v-list>
+                  </v-flex>
+                </v-container>
+              </v-card>
+            </v-tab-item>
+          </v-tabs-items>
+        </v-card-text>
+        <v-divider />
+        <v-card-actions/>
       </v-card>
     </v-dialog>
 		<v-dialog
@@ -808,10 +796,6 @@ export default {
 </script>
 
 <style>
-.scrollText{
-  max-height: 450px !important;
-  overflow-y: auto !important;
-}
 .v-pagination {
   justify-content: flex-end !important;
 }

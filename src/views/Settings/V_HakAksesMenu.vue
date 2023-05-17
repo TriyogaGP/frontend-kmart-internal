@@ -113,6 +113,7 @@
 		</v-row>
 		<v-dialog
       v-model="DialogRoleMenu"
+			scrollable
       max-width="800px"
       persistent
       transition="dialog-bottom-transition"
@@ -134,82 +135,76 @@
             </v-btn>
           </v-toolbar-items>
         </v-toolbar>
-        <v-card>
-          <div class="scrollText">
-            <div class="px-5">
-              <v-divider />
-            </div>
-            <v-card-text>
-              <v-row no-gutters>
-                <v-col
-                  cols="12"
-                  md="4"
-                  class="pt-2 d-flex align-center font-weight-bold"
-                >
-                  Role Name
-                </v-col>
-                <v-col
-                  cols="12"
-                  md="8"
-                  class="pt-3"
-                >
-									<v-autocomplete
-										v-model="inputRoleMenu.menu"
-										:items="menuOptions"
-										placeholder="Pilih Menu"
-										label="Pilih Menu"
-										item-text="menuText"
-										item-value="idMenu"
-										multiple
+				<v-card-text class="pt-4">
+					<v-row no-gutters>
+						<v-col
+							cols="12"
+							md="4"
+							class="pt-2 d-flex align-center font-weight-bold"
+						>
+							Role Name
+						</v-col>
+						<v-col
+							cols="12"
+							md="8"
+							class="pt-3"
+						>
+							<v-autocomplete
+								v-model="inputRoleMenu.menu"
+								:items="menuOptions"
+								placeholder="Pilih Menu"
+								label="Pilih Menu"
+								item-text="menuText"
+								item-value="idMenu"
+								multiple
+								outlined
+								hide-details
+								dense
+								clearable
+								@change="addData($event)"
+							>
+								<template #selection="data">
+									<v-chip
+										v-bind="data.attrs"
+										:input-value="data.selected"
+										close
+										small
 										outlined
-										hide-details
-										dense
-										clearable
-										@change="addData($event)"
+										class="ma-1"
+										color="light-blue darken-3"
+										@click="data.select"
+										@click:close="remove(data.item)"
 									>
-										<template #selection="data">
-											<v-chip
-												v-bind="data.attrs"
-												:input-value="data.selected"
-												close
-												small
-												outlined
-												class="ma-1"
-												color="light-blue darken-3"
-												@click="data.select"
-												@click:close="remove(data.item)"
-											>
-												{{ data.item.menuText }}
-											</v-chip>
-										</template>
-									</v-autocomplete>
-                </v-col>
-              </v-row>
-            </v-card-text>
-          </div>
-          <v-card-actions>
-            <v-row 
-              no-gutters
-              class="mt-1 mr-3"
-            >
-              <v-col
-                class="text-end"
-                cols="12"
-              >
-                <v-btn
-                  color="light-blue darken-3"
-                  class="white--text text--darken-2"
-                  small
-                  dense
-                  depressed
-                  @click="SimpanForm()"
-                >
-                  Ubah Data
-                </v-btn>
-              </v-col>
-            </v-row>
-          </v-card-actions>
-        </v-card>
+										{{ data.item.menuText }}
+									</v-chip>
+								</template>
+							</v-autocomplete>
+						</v-col>
+					</v-row>
+				</v-card-text>
+				<v-divider />
+				<v-card-actions>
+					<v-row 
+						no-gutters
+						class="mt-1 mr-3"
+					>
+						<v-col
+							class="text-end"
+							cols="12"
+						>
+							<v-btn
+								color="light-blue darken-3"
+								class="white--text text--darken-2"
+								small
+								dense
+								depressed
+								@click="SimpanForm()"
+							>
+								Ubah Data
+							</v-btn>
+						</v-col>
+					</v-row>
+				</v-card-actions>
       </v-card>
     </v-dialog>
 		<v-dialog

@@ -123,6 +123,9 @@
 					:headers="headersDataSurveyDNM"
 					:loading="isLoadingDataSurveyDNM"
 					:items="DataSurveyDNM"
+					:single-expand="singleExpand"
+          :expanded.sync="expanded"
+          show-expand
 					item-key="idUser"
 					:sort-by="sortBy"
 					:sort-desc="sortDesc"
@@ -146,18 +149,24 @@
 					<template #[`item.createdAt`]="{ item }">
 						<span v-html="convertDateTime(item.createdAt)" /> 
 					</template>
+					<template #expanded-item="{ headers, item }">
+            <td :colspan="headers.length" class="white"> 
+              <v-btn
+                :value="item.idUser"
+                color="#04f7f7"
+                small
+                dense
+                depressed
+                class="ma-2 white--text text--darken-2"
+								@click="openDialog(item)"
+              >
+                <v-icon small>info</v-icon>	Detail
+              </v-btn> 
+              <v-divider />
+            </td>
+          </template>
 				</v-data-table>
 			</div>
-			<!-- <v-row>
-				<v-col cols="12" class="mt-2 pa-2 px-5">
-					<v-pagination
-						v-if="DataSurveyDNM.length > 0"
-						v-model="page"
-						:length="pageCount"
-						:total-visible="7"
-					/>
-				</v-col>
-			</v-row> -->
 			<v-row>
 				<v-col cols="10" class="mt-2 d-flex justify-start align-center">
 					<span>Halaman <strong>{{ pageSummary.page ? pageSummary.page : 0 }}</strong> dari Total Halaman <strong>{{ pageSummary.totalPages ? pageSummary.totalPages : 0 }}</strong> (Records {{ pageSummary.total ? pageSummary.total : 0 }})</span>
@@ -195,6 +204,123 @@
 				</v-col>
 			</v-row>
 		</v-card>
+		<v-dialog
+      v-model="DialogDetail"
+			scrollable
+      max-width="800px"
+      persistent
+      transition="dialog-bottom-transition"
+    >
+      <v-card>
+        <v-toolbar
+          dark
+          color="light-blue darken-3"
+        >
+          <v-toolbar-title>Detail Survey DNM</v-toolbar-title>
+          <v-spacer />
+          <v-toolbar-items>
+            <v-btn
+              icon
+              dark
+              @click="DialogDetail = false"
+            >
+              <v-icon>close</v-icon>
+            </v-btn>
+          </v-toolbar-items>
+        </v-toolbar>
+				<v-card-text class="pt-4">
+					<v-row no-gutters class="py-2">
+						<v-col
+							cols="12"
+							md="6"
+						>
+							<strong>Nama Lengkap</strong><br>
+							{{ this.detailSurvei.fullname }}
+						</v-col>
+						<v-col
+							cols="12"
+							md="6"
+						>
+							<strong>No. Telepon</strong><br>
+							{{ this.detailSurvei.deviceNumber }}
+						</v-col>
+					</v-row>
+					<v-row no-gutters class="py-2">
+						<v-col
+							cols="12"
+							md="6"
+						>
+							<strong>User Type</strong><br>
+							{{ this.detailSurvei.consumerType }}
+						</v-col>
+						<v-col
+							cols="12"
+							md="6"
+						>
+							<strong>Email</strong><br>
+							{{ this.detailSurvei.email ? this.detailSurvei.email : '-' }}
+						</v-col>
+					</v-row>
+					<v-row no-gutters class="py-2">
+						<v-col
+							cols="12"
+							md="6"
+						>
+							<strong>ID Member</strong><br>
+							{{ this.detailSurvei.consumerType === 'MEMBER' ? this.detailSurvei.idMember : '-' }}
+						</v-col>
+						<v-col
+							cols="12"
+							md="6"
+						/>
+					</v-row>
+					<v-divider />
+					<v-row no-gutters class="py-2">
+						<v-col cols="12">
+							<strong>Tanggal Survei</strong><br>
+							{{ convertDateTime(this.detailSurvei.createdAt) }}
+						</v-col>
+					</v-row>
+					<v-row no-gutters class="py-2">
+						<v-col cols="12">
+							<strong>Rating (1 - 5)</strong><br>
+							{{ this.detailSurvei.rating }}
+						</v-col>
+					</v-row>
+					<v-row no-gutters class="py-2">
+						<v-col cols="12">
+							<strong>Apa yang anda sukai dari DNM Mobile App ?</strong><br>
+							<div v-if="this.detailSurvei.dataQuesioner">
+								<span v-if="typeof this.detailSurvei.dataQuesioner[1].jawaban === 'string'">{{ this.detailSurvei.dataQuesioner[1].jawaban }}</span>	
+								<ol v-else style="padding-left: 15px !important;">
+									<li v-for="(item, i) in this.detailSurvei.dataQuesioner[1].jawaban" :key="i">
+										{{ item }}
+									</li>
+								</ol>
+							</div>
+						</v-col>
+					</v-row>
+					<v-row no-gutters class="py-2">
+						<v-col cols="12">
+							<strong>Apakah anda akan merekomendasikan DNM Mobile App kepada Keluarga/Teman anda ?</strong><br>
+							<div v-if="this.detailSurvei.dataQuesioner">
+								<span>{{ this.detailSurvei.dataQuesioner[2].jawaban }}</span>	
+							</div>
+						</v-col>
+					</v-row>
+					<v-row no-gutters class="pt-2">
+						<v-col cols="12">
+							<strong>Saran dan Masukan</strong><br>
+							<div v-if="this.detailSurvei.dataQuesioner">
+								<span>{{ this.detailSurvei.dataQuesioner[3].jawaban }}</span>	
+							</div>
+						</v-col>
+					</v-row>
+				</v-card-text>
+        <v-divider />
+				<v-card-actions />
+      </v-card>
+    </v-dialog>
 		<v-dialog
 			v-model="isLoadingExport"
 			transition="dialog-bottom-transition"
@@ -239,6 +365,9 @@ export default {
     loadingButtonDataSurveyDNM: false,
     isLoadingDataSurveyDNM: false,
     isLoadingExport: false,
+    DialogDetail: false,
+		expanded: [],
+    singleExpand: true,
 		page: 1,
     pageCount: 0,
     itemsPerPage: 100,
@@ -261,6 +390,7 @@ export default {
 		},
 		headersDataSurveyDNM: [
       { text: "No.", value: "number", sortable: false, width: "7%" },
+      { text: "#", value: "data-table-expand", sortable: false, width: "5%" },
       { text: "Nama", value: "name", sortable: true },
       { text: "Survey Date", value: "createdAt", sortable: true },
       { text: "Rating (1 - 5)", value: "rating", sortable: true, width: "12%" },
@@ -272,6 +402,7 @@ export default {
 		sortDesc: [],
 		kumpulSort: '',
 		rating: '',
+		detailSurvei: '',
 		optionsRating: [
       { value: 1 },
 			{ value: 2 },
@@ -401,6 +532,10 @@ export default {
 				})
 			);
 			document.body.removeChild(link);
+		},
+		openDialog(item){
+			this.detailSurvei = item
+			this.DialogDetail = true
 		},
 		updateSort(kondisi, data) {
 			if(kondisi == 'By'){

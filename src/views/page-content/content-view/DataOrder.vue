@@ -191,6 +191,7 @@
 		</v-card>
 		<v-dialog
       v-model="DialogUbahStatus"
+			scrollable
       max-width="800px"
       persistent
       transition="dialog-bottom-transition"
@@ -212,111 +213,110 @@
             </v-btn>
           </v-toolbar-items>
         </v-toolbar>
-        <v-card>
-					<v-card-text>
-						<v-row no-gutters>
-							<v-col
-								cols="12"
-								md="4"
-								class="pt-2 d-flex align-center font-weight-bold"
-							>
-								ID Order
-							</v-col>
-							<v-col
-								cols="12"
-								md="8"
-								class="pt-3"
-							>
-								<v-text-field
-									v-model="input.idOrder"
-									placeholder="ID Order"
-									outlined
-									dense
-									label="ID Order"
-									color="light-blue darken-3"
-									hide-details
-									readonly
-								/>
-							</v-col>
-						</v-row>
-						<v-row no-gutters>
-							<v-col
-								cols="12"
-								md="4"
-								class="pt-2 d-flex align-center font-weight-bold"
-							>
-								Status
-							</v-col>
-							<v-col
-								cols="12"
-								md="8"
-								class="pt-3"
-							>
-								<v-autocomplete
-									v-model="input.status"
-									:items="statusOptions"
-									item-text="value"
-									item-value="value"
-									placeholder="Status"
-									label="Status"
-									outlined
-									dense
-									hide-details
-									clearable
-								/>
-							</v-col>
-						</v-row>
-						<v-row no-gutters>
-							<v-col
-								cols="12"
-								md="4"
-								class="pt-2 d-flex align-center font-weight-bold"
-							>
-								Remarks
-							</v-col>
-							<v-col
-								cols="12"
-								md="8"
-								class="pt-3"
-							>
-							<v-textarea
-								v-model="input.remarks"
-								placeholder="Remarks"
+				<v-card-text class="pt-4">
+					<v-row no-gutters>
+						<v-col
+							cols="12"
+							md="4"
+							class="pt-2 d-flex align-center font-weight-bold"
+						>
+							ID Order
+						</v-col>
+						<v-col
+							cols="12"
+							md="8"
+							class="pt-3"
+						>
+							<v-text-field
+								v-model="input.idOrder"
+								placeholder="ID Order"
 								outlined
 								dense
-								rows="4"
-								label="Remarks"
+								label="ID Order"
 								color="light-blue darken-3"
 								hide-details
-								clearable
-								no-resize
+								readonly
 							/>
-							</v-col>
-						</v-row>
-					</v-card-text>
-					<v-card-actions>
-						<v-row 
-							no-gutters
-							class="mt-1 mr-3"
+						</v-col>
+					</v-row>
+					<v-row no-gutters>
+						<v-col
+							cols="12"
+							md="4"
+							class="pt-2 d-flex align-center font-weight-bold"
 						>
-							<v-col
-								class="text-end"
-								cols="12"
-							> 
-								<v-btn
-									color="light-blue darken-3"
-									class="white--text text--darken-2"
-									small
-									dense
-									depressed
-									@click="hitUpdate()"
-								>
-									Ubah Status
-								</v-btn>
-							</v-col>
-						</v-row>
-					</v-card-actions>
-				</v-card>
+							Status
+						</v-col>
+						<v-col
+							cols="12"
+							md="8"
+							class="pt-3"
+						>
+							<v-autocomplete
+								v-model="input.status"
+								:items="statusOptions"
+								item-text="value"
+								item-value="value"
+								placeholder="Status"
+								label="Status"
+								outlined
+								dense
+								hide-details
+								clearable
+							/>
+						</v-col>
+					</v-row>
+					<v-row no-gutters>
+						<v-col
+							cols="12"
+							md="4"
+							class="pt-2 d-flex align-center font-weight-bold"
+						>
+							Remarks
+						</v-col>
+						<v-col
+							cols="12"
+							md="8"
+							class="pt-3"
+						>
+						<v-textarea
+							v-model="input.remarks"
+							placeholder="Remarks"
+							outlined
+							dense
+							rows="4"
+							label="Remarks"
+							color="light-blue darken-3"
+							hide-details
+							clearable
+							no-resize
+						/>
+						</v-col>
+					</v-row>
+				</v-card-text>
+				<v-divider />
+				<v-card-actions>
+					<v-row 
+						no-gutters
+						class="mt-1 mr-3"
+					>
+						<v-col
+							class="text-end"
+							cols="12"
+						> 
+							<v-btn
+								color="light-blue darken-3"
+								class="white--text text--darken-2"
+								small
+								dense
+								depressed
+								@click="hitUpdate()"
+							>
+								Ubah Status
+							</v-btn>
+						</v-col>
+					</v-row>
+				</v-card-actions>
 			</v-card>
 		</v-dialog>
 		<v-dialog
