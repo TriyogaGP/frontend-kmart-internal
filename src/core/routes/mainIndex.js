@@ -24,6 +24,11 @@ export default [
         component: () => import('@/views/page-content/Administrator/V_Administrator.vue')
       },
       {
+        path: '/dataBeritaAcara',
+        name: 'DataBeritaAcara',
+        component: () => import('@/views/page-content/content-view/DataBeritaAcara.vue')
+      },
+      {
         path: '/dataHarian',
         name: 'DataHarian',
         component: () => import('@/views/page-content/content-view/DataHarian.vue')

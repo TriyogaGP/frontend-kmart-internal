@@ -651,7 +651,7 @@ export default {
 			}
 			let payload = {
         method: "get",
-				url: `admin/getAdmin?page=${page}&limit=${limit}${keyword ? `&keyword=${keyword}` : ''}`,
+				url: `admin/Admin?page=${page}&limit=${limit}${keyword ? `&keyword=${keyword}` : ''}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -758,7 +758,7 @@ export default {
       }
       let payload = {
 				method: "post",
-				url: `admin/postAdmin`,
+				url: `admin/Admin`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -782,7 +782,7 @@ export default {
       }
       let payload = {
 				method: "post",
-				url: `admin/postAdmin`,
+				url: `admin/Admin`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -806,7 +806,7 @@ export default {
       }
       let payload = {
 				method: "post",
-				url: `admin/postAdmin`,
+				url: `admin/Admin`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
