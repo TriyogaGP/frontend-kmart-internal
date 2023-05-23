@@ -8,7 +8,7 @@
             <v-list-item>
               <v-list-item-content>
                 <div class="overline text-right">Record</div>
-                <v-list-item-title class="headline mb-1 text-right">{{ pageSummary.total !== 0 ? pageSummary.total : 0 }}</v-list-item-title>
+                <v-list-item-title class="headline mb-1 text-right">{{ pageSummary.total !== '' ? pageSummary.total : 0 }}</v-list-item-title>
                 <div><v-divider /></div>
               </v-list-item-content>
             </v-list-item>
@@ -267,7 +267,9 @@
 							md="6"
 						>
 							<strong>ID Member</strong><br>
-							{{ this.detailSurvei.consumerType === 'MEMBER' ? this.detailSurvei.idMember : '-' }}
+							<input type="hidden" id="testing-code-on" :value="detailSurvei.consumerType === 'MEMBER' ? detailSurvei.idMember : '-'">
+					    <span ref="myinputon" v-html="detailSurvei.consumerType === 'MEMBER' ? detailSurvei.idMember : '-'" /> <v-icon @click.stop.prevent="copyIDMember(detailSurvei.consumerType === 'MEMBER' ? detailSurvei.idMember : '-')" small>copy_all</v-icon>
+							<!-- {{ this.detailSurvei.consumerType === 'MEMBER' ? this.detailSurvei.idMember : '-' }} -->
 						</v-col>
 						<v-col
 							cols="12"
@@ -547,6 +549,23 @@ export default {
         return `${val}-${this.sortDesc[i] === false ? 'ASC' : 'DESC'}`
       }).join(',')
 		},
+		copyIDMember(IDMember) {
+      let testingCodeToCopy = document.querySelector('#testing-code-on')
+			let code = document.getElementById('testing-code-on').value = IDMember
+			testingCodeToCopy.setAttribute('type', 'text') 
+			testingCodeToCopy.select()
+
+			try {
+				var successful = document.execCommand('copy');
+				var msg = successful ? 'berhasil' : 'gagal';
+				alert('ID Member '+ code + ' ' + msg +' disalin');
+			} catch (err) {
+				alert('Oops, tidak bisa disalin');
+			}
+			
+			testingCodeToCopy.setAttribute('type', 'hidden')
+			window.getSelection().removeAllRanges()
+    },
 		notifikasi(kode, text, proses){
       this.dialogNotifikasi = true
       this.notifikasiKode = kode

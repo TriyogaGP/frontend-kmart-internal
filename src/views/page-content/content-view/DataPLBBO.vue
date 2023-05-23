@@ -8,7 +8,7 @@
             <v-list-item>
               <v-list-item-content>
                 <div class="overline text-right">Total Record</div>
-                <v-list-item-title class="headline mb-1 text-right">{{ pageSummary.total }}</v-list-item-title>
+                <v-list-item-title class="headline mb-1 text-right">{{ pageSummary.total !== '' ? pageSummary.total : 0 }}</v-list-item-title>
                 <div><v-divider /></div>
               </v-list-item-content>
             </v-list-item>
@@ -19,7 +19,7 @@
             <v-list-item>
               <v-list-item-content>
                 <div class="overline text-right">Total Omzet</div>
-                <v-list-item-title class="headline mb-1 text-right">Rp. {{ currencyDotFormatNumber(Omzet) }}</v-list-item-title>
+                <v-list-item-title class="headline mb-1 text-right">Rp. {{ Omzet !== 0 ? currencyDotFormatNumber(Omzet) : 0 }}</v-list-item-title>
                 <div><v-divider /></div>
               </v-list-item-content>
             </v-list-item>

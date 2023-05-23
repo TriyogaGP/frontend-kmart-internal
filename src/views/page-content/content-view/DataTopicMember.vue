@@ -720,7 +720,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .v-pagination {
   justify-content: flex-end !important;
 }

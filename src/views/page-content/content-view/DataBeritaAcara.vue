@@ -66,6 +66,13 @@
           <template #[`item.number`]="{ item }">
             {{ page > 1 ? ((page - 1)*limit) + DataBeritaAcara.indexOf(item) + 1 : DataBeritaAcara.indexOf(item) + 1 }}
           </template>
+					<template #[`item.orderNumber`]="{ item }">
+						<input type="hidden" id="testing-code-on" :value="item.orderNumber">
+					  <span ref="myinputon" v-html="item.orderNumber" /> <v-icon @click.stop.prevent="copyOrderNumber(item.orderNumber)" small>copy_all</v-icon> 
+					</template>
+					<template #[`item.penjelasan`]="{ item }">
+						<span v-html="(item.penjelasan || '').length > 120 ? `${item.penjelasan.substring(0, 120)}...` : item.penjelasan" /> 
+					</template>
 					<template #[`item.createdAt`]="{ item }">
 						<span v-html="convertDateTime(item.createdAt)" /> 
 					</template>
@@ -82,6 +89,17 @@
               >
                 <v-icon small>edit</v-icon>	Ubah
               </v-btn> 
+              <v-btn
+                :value="item.idBeritaAcara"
+                color="#04f7f7"
+                small
+                dense
+                depressed
+                class="ma-2 white--text text--darken-2"
+                @click="bukaDialog(item, 2)"
+              >
+                <v-icon small>info</v-icon>	Detail
+              </v-btn>
               <v-divider />
             </td>
           </template>
@@ -144,7 +162,20 @@
           dark
           color="light-blue darken-3"
         >
-          <v-toolbar-title>{{editedIndex == 0 ? 'Tambah' : editedIndex == 1 ? 'Ubah' : 'View'}} Data Berita Acara</v-toolbar-title>
+          <v-toolbar-title>
+            {{editedIndex == 0 ? 'Tambah' : editedIndex == 1 ? 'Ubah' : 'View'}} Data Berita Acara
+            <v-btn
+              color="#04f7f7"
+              small
+              dense
+              depressed
+              :loading="isLoadingExport"
+              class="ma-2 white--text text--darken-2"
+              @click="pdfCreate(inputDataBeritaAcara)"
+            >
+              <v-icon small>info</v-icon>	Cetak PDF
+            </v-btn>
+          </v-toolbar-title>
           <v-spacer />
           <v-toolbar-items>
             <v-btn
@@ -156,7 +187,7 @@
             </v-btn>
           </v-toolbar-items>
         </v-toolbar>
-        <v-card-text class="pt-4">
+        <v-card-text v-if="editedIndex !== 2" class="pt-4">
           <v-row no-gutters>
             <v-col
               cols="12"
@@ -240,8 +271,46 @@
             </v-col>
           </v-row>
         </v-card-text>
+        <v-card-text v-if="editedIndex === 2" class="pt-4">
+          <v-row no-gutters class="py-2">
+						<v-col
+							cols="12"
+							md="6"
+						>
+							<strong>Order Number</strong><br>
+              <input type="hidden" id="testing-code-on" :value="inputDataBeritaAcara.order_number">
+					    <span ref="myinputon" v-html="inputDataBeritaAcara.order_number" /> <v-icon @click.stop.prevent="copyOrderNumber(inputDataBeritaAcara.order_number)" small>copy_all</v-icon> 
+						</v-col>
+						<v-col
+							cols="12"
+							md="6"
+						>
+							<strong>Tanggal Request</strong><br>
+							{{ convertDateTime(this.inputDataBeritaAcara.created_at) }}
+						</v-col>
+					</v-row>
+          <v-row no-gutters class="py-2">
+						<v-col
+							cols="12"
+							md="12"
+						>
+							<strong>Request By</strong><br>
+							{{ this.inputDataBeritaAcara.request_by }}
+						</v-col>
+					</v-row>
+          <v-row no-gutters class="py-2">
+						<v-col
+							cols="12"
+							md="12"
+						>
+							<strong>Penjelasan</strong><br>
+							{{ this.inputDataBeritaAcara.penjelasan }}
+						</v-col>
+					</v-row>
+        </v-card-text>
         <v-divider />
-        <v-card-actions>
+        <v-card-actions v-if="editedIndex === 2"/>
+        <v-card-actions v-if="editedIndex !== 2">
           <v-row 
             no-gutters
             class="mt-1 mr-3"
@@ -279,6 +348,19 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog
+			v-model="isLoadingExport"
+			transition="dialog-bottom-transition"
+			persistent
+			width="500px"
+		>
+			<v-progress-linear
+				class="pa-3"
+				indeterminate
+				color="black darken-3"
+			/>
+			<h4 style="color: #000; text-align: center; background-color: #FFF;">Sedang proses export data, harap menunggu ...</h4>
+		</v-dialog>
     <v-dialog
       v-model="dialogNotifikasi"
       transition="dialog-bottom-transition"
@@ -339,14 +421,17 @@ export default {
     ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
+    BASEURL: '',
     roleID: '',
     idLog: '',
     DialogBeritaAcara: false,
+    isLoadingExport: false,
     inputDataBeritaAcara: {
       id_berita_acara: '',
       order_number: '',
       penjelasan: '',
       request_by: '',
+      created_at: '',
     },
     editedIndex: 0,
     kondisiTombol: true,
@@ -401,6 +486,7 @@ export default {
 		},
   },
   mounted() {
+    this.BASEURL = process.env.VUE_APP_NODE_ENV === "production" ? process.env.VUE_APP_PROD_API_URL : process.env.VUE_APP_DEV_API_URL
     this.roleID = localStorage.getItem('roleID')
     this.idLog = localStorage.getItem('idLogin')
 		this.getBeritaAcara(this.page, this.limit, this.searchData);
@@ -465,6 +551,7 @@ export default {
         this.inputDataBeritaAcara.order_number = item.orderNumber
         this.inputDataBeritaAcara.penjelasan = item.penjelasan
         this.inputDataBeritaAcara.request_by = item.requestBy
+        this.inputDataBeritaAcara.created_at = item.createdAt
       }
       this.DialogBeritaAcara = true
     },
@@ -497,11 +584,59 @@ export default {
 				this.notifikasi("error", err.response.data.message, "1")
 			});
     },
+    pdfCreate(data) {
+      this.isLoadingExport = true
+      fetch(`${this.BASEURL}admin/PDF/${data.id_berita_acara}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('user_token')}`
+        }
+      })
+      .then(response => response.arrayBuffer())
+      .then(async response => {
+        this.isLoadingExport = false
+        let blob = new Blob([response], { type: 'application/pdf' })
+        this.downloadBlob(blob,`Berita Acara - ${data.order_number}.pdf`)
+        this.notifikasi("success", 'Sukses Export PDF', "1")
+      })
+    },
+		downloadBlob(blob, name = '') {
+			const blobUrl = URL.createObjectURL(blob);
+			const link = document.createElement("a");
+			link.href = blobUrl;
+			link.download = name;
+			document.body.appendChild(link);
+			link.dispatchEvent(
+				new MouseEvent('click', { 
+					bubbles: true, 
+					cancelable: true, 
+					view: window 
+				})
+			);
+			document.body.removeChild(link);
+		},
     clearForm() {
       this.inputDataBeritaAcara.id_berita_acara = ''
       this.inputDataBeritaAcara.order_number = ''
       this.inputDataBeritaAcara.penjelasan = ''
       this.inputDataBeritaAcara.request_by = ''
+    },
+    copyOrderNumber(orderNumber) {
+      let testingCodeToCopy = document.querySelector('#testing-code-on')
+			let code = document.getElementById('testing-code-on').value = orderNumber
+			testingCodeToCopy.setAttribute('type', 'text') 
+			testingCodeToCopy.select()
+
+			try {
+				var successful = document.execCommand('copy');
+				var msg = successful ? 'berhasil' : 'gagal';
+				alert('Order Number '+ code + ' ' + msg +' disalin');
+			} catch (err) {
+				alert('Oops, tidak bisa disalin');
+			}
+			
+			testingCodeToCopy.setAttribute('type', 'hidden')
+			window.getSelection().removeAllRanges()
     },
     notifikasi(kode, text, proses){
       this.dialogNotifikasi = true
