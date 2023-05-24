@@ -325,6 +325,7 @@
 			v-model="detailProduct"
 			transition="dialog-bottom-transition"
 			persistent
+      scrollable
 			width="1000px"
 		>
       <v-card>
@@ -344,7 +345,7 @@
             </v-btn>
           </v-toolbar-items>
         </v-toolbar>
-        <v-card-text class="px-4">
+        <v-card-text class="pt-4">
           <v-data-table
             loading-text="Sedang memuat... Harap tunggu"
             no-data-text="Tidak ada data yang tersedia"
@@ -420,6 +421,7 @@
 			v-model="detailUser"
 			transition="dialog-bottom-transition"
 			persistent
+      scrollable
 			width="1000px"
 		>
       <v-card>
@@ -440,7 +442,7 @@
           </v-toolbar-items>
         </v-toolbar>
         <v-divider />
-        <v-card-text class="px-4">
+        <v-card-text class="pt-4">
           <v-row no-gutters>
             <v-col cols="12" md="10" />
             <v-col cols="12" md="2" class="pl-2 d-flex justify-center align-center">
