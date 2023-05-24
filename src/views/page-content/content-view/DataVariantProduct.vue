@@ -163,7 +163,8 @@
 						<img class="gambar" :src="item.images" width="150"/>
 					</template>
 					<template #[`item.OrderDetails`]="{ item }">
-						<v-tooltip bottom>
+						Detail <v-icon small @click="openOrderDetails(item.OrderDetails)">info</v-icon>
+						<!-- <v-tooltip bottom>
 							<template v-slot:activator="{ on, attrs }">
                 Detail <v-icon small v-bind="attrs" v-on="on">info</v-icon>
               </template>
@@ -191,10 +192,11 @@
 									</li>
 								</ol>
 							</div>			
-            </v-tooltip>
+            </v-tooltip> -->
 					</template>
 					<template #[`item.varian`]="{ item }">
-						<v-tooltip bottom>
+						Detail <v-icon small @click="openVariant(item.hasil)">info</v-icon>
+						<!-- <v-tooltip bottom>
 							<template v-slot:activator="{ on, attrs }">
                 Detail <v-icon small v-bind="attrs" v-on="on">info</v-icon>
               </template>
@@ -222,7 +224,7 @@
 									</tr>
 								</tbody>
 							</v-simple-table>			
-            </v-tooltip>
+            </v-tooltip> -->
 					</template>
 				</v-data-table>
 			</div>
@@ -237,6 +239,96 @@
 				</v-col>
 			</v-row>
 		</v-card>
+		<v-bottom-sheet
+      v-model="dialogOrderDetails"
+			scrollable
+      persistent
+    >
+      <v-sheet style="font-size: 14px;">
+        <div class="text-right">
+          <v-btn  
+            icon
+            @click="() => { dialogOrderDetails = false; OrderDetailsData = []; }"
+          >
+            <v-icon large>close</v-icon>
+          </v-btn>
+        </div>
+        <v-card class="ma-4 pa-2">
+					<div class="customScroll">
+						<h4 style="font-weight: bold;">Detail Order</h4>
+						<div
+							class="mb-2"
+							v-for="(data, index) in OrderDetailsData"
+							:key="index"
+						>
+							<strong>Package :</strong> {{ data.productName }} ({{ data.quantity }})
+							<ol>
+								<li
+									v-for="(data1) in data.packages"
+									:key="data1.productName"
+								>
+									{{ data1.productName }} ({{ data1.quantity }})
+									<ul>
+										<li
+											v-for="(data2) in data1.selectedVariants"
+											:key="data2.id"
+										>
+											{{ data2.valueString }} ({{ data2.quantity }})
+										</li>
+									</ul>
+								</li>
+							</ol>
+						</div>
+					</div>
+				</v-card>
+      </v-sheet>
+    </v-bottom-sheet>
+		<v-bottom-sheet
+      v-model="dialogVariant"
+			scrollable
+      persistent
+    >
+      <v-sheet style="font-size: 14px;">
+        <div class="text-right">
+          <v-btn  
+            icon
+            @click="() => { dialogVariant = false; OrderDetailsData = []; }"
+          >
+            <v-icon large>close</v-icon>
+          </v-btn>
+        </div>
+        <v-card class="ma-4 pa-2">
+					<div class="customScroll">
+						<h4 style="font-weight: bold;">Detail Varian Product</h4>
+						<v-simple-table dark dense>
+							<thead>
+								<tr>
+									<th class="text-left">ID Product Sync</th>
+									<th class="text-left">Product Name</th>
+									<th class="text-left">Attribute</th>
+									<th class="text-left">Color</th>
+									<th class="text-left">Quantity</th>
+									<th class="text-left">Images</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr
+									v-for="(data, index) in VariantData"
+									:key="index"
+								>
+									<td>{{ data.idProductSync }}</td>
+									<td>{{ data.productName ? data.productName : '-' }}</td>
+									<td>{{ data.name ? data.name : '-' }}</td>
+									<td>{{ data.groupInputType ? data.groupInputType : '-' }}</td>
+									<td>{{ data.quantity }}</td>
+									<td><img class="gambar" :src="data.images" width="80"/></td>
+								</tr>
+							</tbody>
+						</v-simple-table>	
+					</div>
+				</v-card>
+      </v-sheet>
+    </v-bottom-sheet>
 		<v-dialog
 			v-model="dialogNotifikasi"
 			transition="dialog-bottom-transition"
@@ -269,6 +361,10 @@ export default {
 		DataVariantProduct: [],
     loadingButtonDataVariantProduct: false,
     isLoadingDataVariantProduct: false,
+    dialogOrderDetails: false,
+    dialogVariant: false,
+		OrderDetailsData: [],
+		VariantData: [],
 		page: 1,
     pageCount: 0,
     itemsPerPage: 25,
@@ -281,6 +377,7 @@ export default {
 		headersDataVariantProductPackageCombination: [
       { text: "No.", value: "number", sortable: false, width: "7%" },
       { text: "Product Package Combination", value: "idPackageCombinationSync", sortable: false },
+      { text: "Product Package Name", value: "productPackageName", sortable: false },
       { text: "Name", value: "name", sortable: false },
       { text: "Attribute", value: "groupInputType", sortable: false },
       { text: "Image", value: "images", sortable: false },
@@ -293,6 +390,7 @@ export default {
 		headersDataVariantIDProductPackage: [
       { text: "No.", value: "number", sortable: false, width: "7%" },
       { text: "Product Package", value: "idProductPackage", sortable: false },
+      { text: "Product Package Name", value: "productPackageName", sortable: false },
       { text: "Varian", value: "varian", sortable: false },
     ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
@@ -385,6 +483,14 @@ export default {
 				this.invoice = ''
 			}
 		},
+		openOrderDetails(data){
+			this.OrderDetailsData = data
+			this.dialogOrderDetails = true
+		},
+		openVariant(data){
+			this.VariantData = data
+			this.dialogVariant = true
+		},
 		notifikasi(kode, text, proses){
       this.dialogNotifikasi = true
       this.notifikasiKode = kode
@@ -405,9 +511,34 @@ export default {
 .v-text-field.v-input--dense {
   font-size: 13px !important;
 }
+</style>
+
+<style scoped>
 .gambar {
 	border-style: solid !important;
 	border-radius: 10px !important;
 	padding: 2px !important;
+}
+.customScroll {
+  width: 100%;
+  height: 200px;
+  background: #fff;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.customScroll::-webkit-scrollbar {
+  width: 16px;
+}
+.customScroll::-webkit-scrollbar-thumb {
+  background-color: #4CAF50;
+  border: 5px solid #fff;
+  border-radius: 10rem;
+}
+.customScroll::-webkit-scrollbar-track {
+  position: absolute;
+  right: -3rem;
+  top: -50rem;
+  background: transparent;
 }
 </style>

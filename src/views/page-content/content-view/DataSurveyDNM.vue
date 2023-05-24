@@ -268,8 +268,7 @@
 						>
 							<strong>ID Member</strong><br>
 							<input type="hidden" id="testing-code-on" :value="detailSurvei.consumerType === 'MEMBER' ? detailSurvei.idMember : '-'">
-					    <span ref="myinputon" v-html="detailSurvei.consumerType === 'MEMBER' ? detailSurvei.idMember : '-'" /> <v-icon @click.stop.prevent="copyIDMember(detailSurvei.consumerType === 'MEMBER' ? detailSurvei.idMember : '-')" small>copy_all</v-icon>
-							<!-- {{ this.detailSurvei.consumerType === 'MEMBER' ? this.detailSurvei.idMember : '-' }} -->
+					    <span ref="myinputon" v-html="detailSurvei.consumerType === 'MEMBER' ? detailSurvei.idMember : '-'" /> <v-icon v-if="detailSurvei.consumerType === 'MEMBER'" @click.stop.prevent="copyIDMember(detailSurvei.idMember)" small>copy_all</v-icon>
 						</v-col>
 						<v-col
 							cols="12"

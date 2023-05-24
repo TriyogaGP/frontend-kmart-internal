@@ -357,7 +357,7 @@
 			<v-progress-linear
 				class="pa-3"
 				indeterminate
-				color="black darken-3"
+				color="light-blue darken-3"
 			/>
 			<h4 style="color: #000; text-align: center; background-color: #FFF;">Sedang proses export data, harap menunggu ...</h4>
 		</v-dialog>

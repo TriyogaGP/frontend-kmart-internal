@@ -344,82 +344,76 @@
             </v-btn>
           </v-toolbar-items>
         </v-toolbar>
-        <v-card>
-          <div class="scrollText">
-            <div class="px-5">
-              <v-divider />
-            </div>
-            <v-card-text>
-              <v-data-table
-                loading-text="Sedang memuat... Harap tunggu"
-                no-data-text="Tidak ada data yang tersedia"
-                no-results-text="Tidak ada catatan yang cocok ditemukan"
-                :headers="headers"
-                :loading="isLoading"
-                :items="DataProduct"
-                item-key="idProduct"
-                hide-default-footer
-                class="elevation-1"
-                :page.sync="page"
-                :items-per-page="itemsPerPage"
-                @page-count="pageCount = $event"
-              >
-                <template #[`item.number`]="{ item }">
-                  {{ DataProduct.indexOf(item) + 1 }}
-                </template>
-                <template #[`item.name`]="{ item }">
-                  <span>
-                    <v-tooltip right>
-                      <template v-slot:activator="{ on, attrs }">
-                        <img class="gambar" :src="item.coverImage" width="50" v-bind="attrs" v-on="on"/>
-                      </template>
-                      <div>
-                        <img class="gambar" :src="item.coverImage" width="250"/><br>
-                        {{ item.name }}
-                      </div>
-                    </v-tooltip><br>
+        <v-card-text class="px-4">
+          <v-data-table
+            loading-text="Sedang memuat... Harap tunggu"
+            no-data-text="Tidak ada data yang tersedia"
+            no-results-text="Tidak ada catatan yang cocok ditemukan"
+            :headers="headers"
+            :loading="isLoading"
+            :items="DataProduct"
+            item-key="idProduct"
+            hide-default-footer
+            class="elevation-1"
+            :page.sync="page"
+            :items-per-page="itemsPerPage"
+            @page-count="pageCount = $event"
+          >
+            <template #[`item.number`]="{ item }">
+              {{ DataProduct.indexOf(item) + 1 }}
+            </template>
+            <template #[`item.name`]="{ item }">
+              <span>
+                <v-tooltip right>
+                  <template v-slot:activator="{ on, attrs }">
+                    <img class="gambar" :src="item.coverImage" width="50" v-bind="attrs" v-on="on"/>
+                  </template>
+                  <div>
+                    <img class="gambar" :src="item.coverImage" width="250"/><br>
                     {{ item.name }}
-                  </span>
-                </template>
-                <template #[`item.total`]="{ item }">
-                  <span v-if="kategori === 'product'" v-html="item.totalSold"></span>
-                  <span v-if="kategori === 'productBSLM'" v-html="item.totalSoldLastMonth"></span>
-                  <span v-if="kategori === 'productBSL90D'" v-html="item.totalSoldLast90Day"></span>
-                </template>
-                <template #[`item.isPackage`]="{ item }">
-                  <v-icon small v-if="item.isPackage == true" color="green">check</v-icon>
-                  <v-icon small v-else-if="item.isPackage == false" color="red">clear</v-icon>
-                </template>
-                <template #[`item.isPublished`]="{ item }">
-                  <v-icon small v-if="item.isPublished == true" color="green">check</v-icon>
-                  <v-icon small v-else-if="item.isPublished == false" color="red">clear</v-icon>
-                </template>
-                <template #[`item.isHidden`]="{ item }">
-                  <v-icon small v-if="item.isHidden == true" color="green">check</v-icon>
-                  <v-icon small v-else-if="item.isHidden == false" color="red">clear</v-icon>
-                </template>
-              </v-data-table>
-            </v-card-text>
-          </div>
-          <v-card-actions>
-            <v-row 
-              no-gutters
-              class="mt-1 mr-3"
+                  </div>
+                </v-tooltip><br>
+                {{ item.name }}
+              </span>
+            </template>
+            <template #[`item.total`]="{ item }">
+              <span v-if="kategori === 'product'" v-html="item.totalSold"></span>
+              <span v-if="kategori === 'productBSLM'" v-html="item.totalSoldLastMonth"></span>
+              <span v-if="kategori === 'productBSL90D'" v-html="item.totalSoldLast90Day"></span>
+            </template>
+            <template #[`item.isPackage`]="{ item }">
+              <v-icon small v-if="item.isPackage == true" color="green">check</v-icon>
+              <v-icon small v-else-if="item.isPackage == false" color="red">clear</v-icon>
+            </template>
+            <template #[`item.isPublished`]="{ item }">
+              <v-icon small v-if="item.isPublished == true" color="green">check</v-icon>
+              <v-icon small v-else-if="item.isPublished == false" color="red">clear</v-icon>
+            </template>
+            <template #[`item.isHidden`]="{ item }">
+              <v-icon small v-if="item.isHidden == true" color="green">check</v-icon>
+              <v-icon small v-else-if="item.isHidden == false" color="red">clear</v-icon>
+            </template>
+          </v-data-table>
+        </v-card-text>
+        <v-divider />
+        <v-card-actions>
+          <v-row 
+            no-gutters
+            class="mt-1 mr-3"
+          >
+            <v-col
+              class="text-end"
+              cols="12"
             >
-              <v-col
-                class="text-end"
-                cols="12"
-              >
-                <v-pagination
-                  v-if="DataProduct.length > 0"
-                  v-model="page"
-                  :length="pageCount"
-                  :total-visible="7"
-                />
-              </v-col>
-            </v-row>
-          </v-card-actions>
-        </v-card>
+              <v-pagination
+                v-if="DataProduct.length > 0"
+                v-model="page"
+                :length="pageCount"
+                :total-visible="7"
+              />
+            </v-col>
+          </v-row>
+        </v-card-actions>
       </v-card>
 		</v-dialog>
     <v-dialog
@@ -445,102 +439,95 @@
             </v-btn>
           </v-toolbar-items>
         </v-toolbar>
-        <v-card>
-          <div class="scrollText">
-            <div class="px-5">
-              <v-divider />
-            </div>
-            <v-card-text>
-              <v-row no-gutters>
-								<v-col cols="12" md="10" />
-								<v-col cols="12" md="2" class="pl-2 d-flex justify-center align-center">
-									<v-autocomplete
-											v-model="page1"
-											:items="pageOptions"
-											item-text="value"
-											item-value="value"
-											label="Page"
-											outlined
-											dense
-											hide-details
-											:disabled="DataDetailUser.length ? false : true"
-										/>
-								</v-col>
-							</v-row>
-              <v-data-table
-                loading-text="Sedang memuat... Harap tunggu"
-                no-data-text="Tidak ada data yang tersedia"
-                no-results-text="Tidak ada catatan yang cocok ditemukan"
-                :headers="headersDetail"
-                :loading="isLoading"
-                :items="DataDetailUser"
-                item-key="idUser"
-                hide-default-footer
-                class="elevation-1"
-                :items-per-page="itemsPerPage1"
-                @page-count="pageCount1 = $event"
+        <v-divider />
+        <v-card-text class="px-4">
+          <v-row no-gutters>
+            <v-col cols="12" md="10" />
+            <v-col cols="12" md="2" class="pl-2 d-flex justify-center align-center">
+              <v-autocomplete
+                  v-model="page1"
+                  :items="pageOptions"
+                  item-text="value"
+                  item-value="value"
+                  label="Page"
+                  outlined
+                  dense
+                  hide-details
+                  :disabled="DataDetailUser.length ? false : true"
+                />
+            </v-col>
+          </v-row>
+          <v-data-table
+            loading-text="Sedang memuat... Harap tunggu"
+            no-data-text="Tidak ada data yang tersedia"
+            no-results-text="Tidak ada catatan yang cocok ditemukan"
+            :headers="headersDetail"
+            :loading="isLoading"
+            :items="DataDetailUser"
+            item-key="idUser"
+            hide-default-footer
+            class="elevation-1"
+            :items-per-page="itemsPerPage1"
+            @page-count="pageCount1 = $event"
+          >
+            <template #[`item.number`]="{ item }">
+              {{ page1 > 1 ? ((page1 - 1)*limit) + DataDetailUser.indexOf(item) + 1 : DataDetailUser.indexOf(item) + 1 }}
+            </template>
+            <template #[`item.order`]="{ item }">
+              <v-btn
+                color="light-blue darken-3"
+                class="white--text text--darken-2"
+                small
+                dense
+                depressed
+                @click="viewDataOrder(item.idUser, consumerType, item.fullname)"
               >
-                <template #[`item.number`]="{ item }">
-                  {{ page1 > 1 ? ((page1 - 1)*limit) + DataDetailUser.indexOf(item) + 1 : DataDetailUser.indexOf(item) + 1 }}
-                </template>
-                <template #[`item.order`]="{ item }">
-                  <v-btn
-                    color="light-blue darken-3"
-                    class="white--text text--darken-2"
-                    small
-                    dense
-                    depressed
-                    @click="viewDataOrder(item.idUser, consumerType, item.fullname)"
-                  >
-                    Lihat Order
-                  </v-btn>
-                </template>
-              </v-data-table>
-            </v-card-text>
-          </div>
-          <v-divider />
-          <v-card-actions>
-            <v-row 
-              no-gutters
-              class="mr-3"
-            >
-              <v-col cols="10" class="d-flex justify-start align-center">
-                <span>Halaman <strong>{{ pageSummary.page ? pageSummary.page : 0 }}</strong> dari Total Halaman <strong>{{ pageSummary.totalPages ? pageSummary.totalPages : 0 }}</strong> (Records {{ pageSummary.total ? pageSummary.total : 0 }})</span>
-              </v-col>
-              <v-col cols="2" class="text-right">
-                <div class="d-flex justify-end">
-                  <v-autocomplete
-                    v-model="limit"
-                    :items="limitPage"
-                    item-text="value"
-                    item-value="value"
-                    label="Limit"
-                    outlined
-                    dense
-                    hide-details
-                    :disabled="DataDetailUser.length ? false : true"
-                  />
-                  <v-icon
-                    style="cursor: pointer;"
-                    large
-                    :disabled="DataDetailUser.length ? pageSummary.page != 1 ? false : true : true"
-                    @click="getDetailUserActive(pageSummary.page - 1, limit, member, 1)"
-                  >
-                    keyboard_arrow_left
-                  </v-icon>
-                  <v-icon
-                    style="cursor: pointer;"
-                    large
-                    :disabled="DataDetailUser.length ? pageSummary.page != pageSummary.totalPages ? false : true : true"
-                    @click="getDetailUserActive(pageSummary.page + 1, limit, member, 1)"
-                  >
-                    keyboard_arrow_right
-                  </v-icon>
-                </div>
-              </v-col>
-            </v-row>
-          </v-card-actions>
-        </v-card>
+                Lihat Order
+              </v-btn>
+            </template>
+          </v-data-table>
+        </v-card-text>
+        <v-card-actions>
+          <v-row 
+            no-gutters
+            class="mr-3"
+          >
+            <v-col cols="10" class="d-flex justify-start align-center">
+              <span>Halaman <strong>{{ pageSummary.page ? pageSummary.page : 0 }}</strong> dari Total Halaman <strong>{{ pageSummary.totalPages ? pageSummary.totalPages : 0 }}</strong> (Records {{ pageSummary.total ? pageSummary.total : 0 }})</span>
+            </v-col>
+            <v-col cols="2" class="text-right">
+              <div class="d-flex justify-end">
+                <v-autocomplete
+                  v-model="limit"
+                  :items="limitPage"
+                  item-text="value"
+                  item-value="value"
+                  label="Limit"
+                  outlined
+                  dense
+                  hide-details
+                  :disabled="DataDetailUser.length ? false : true"
+                />
+                <v-icon
+                  style="cursor: pointer;"
+                  large
+                  :disabled="DataDetailUser.length ? pageSummary.page != 1 ? false : true : true"
+                  @click="getDetailUserActive(pageSummary.page - 1, limit, member, 1)"
+                >
+                  keyboard_arrow_left
+                </v-icon>
+                <v-icon
+                  style="cursor: pointer;"
+                  large
+                  :disabled="DataDetailUser.length ? pageSummary.page != pageSummary.totalPages ? false : true : true"
+                  @click="getDetailUserActive(pageSummary.page + 1, limit, member, 1)"
+                >
+                  keyboard_arrow_right
+                </v-icon>
+              </div>
+            </v-col>
+          </v-row>
+        </v-card-actions>
       </v-card>
 		</v-dialog>
     <v-bottom-sheet
@@ -556,10 +543,10 @@
             <v-icon large>close</v-icon>
           </v-btn>
         </div>
-        <v-card class="mx-2" elavation="1">
+        <v-card class="ma-4 pa-2">
           Nama user : <strong>{{ namaUser }}</strong>
-          <div class="scrollText">
-            <v-card-text>
+					<div class="customScroll">
+						<v-card-text>
               <v-data-table
                 loading-text="Sedang memuat... Harap tunggu"
                 no-data-text="Tidak ada data yang tersedia"
@@ -580,9 +567,8 @@
                 </template>
               </v-data-table>
             </v-card-text>
-          </div>
-        </v-card>
-        <br>
+					</div>
+				</v-card>
       </v-sheet>
     </v-bottom-sheet>
     <v-dialog
@@ -1254,5 +1240,30 @@ export default {
 }
 .v-text-field.v-input--dense {
   font-size: 13px !important;
+}
+</style>
+
+<style scoped>
+.customScroll {
+  width: 100%;
+  height: 200px;
+  background: #fff;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.customScroll::-webkit-scrollbar {
+  width: 16px;
+}
+.customScroll::-webkit-scrollbar-thumb {
+  background-color: #4CAF50;
+  border: 5px solid #fff;
+  border-radius: 10rem;
+}
+.customScroll::-webkit-scrollbar-track {
+  position: absolute;
+  right: -3rem;
+  top: -50rem;
+  background: transparent;
 }
 </style>
