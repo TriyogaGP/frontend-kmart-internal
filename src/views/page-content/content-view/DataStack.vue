@@ -355,10 +355,12 @@ export default {
 			this.DialogTracking = true
 		},
 		hitUpdate(item) {
-			console.log(item);
 			let payload = {
-				method: "get",
-				url: `kmart/hitUpdateStatus?idOrder=${item.idOrder}&status=ARRIVED_AT_DESTINATION&remarks=hit manual`,
+				method: "put",
+				url: `kmart/hitUpdateStatus?status=ARRIVED_AT_DESTINATION&remarks=hit manual`,
+				body: {
+					orderId: [ item.idOrder ]
+				},
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -370,37 +372,21 @@ export default {
 			});
 		},
 		async hitUpdateChecked() {
-			let kirim = await Promise.all(this.selectRecord.map(async val => {
-				let response = []
-				let payload = {
-					method: "get",
-					url: `kmart/hitUpdateStatus?idOrder=${val}&status=ARRIVED_AT_DESTINATION&remarks=hit manual`,
-					authToken: localStorage.getItem('user_token')
-				};
-				try {
-					await this.fetchData(payload)
-					response.push({
-						idOrder: val,
-						status: 'success'
-					})
-				} catch (error) {
-					response.push({
-						idOrder: val,
-						status: 'error'
-					})
-				}
-				return response[0]
-			}))
-			let success = kirim.filter(val => val.status == 'success').length 
-			let error = kirim.filter(val => val.status == 'error').length
-			// console.log(kirim, success);
-			if(success > error) {
-				this.selectRecord = []
-				this.notifikasi("success", "SUKSES", "1")
-			}else{
-				this.selectRecord = []
-				this.notifikasi("error", "GAGAL", "1")
-			}
+			let payload = {
+				method: "put",
+				url: `kmart/hitUpdateStatus?status=ARRIVED_AT_DESTINATION&remarks=hit manual`,
+				body: {
+					orderId: this.selectRecord
+				},
+				authToken: localStorage.getItem('user_token')
+			};
+			this.fetchData(payload)
+			.then((res) => {
+				this.notifikasi("success", res.data.message, "1")
+			})
+			.catch((err) => {
+				this.notifikasi("error", err.response.data.message, "1")
+			});
 		},
 		copyOrderNumber(orderNumber) {
       let testingCodeToCopy = document.querySelector('#testing-code-on')

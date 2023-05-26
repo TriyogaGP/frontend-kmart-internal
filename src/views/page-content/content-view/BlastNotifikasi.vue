@@ -487,11 +487,12 @@ export default {
 		blastNotifikasi() {
 			// console.log(this.inputData);
 			this.loadingButtonBlastNotifikasi = true
-			let id_user = this.inputData.idUser.join(',')
+			// let id_user = this.inputData.idUser.join(',')
       let payload = {
 				method: "put",
 				url: `kmart/blastNotifikasi?id_user=${id_user}`,
 				body: {
+					id_user: this.inputData.idUser,
 					payload: {
 						title: this.inputData.judul,
 						body: this.inputData.isi,

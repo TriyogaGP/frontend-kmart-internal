@@ -489,6 +489,7 @@
             </template>
           </v-data-table>
         </v-card-text>
+        <v-divider />
         <v-card-actions>
           <v-row 
             no-gutters

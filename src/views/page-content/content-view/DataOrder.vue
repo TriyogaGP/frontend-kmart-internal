@@ -502,8 +502,11 @@ export default {
     },
 		hitUpdate() {
 			let payload = {
-				method: "get",
-				url: `kmart/hitUpdateStatus?idOrder=${this.input.idOrder}&status=${this.input.status}&remarks=${this.input.remarks}`,
+				method: "put",
+				url: `kmart/hitUpdateStatus?status=${this.input.status}&remarks=${this.input.remarks}`,
+				body: {
+					orderId: [ this.input.idOrder ]
+				},
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
