@@ -359,7 +359,7 @@ export default {
 				method: "put",
 				url: `kmart/hitUpdateStatus?status=ARRIVED_AT_DESTINATION&remarks=hit manual`,
 				body: {
-					orderId: [ item.idOrder ]
+					idOrder: [ item.idOrder ]
 				},
 				authToken: localStorage.getItem('user_token')
 			};
@@ -376,7 +376,7 @@ export default {
 				method: "put",
 				url: `kmart/hitUpdateStatus?status=ARRIVED_AT_DESTINATION&remarks=hit manual`,
 				body: {
-					orderId: this.selectRecord
+					idOrder: this.selectRecord
 				},
 				authToken: localStorage.getItem('user_token')
 			};

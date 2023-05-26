@@ -505,7 +505,7 @@ export default {
 				method: "put",
 				url: `kmart/hitUpdateStatus?status=${this.input.status}&remarks=${this.input.remarks}`,
 				body: {
-					orderId: [ this.input.idOrder ]
+					idOrder: [ this.input.idOrder ]
 				},
 				authToken: localStorage.getItem('user_token')
 			};
