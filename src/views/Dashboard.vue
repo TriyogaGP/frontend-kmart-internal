@@ -274,6 +274,49 @@
       </v-container>
     </v-card>
     <v-card class="mt-2 mb-2 pa-1" outlined elevation="0">
+      <h3 class="text-center"><u>SHIPPING AND COURIER</u></h3>
+      <v-container>
+        <v-layout row wrap>
+          <v-flex sm6 xs6 md6 lg6>
+            <v-card class="ma-3">
+              <v-list-item>
+                <v-list-item-content>
+                  <v-row>
+                    <v-col class="md-6 text-left" />
+                    <v-col class="md-6">
+                      <div class="overline text-right">Grafik % Shipping</div> 
+                    </v-col>
+                  </v-row>
+                  <ChartDonut
+                    :record.sync="record6"
+                    :options.sync="optionsDonut"
+                  />
+                  </v-list-item-content>
+              </v-list-item>
+            </v-card>
+          </v-flex>
+          <v-flex sm6 xs6 md6 lg6>
+            <v-card class="ma-3">
+              <v-list-item>
+                <v-list-item-content>
+                  <v-row>
+                    <v-col class="md-6 text-left" />
+                    <v-col class="md-6">
+                      <div class="overline text-right">Grafik % Courier</div> 
+                    </v-col>
+                  </v-row>
+                  <ChartDonut
+                    :record.sync="record7"
+                    :options.sync="optionsDonut"
+                  />
+                  </v-list-item-content>
+              </v-list-item>
+            </v-card>
+          </v-flex>
+        </v-layout>
+      </v-container>
+    </v-card>
+    <v-card class="mt-2 mb-2 pa-1" outlined elevation="0">
       <h3 class="text-center"><u>Top 10 Products {{ new Date().getFullYear() }}</u></h3>
       <v-container>
         <v-layout row wrap>
@@ -659,6 +702,14 @@ export default {
       labels: [],
       datasets: []
     },
+    record6: {
+      labels: [],
+      datasets: []
+    },
+    record7: {
+      labels: [],
+      datasets: []
+    },
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -824,6 +875,8 @@ export default {
     this.bulan = this.bulanNow,
     this.getDataUserMember(this.bulanNow)
     this.getDataUserCustomer(this.bulanNow)
+    this.getDataShipping()
+    this.getDataCourier()
     this.getDataTransaksi(d.getFullYear())
     this.getDataTransaksiDaily(this.tahun, this.bulan, this.dataView)
     this.judul = '10 Best Seller Product Basic'
@@ -987,6 +1040,65 @@ export default {
           {
             backgroundColor: ['#41B883', '#E46651', '#00D8FF', '#DD1B16', '#E042F5', '#3CFA4F', '#EDD609', '#7A09E3', '#F7550A', '#0AF7DF'],
             data: datauser
+          }
+        ]
+			})
+			.catch((err) => {
+				this.notifikasi("error", err.response.data.message, "1")
+			});
+		},
+    getDataShipping() {
+      this.record6 = {
+        labels: [],
+        datasets: []
+      }
+      let payload = {
+				method: "get",
+				url: `kmart/getDashboardShipping`,
+				authToken: localStorage.getItem('user_token')
+			};
+			this.fetchData(payload)
+			.then(async (res) => {
+				let dataShipping = res.data.result
+				let datashipping = []
+        dataShipping.map(val => {
+          let nama = `${val.shippingType.replace(/_/g, " ")} - (${val.jml})`
+          this.record6.labels.push(nama)
+          datashipping.push(val.persentase)
+        })
+        this.record6.datasets = [
+          {
+            backgroundColor: ['#41B883', '#E46651', '#00D8FF', '#DD1B16'],
+            data: datashipping
+          }
+        ]
+			})
+			.catch((err) => {
+				this.notifikasi("error", err.response.data.message, "1")
+			});
+		},
+    getDataCourier() {
+      this.record7 = {
+        labels: [],
+        datasets: []
+      }
+      let payload = {
+				method: "get",
+				url: `kmart/getDashboardCourier`,
+				authToken: localStorage.getItem('user_token')
+			};
+			this.fetchData(payload)
+			.then(async (res) => {
+				let dataCourier = res.data.result
+				let datacourier = []
+        dataCourier.map(val => {
+          this.record7.labels.push(`${this.uppercaseLetterFirst(val.carrierName)} - (${val.jml})`)
+          datacourier.push(val.persentase)
+        })
+        this.record7.datasets = [
+          {
+            backgroundColor: ['#41B883', '#E46651', '#00D8FF', '#DD1B16', '#E042F5', '#3CFA4F', '#EDD609', '#7A09E3', '#F7550A'],
+            data: datacourier
           }
         ]
 			})
