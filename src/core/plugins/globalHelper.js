@@ -247,6 +247,15 @@ const Helper = {
         
           return datetime
         },
+        convertDate2(str) {
+          const bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
+          let date = new Date(str),
+          mnth = bulan[date.getMonth()],
+          day = ("0" + date.getDate()).slice(-2);
+          const valueConvertDate = [day, mnth, date.getFullYear()].join(" ");
+        
+          return valueConvertDate
+        },
         uppercaseLetterFirst(textInput) {
           textInput = textInput.toLowerCase();
           var stringArray = textInput.split(/\b(\s)/);

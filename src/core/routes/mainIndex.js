@@ -125,6 +125,11 @@ export default [
         component: () => import('@/views/page-content/content-view/DataCustomer.vue')
       },
       {
+        path: '/dataReg',
+        name: 'DataRegisterInMobileApps',
+        component: () => import('@/views/page-content/content-view/DataCustomerMemberReg.vue')
+      },
+      {
         path: '/surveyDNM',
         name: 'DataSurveyDNM',
         component: () => import('@/views/page-content/content-view/DataSurveyDNM.vue')
