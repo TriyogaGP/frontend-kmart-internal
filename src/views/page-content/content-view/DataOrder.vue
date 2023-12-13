@@ -100,6 +100,16 @@
 							</div>
             </v-tooltip>
           </template>
+					<template #[`item.product`]="{ item }">
+						<v-tooltip bottom>
+							<template v-slot:activator="{ on, attrs }">
+								<v-icon small v-bind="attrs" v-on="on">info</v-icon>
+							</template>
+							<div v-for="(data, i) in item.productDetails" :key="i">
+								<span v-html="data.name" /> (<span v-html="data.quantity" />)<br>
+							</div>
+						</v-tooltip>
+					</template>
 					<template #[`item.shippingType`]="{ item }">
 						<v-tooltip v-if="item.shippingType == 'PICKUP'" bottom>
 							<template v-slot:activator="{ on, attrs }">
@@ -394,6 +404,7 @@ export default {
       { text: "Receiptment", value: "receipt", sortable: false },
       { text: "Total", value: "total", sortable: false },
       { text: "Data User", value: "user", sortable: false },
+      { text: "Data Product", value: "product", sortable: false },
       { text: "Payment Status", value: "paymentStatusFinal", sortable: false },
       { text: "Order Type", value: "shippingType", sortable: false },
       { text: "Order Status", value: "orderStatusLatest", sortable: false },

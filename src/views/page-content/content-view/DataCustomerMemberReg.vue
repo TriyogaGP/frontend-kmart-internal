@@ -233,9 +233,7 @@ export default {
 			deep: true,
 			handler(value, oldvalue) {
 				if(value == '' || value != oldvalue){
-					this.DataCustomer = []
-					this.tanggal = []
-					this.getData(this.page, this.limit, this.searchData, this.tanggal);
+					this.resetData()
 				}
 			}
 		},
